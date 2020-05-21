@@ -1,0 +1,2307 @@
+---
+title: "NSMB_Microsats_UNUSED"
+author: "Joe Gunn"
+date: "5/21/2020"
+output: html_document
+---
+#metadata
+```{r}
+smb_metadata_geo <- read_excel("smb_metadata_geo.xlsx")
+smb_metadata_geo_nor <- smb_metadata_geo[c(617:766),]
+smb_metadata_neo <- read_excel("smb_metadata_nonGEO.xlsx")
+
+```
+
+
+###Extra Stuff
+
+```{r}
+#metrics <- read_excel("bargraph.xls")
+#metrics <- metrics %>% mutate(Proportion = factor(Proportion), Range = factor(Range), Diversity_Metric = factor(Diversity_Metric))
+#metrics_all <- metrics %>% filter(Proportion == "all")
+#metrics_all
+
+#metrics_pure <- metrics %>% filter(Proportion == "pure")
+#metrics_pure_he <- metrics_pure %>% filter(Diversity_Metric == "HE")
+#metrics_pure_he
+
+#metrics_pure_ho <- metrics_pure %>% filter(Diversity_Metric == "HO")
+#metrics_pure_ar <- metrics_pure %>% filter(Diversity_Metric == "AR")
+#metrics_pure_ae <- metrics_pure %>% filter(Diversity_Metric == "AE")
+#metrics_pure_ap <- metrics_pure %>% filter(Diversity_Metric == "AP")
+#metrics_pure_a95 <- metrics_pure %>% filter(Diversity_Metric == "A95")
+
+#he <- ggplot(metrics_pure_he, aes(x = Diversity_Metric, y = Average, fill = Range)) + geom_bar(position=position_dodge(), stat="identity", show.legend = F) +
+   # geom_errorbar(aes(ymin=Average-sd, ymax=Average+sd),
+             #     width=.2,                    
+                 # position=position_dodge(.9)) + theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+
+#ho <- ggplot(metrics_pure_ho, aes(x = Diversity_Metric, y = Average, fill = Range)) + geom_bar(position=position_dodge(), stat="identity", show.legend = F) +
+ #   geom_errorbar(aes(ymin=Average-sd, ymax=Average+sd),
+            #      width=.2,                    
+      #            position=position_dodge(.9)) + theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+
+#ar <- ggplot(metrics_pure_ar, aes(x = Diversity_Metric, y = Average, fill = Range)) + geom_bar(position=position_dodge(), stat="identity", show.legend = F) +
+   # geom_errorbar(aes(ymin=Average-sd, ymax=Average+sd),
+          #        width=.2,                    
+               #   position=position_dodge(.9)) + theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+
+#ae <- ggplot(metrics_pure_ae, aes(x = Diversity_Metric, y = Average, fill = Range)) + geom_bar(position=position_dodge(), stat="identity", show.legend = F) +
+#    geom_errorbar(aes(ymin=Average-sd, ymax=Average+sd),
+  #                width=.2,                    
+#                  position=position_dodge(.9)) + theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+
+#ap <- ggplot(metrics_pure_ap, aes(x = Diversity_Metric, y = Average, fill = Range)) + geom_bar(position=position_dodge(), stat="identity", show.legend = F) +
+   # geom_errorbar(aes(ymin=Average-sd, ymax=Average+sd),
+                 # width=.2,                    
+  #                position=position_dodge(.9)) + theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+
+#a95 <- ggplot(metrics_pure_a95, aes(x = Diversity_Metric, y = Average, fill = Range)) + geom_bar(position=position_dodge(), stat="identity", show.legend = F) +
+  #  geom_errorbar(aes(ymin=Average-sd, ymax=Average+sd),
+                #  width=.2,                    
+     #             position=position_dodge(.9)) + theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+
+
+
+#both <- plot_grid(he, ho, ar, ae, ap, a95, labels = c("a", "b", "c", "d", "e", "f"), nrow = 3)
+#both
+
+#Test for skewed data due to uneven sampling
+
+#gen.neosho <- gen.data.nospb %>% filter(Range == "Neosho")
+#neo.subsample <- gen.neosho[sample(nrow(gen.neosho), 116), ]
+
+###drop sample #120 because it skews the data 
+
+
+
+#gen.northern <- gen.data.nospb %>% filter(Range == "Northern")
+
+#gen.subsample <- rbind(gen.northern, neo.subsample)
+#View(gen.subsample)
+
+#gen.subsample$Population_Name <- as.factor(gen.subsample$Population_Name)
+#gen.subsample$Sample_ID <- as.factor(gen.subsample$Sample_ID)
+
+#summary(gen.subsample)
+#View(gen.subsample)
+#gen.data.mv.gen.subsample <- to_mv(gen.subsample, drop.allele = T)
+#fit.pca.gen.subsample <- princomp(gen.data.mv.gen.subsample, cor = T)
+#summary(fit.pca.gen.subsample)
+#biplot(fit.pca.gen.subsample)
+# capture.output(fit.pca, file=paste(out.dir, species, date, "_summary_fit_PCA.txt",sep=""))  #write component summaries to a output fiel
+
+#pred.gen.subsample<- predict(fit.pca.gen.subsample)
+#pca.df.gen.subsample <- data.frame(PC1=pred.gen.subsample[,1], PC2=pred.gen.subsample[,2], Clade=gen.subsample$Range, Pop=gen.subsample$Population_Name, Drain=gen.subsample$Drainage) 
+
+#pca.df.gen.subsample#Species=arapat$Species, Clade=arapat$Cluster, Pop=arapat$Population)
+# write.csv(pca.df, file=paste(out.dir, species, date, "_PCA_df.csv",sep=""))  # write plotting data frame to output file
+#jpeg("/Users/joegunn/Desktop/Projects/NSMB/Neosho Taxonomy/Analyses_in_R/Microsat_analyses/pca_puechmaille.jpeg", width=1200, height=600, units='px', res=150)
+
+#ggplot(pca.df.gen.subsample, aes(x = PC1, y = PC2, color=Pop)) + geom_point(size = 1.25, alpha = 1) + scale_color_manual(values = c("forestgreen", "lightskyblue", "darkorchid1", "blue", "chocolate1", "gold1", "mediumspringgreen", "maroon1")) + labs(x = "PC1 (3.5 %)", y = "PC2 (1.8 %)")
+  
+#dev.off()
+ 
+#jpeg("/Users/joegunn/Desktop/Projects/NSMB/Neosho Taxonomy/Analyses_in_R/Microsat_analyses/pca_deltak.jpeg", width=1200, height=600, units='px', res=150)
+
+#ggplot(pca.df.gen.subsample, aes(x = PC1, y = PC2, color=Clade)) + geom_point(size = 1.25, alpha = 0.7) + scale_color_manual(values = c("green4", "purple2")) + labs(x = "PC1 (3.5 %)", y = "PC2 (1.8 %)") #shape = Species, color = Clade
+
+#dev.off()
+
+
+#Plot density distributions for each morphometric trait (total length (TL), standard length (SL), orbital length (OL), head length (HL), and body depth (BD), and color them by their genetic assignment. Those that assigned over 90 percent to either neosho or northern were colored either green or purple, respectively. Those that did not assign over 90 percent to any cluster were colored as pink and considered "Admixed"
+
+#alldata_tl <- ggplot(morph_90_all, aes(x = Total_Length, fill = gen_id)) + geom_density(alpha = 0.6, show.legend = F) + labs(y = "Probability Density") + theme(axis.title.x = element_blank()) + scale_fill_manual(values = c("lightpink", "springgreen3", "mediumpurple"))
+
+#alldata_sl <- ggplot(morph_90_all, aes(x = sl_c, fill = gid)) + geom_density(alpha = 0.6, show.legend = F) + theme(axis.title.x = element_blank()) + theme(axis.title.y = element_blank()) + scale_fill_manual(values = c("lightpink", "springgreen3", "mediumpurple"))
+
+#alldata_ol <- ggplot(morph_90_all, aes(x = ol_c, fill = gid)) + geom_density(alpha = 0.6, show.legend = F) + theme(axis.title.x = element_blank()) + theme(axis.title.y = element_blank()) + scale_fill_manual(values = c("lightpink", "springgreen3", "mediumpurple"))
+
+#alldata_hl <- ggplot(morph_90_all, aes(x = hl_c, fill = gid)) + geom_density(alpha = 0.6, show.legend = F) + theme(axis.title.x = element_blank()) + theme(axis.title.y = element_blank()) + scale_fill_manual(values = c("lightpink", "springgreen3", "mediumpurple"))
+
+#alldata_bd <- ggplot(morph_90_all, aes(x = bd_c, fill = gid)) + geom_density(alpha = 0.6, show.legend = F) + theme(axis.title.x = element_blank()) + theme(axis.title.y = element_blank()) + scale_fill_manual(values = c("lightpink", "springgreen3", "mediumpurple"))
+
+#Visualize
+
+```
+
+
+###Raw Morphometric Analysis - Averages, Standard Deviation, and Frequency Distribution
+
+```{r}
+
+#et_se <- function(x) {
+  #stand <- sd(x[!is.na(x)])
+  #se <- stand/sqrt(length(x[!is.na(x)]))
+  #return(se) }
+
+#morph_90_aves <- morph_90 %>% group_by(gen_id) %>% summarize(mean_tl = mean(tl), mean_sl = mean(sl), mean_ol = mean(ol), mean_hl = mean(hl), mean_bd = mean(bd), mean_rc = mean(fin_ray), mean_bdtl = mean(bdtl)) #calculate average morphometric values per subspecies (by genetic id)
+
+#morph_90_aves <- as.data.frame(morph_90_aves)
+
+#morph_90_sd <- morph_90 %>% group_by(gen_id) %>% summarize(sd_tl = sd(tl), sd_sl = sd(sl), sd_ol = sd(ol), sd_hl = sd(hl), sd_bd = sd(bd), sd_rc = sd(fin_ray)) #calculate average standard deviation for morphometric averages per subspecies
+
+#morph_90_sd <- as.data.frame(morph_90_sd)
+
+###Calculate the same metrics for all measurements corrected for total length
+
+#morph_90_c_aves <- morph_90 %>% group_by(gen_id) %>% summarize(mean_sl_c = mean(sl_c), mean_ol_c = mean(ol_c), mean_hl_c = mean(hl_c), mean_bd_c = mean(bd_c)) #calculate average morphometric values per subspecies (by genetic id)
+
+#morph_90_c_aves <- as.data.frame(morph_90_c_aves)
+
+#morph_90_c_sd <- morph_90 %>% group_by(gen_id) %>% summarize(sd_sl_c = sd(sl_c), sd_ol_c = sd(ol_c), sd_hl_c = sd(hl_c), sd_bd_c = sd(bd_c)) #calculate average standard deviation for morphometric averages per subspecies
+
+#morph_90_c_sd <- as.data.frame(morph_90_c_sd)
+
+
+
+#morph_90_num <- morph_90 %>% group_by(gen_id) %>% count() #calculate number of individuals in data set belonging to each group
+#morph_90_num <- as.data.frame(morph_90_num)
+
+
+#density distributions for all data (no orbital length) based on genetic id
+
+
+#tl <- ggplot(morph_90, aes(x = tl, fill = gen_id)) + geom_density(alpha = 0.6, show.legend = F) + scale_fill_manual(values = c("springgreen3", "mediumpurple")) + labs(x = "Total Length   (mm)", y = "Probability Density") 
+
+#+ theme(plot.background = element_rect(fill = "black"), axis.title.x = element_text(color = "white"), axis.title.y = element_text(color = "white"), axis.ticks = element_line(color = "white"), axis.text = element_text(color = "white"), panel.grid= element_blank(), panel.border = element_rect(color = "white"), legend.text = element_text(color = "white"), legend.title = element_text(color = "white"))
+
+#original colors: springgreen3, mediumpurple
+#new colors: lightgreen, plum2
+
+
+#sl <- ggplot(morph_90, aes(x = sl, fill = gen_id)) + geom_density(alpha = 0.6, show.legend = F)  + scale_fill_manual(values = c("springgreen3", "mediumpurple")) + labs(x = "Standard Length (mm)") + theme(axis.title.y = element_blank())
+#+ theme(plot.background = element_rect(fill = "black"), axis.title.x = element_text(color = "white"), axis.title.y = element_text(color = "white"), axis.ticks = element_line(color = "white"), axis.text = element_text(color = "white"), panel.grid= element_blank(), panel.border = element_rect(color = "white"), legend.text = element_text(color = "white"), legend.title = element_text(color = "white"))
+
+#original colors: springgreen3, mediumpurple
+
+
+#ol <- ggplot(morph_90, aes(x = ol, fill = gen_id)) + geom_density(alpha = 0.6, show.legend = F) + scale_fill_manual(values = c("springgreen3", "mediumpurple")) + labs(x = "Orbital Length (mm)") + theme(axis.title.y = element_blank())
+
+#+ theme(plot.background = element_rect(fill = "black"), axis.title.x = element_text(color = "white"), axis.title.y = element_text(color = "white"), axis.ticks = element_line(color = "white"), axis.text = element_text(color = "white"), panel.grid= element_blank(), panel.border = element_rect(color = "white"), legend.text = element_text(color = "white"), legend.title = element_text(color = "white"))
+
+#original colors: springgreen3, mediumpurple
+
+
+#hl <- ggplot(morph_90, aes(x = hl, fill = gen_id)) + geom_density(alpha = 0.6, show.legend = F) + scale_fill_manual(values = c("springgreen3", "mediumpurple")) + labs(x = "Head Length (mm)") + theme(axis.title.y = element_blank())
+
+#+ theme(plot.background = element_rect(fill = "black"), axis.title.x = element_text(color = "white"), axis.title.y = element_text(color = "white"), axis.ticks = element_line(color = "white"), axis.text = element_text(color = "white"), panel.grid= element_blank(), panel.border = element_rect(color = "white"), legend.text = element_text(color = "white"), legend.title = element_text(color = "white"))
+
+
+
+#bd <- ggplot(morph_90, aes(x = bd, fill = gen_id)) + geom_density(alpha = 0.6, show.legend = F) + scale_fill_manual(values = c("springgreen3", "mediumpurple")) + labs(x = "Body Depth (mm)") + theme(axis.title.y = element_blank())
+
+#+ theme(plot.background = element_rect(fill = "black"), axis.title.x = element_text(color = "white"), axis.title.y = element_text(color = "white"), axis.ticks = element_line(color = "white"), axis.text = element_text(color = "white"), panel.grid= element_blank(), panel.border = element_rect(color = "white"), legend.text = element_text(color = "white"), legend.title = element_text(color = "white"))
+
+
+###Now plot corrected values##############
+
+#sl_c <- ggplot(morph_90, aes(x = sl_c, fill = gen_id)) + geom_density(alpha = 0.6, show.legend = F)  + scale_fill_manual(values = c("springgreen3", "mediumpurple")) + labs(x = "Standard Length (mm)") + theme(axis.title.y = element_blank())
+#+ theme(plot.background = element_rect(fill = "black"), axis.title.x = element_text(color = "white"), axis.title.y = element_text(color = "white"), axis.ticks = element_line(color = "white"), axis.text = element_text(color = "white"), panel.grid= element_blank(), panel.border = element_rect(color = "white"), legend.text = element_text(color = "white"), legend.title = element_text(color = "white"))
+
+#original colors: springgreen3, mediumpurple
+
+#ol_c <- ggplot(morph_90, aes(x = ol_c, fill = gen_id)) + geom_density(alpha = 0.6, show.legend = F) + scale_fill_manual(values = c("springgreen3", "mediumpurple")) + labs(x = "Orbital Length (mm)") + theme(axis.title.y = element_blank())
+
+
+#+ theme(plot.background = element_rect(fill = "black"), axis.title.x = element_text(color = "white"), axis.title.y = element_text(color = "white"), axis.ticks = element_line(color = "white"), axis.text = element_text(color = "white"), panel.grid= element_blank(), panel.border = element_rect(color = "white"), legend.text = element_text(color = "white"), legend.title = element_text(color = "white"))
+
+#original colors: springgreen3, mediumpurple
+
+
+#hl_c <- ggplot(morph_90, aes(x = hl_c, fill = gen_id)) + geom_density(alpha = 0.6, show.legend = F) + scale_fill_manual(values = c("springgreen3", "mediumpurple")) + labs(x = "Head Length (mm)") + theme(axis.title.y = element_blank())
+
+#+ theme(plot.background = element_rect(fill = "black"), axis.title.x = element_text(color = "white"), axis.title.y = element_text(color = "white"), axis.ticks = element_line(color = "white"), axis.text = element_text(color = "white"), panel.grid= element_blank(), panel.border = element_rect(color = "white"), legend.text = element_text(color = "white"), legend.title = element_text(color = "white"))
+
+
+
+#bd_c <- ggplot(morph_90, aes(x = bd_c, fill = gen_id)) + geom_density(alpha = 0.6, show.legend = F) + scale_fill_manual(values = c("springgreen3", "mediumpurple")) + labs(x = "Body Depth (mm)") + theme(axis.title.y = element_blank())
+
+#######################################################################################
+
+
+#jpeg("/Users/joegunn/Desktop/Grad_School_Stuff/Projects/Smallmouth_Bass_Microsatellites_Analyses_in_R/Microsat_analyses/morphology_freqs_legend.jpeg", width=7000, height=4000, units='px', res=700) 
+
+#plot_grid(tl, sl, ol, hl, bd, nrow = 2, labels = c("A", "B", "C", "D", "E"))
+
+#dev.off()
+
+#All Samples + Only Genetic Samples
+#jpeg("/Users/joegunn/Desktop/Grad_School_Stuff/Projects/Smallmouth_Bass_Microsatellites_Analyses_in_R/Microsat_analyses/morphology_freqs_everyone.jpeg", width=17000, height=6000, units='px', res=1000) 
+
+#plot_grid(alldata_tl, alldata_sl, alldata_ol, alldata_hl, alldata_bd, tl, sl, ol, hl, bd, nrow = 2, labels = c("A", "B", "C", "D", "E", "F", "G", "H", "I", "J"))
+
+#dev.off()
+
+
+```
+
+###Raw Morphometric Analysis - Linear Models
+```{r}
+
+###Formatting data and testing linear models
+
+#morph_90_log <- morph_90 %>% mutate(sample_id = as.factor(sample_id), range_id = as.factor(range_id), gen_id = as.factor(gen_id), condition = as.factor(condition), logray = log10(fin_ray), logtl = log10(tl), logsl = log10(sl), logol = log10(ol), loghl = log10(hl), logbd = log10(bd), logsl_c = log10(sl_c), logol_c = log10(ol_c), loghl_c = log10(hl_c), logbd_c = log10(bd_c)) #Convert all values to logorithmic
+
+#morph_90_log
+
+#one-way ANOVA for all morphometrics based on genetic id (>90% assignment to one population or the other. These linear models use the log transformed data)
+
+#lm_90_tl <- lm(logtl ~ gen_id, data = morph_90_log)
+#summary(lm_90_tl)
+
+#lm_90_ol <- lm(logol ~ gen_id, data = morph_90_log)
+#summary(lm_90_ol)
+
+#lm_90_sl <- lm(logsl ~ gen_id, data = morph_90_log)
+#summary(lm_90_sl)
+
+#lm_90_ray <- lm(logray ~ gen_id, data = morph_90_log)
+#summary(lm_90_ray)
+
+#lm_90_bd <- lm(logbd ~ gen_id, data = morph_90_log)
+#summary(lm_90_bd)
+
+#lm_90_hl <- lm(loghl ~ gen_id, data = morph_90_log)
+#summary(lm_90_hl)
+
+#one-way ANOVA for all morphometrics based on range id (which putative range the individual was collected)
+
+#lm_range_tl <- lm(logtl ~ range_id, data = morph_90_log)
+#summary(lm_range_tl)
+
+#lm_range_ol <- lm(logol ~ range_id, data = morph_90_log)
+#summary(lm_range_ol)
+
+#lm_range_sl <- lm(logsl ~ range_id, data = morph_90_log)
+#summary(lm_range_sl)
+
+#lm_range_ray <- lm(logray ~ range_id, data = morph_90_log)
+#summary(lm_range_ray)
+
+#lm_range_bd <- lm(logbd ~ range_id, data = morph_90_log)
+#summary(lm_range_bd)
+
+#lm_range_hl <- lm(loghl ~ range_id, data = morph_90_log)
+#summary(lm_range_hl)
+
+
+###Now for the measurements corrected for total length
+#lm_90_ol_c <- lm(logol_c ~ gen_id, data = morph_90_log)
+#summary(lm_90_ol_c)
+
+#lm_90_sl_c <- lm(logsl_c ~ gen_id, data = morph_90_log)
+#summary(lm_90_sl_c)
+
+#lm_90_bd_c <- lm(logbd_c ~ gen_id, data = morph_90_log)
+#summary(lm_90_bd_c)
+
+#lm_90_hl_c <- lm(loghl_c ~ gen_id, data = morph_90_log)
+#summary(lm_90_hl_c)
+
+#one-way ANOVA for all morphometrics based on range id (which putative range the individual was collected)
+
+
+#Visualize plots for range assigned and genetically assigned individuals 
+
+#tl_range_plot <- ggplot(morph_90_log, aes(x = range_id, y = logtl)) + geom_point(position = position_jitter(width = 0.1), alpha = 0.4) + labs(title = "total length") + stat_summary(fun.y = mean, geom = "point", color = "blue", size = 3) + stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.1, color = "blue", size = 1)
+
+#tl_gen_plot <- ggplot(morph_90_log, aes(x = gen_id, y = logtl)) + geom_point(position = position_jitter(width = 0.1), alpha = 0.4) + labs(title = "total length") + stat_summary(fun.y = mean, geom = "point", color = "blue", size = 3) + stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.1, color = "blue", size = 1)
+
+#sl_range_plot <- ggplot(morph_90_log, aes(x = range_id, y = logsl)) + geom_point(position = position_jitter(width = 0.1), alpha = 0.4) + labs(title = "standard length") + stat_summary(fun.y = mean, geom = "point", color = "blue", size = 3) + stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.1, color = "blue", size = 1)
+
+#sl_gen_plot <- ggplot(morph_90_log, aes(x = gen_id, y = logsl)) + geom_point(position = position_jitter(width = 0.1), alpha = 0.4) + labs(title = "standard length") + stat_summary(fun.y = mean, geom = "point", color = "blue", size = 3) + stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.1, color = "blue", size = 1)
+
+#ray_range_plot <- ggplot(morph_90_log, aes(x = range_id, y = logray)) + geom_point(position = position_jitter(width = 0.1), alpha = 0.4) + labs(title = "dorsal rays") + stat_summary(fun.y = mean, geom = "point", color = "blue", size = 3) + stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.1, color = "blue", size = 1)
+
+#ray_gen_plot <- ggplot(morph_90_log, aes(x = gen_id, y = logray)) + geom_point(position = position_jitter(width = 0.1), alpha = 0.4) + labs(title = "dorsal rays") + stat_summary(fun.y = mean, geom = "point", color = "blue", size = 3) + stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.1, color = "blue", size = 1)
+
+#bd_range_plot <- ggplot(morph_90_log, aes(x = range_id, y = logbd)) + geom_point(position = position_jitter(width = 0.1), alpha = 0.4) + labs(title = "body depth") + stat_summary(fun.y = mean, geom = "point", color = "blue", size = 3) + stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.1, color = "blue", size = 1)
+
+#bd_gen_plot <- ggplot(morph_90_log, aes(x = gen_id, y = logbd)) + geom_point(position = position_jitter(width = 0.1), alpha = 0.4) + labs(title = "body depth") + stat_summary(fun.y = mean, geom = "point", color = "blue", size = 3) + stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.1, color = "blue", size = 1)
+
+#hl_range_plot <- ggplot(morph_90_log, aes(x = range_id, y = loghl)) + geom_point(position = position_jitter(width = 0.1), alpha = 0.4) + labs(title = "head length") + stat_summary(fun.y = mean, geom = "point", color = "blue", size = 3) + stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.1, color = "blue", size = 1)
+
+#hl_gen_plot <- ggplot(morph_90_log, aes(x = range_id, y = loghl)) + geom_point(position = position_jitter(width = 0.1), alpha = 0.4) + labs(title = "head length") + stat_summary(fun.y = mean, geom = "point", color = "blue", size = 3) + stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.1, color = "blue", size = 1)
+
+#Visualize
+```
+
+###Raw Morphometric Analysis - Principal Component Analysis I
+
+```{r}
+#Formatting for Principal Component Analysis of Morphometric traits
+#Renaming columns and factors
+#morph_90_log_c <- morph_90_log[,-c(7:16, 18:22)]
+#morph_90_log_c
+
+#morph_90_log_c$logray[morph_90_log_c$logray == "1.07918124604762"] <- "1.11394335230684"
+#morph_90_log_c$logray[morph_90_log_c$logray == "1.17609125905568"] <- "1.14612803567824"
+
+#colnames(morph_90_log_c) <- c("samp_id", "east", "north", "rid", "gid", "con", "ray", "sl", "ol", "hl", "bd")
+
+#ray <- factor(morph_90_log_c$ray)
+#Range <- factor(morph_90_log_c$rid)
+#genetics <- factor(morph_90_log_c$gid)
+#condition <- factor(morph_90_log_c$con)
+
+#PCA Function and Summary
+#neopca_90_c <- prcomp(~ sl + ol + bd + hl, data = morph_90_log_c, center = TRUE, scale. = TRUE) #The "center" and "scale" arguments are a method of preprossessing, or autoscaling, the data. Often variables in PCA are not reported in the same units or on the same scale. Centering the data substracts the variable mean from each individual observation within a variable, and scaling divides each centered data point by it's respective standard deviation.
+
+###OR###
+#fviz_eig(neopca_90_c) #This is from the "factoextra" package
+#Use Kaiser's rule to determine that the principal components with eigenvectors above 1 are to be used in PCA
+#summary(neopca_90_c)
+
+#Format data for PCA
+#pc1and2 <- as.data.frame(neopca_90_c$x[,c(1,2)])
+#pc2and3 <- as.data.frame(neopca_90_c$x[,c(2,3)])
+
+#pc1and3 <- as.data.frame(neopca_90_c$x[,c(1,3)])
+#pc3and4 <- as.data.frame(neopca_90_c$x[,c(3,4)])
+
+#Visualize loadings of individual morphometrics 
+#biplot(neopca_90_c, choices = c(1,2))
+#biplot(neopca_90, choices = c(1,3))
+
+#Visualize PCA Plots
+
+
+#range_neo90_c <- ggplot(pc1and2, aes(PC1, PC2, color = Range, shape = ray)) + geom_point(show.legend = F, size = 3) + labs(x = "PC1 (77.1 %)", y = "PC2 (17.4 %)") + scale_color_manual(values = c("springgreen3", "mediumpurple"))
+
+#gen_neo90_c <- ggplot(pc1and2, aes(PC1, PC2, color = genetics, shape = ray)) + geom_point(show.legend = F, size = 3) + labs(x = "PC1 (77.1 %)", y = "PC2 (17.4 %)") + scale_color_manual(values = c("springgreen3", "mediumpurple"))
+#gen_neo90_c
+#Test other PCs
+
+#pc2plot <- ggplot(pc2and3, aes(x = PC3, y = PC2, color = Range)) + geom_point()
+#pc3plot <- ggplot(pc1and3, aes(x = PC1, y = PC3, color = range)) + geom_point()
+
+#Visualize
+
+#pc2plot
+#pc3plot
+
+#neo90_grid <- plot_grid(range_neo90, gen_neo90, nrow = 1, labels = c("C", "D"))
+
+
+```
+
+###Raw Morphometric Analysis - PERMANOVA
+
+```{r}
+#Individual genetic proportions
+
+#ind <- read_excel("ind_gen_proportions.xls")
+#ind <- ind %>% mutate(ind_id = as.factor(ind_id), pop = as.factor(pop))
+#ind_nor <- filter(ind, northern > 0.9)
+#ind_neo <- filter(ind, neosho > 0.9)
+#ind_rest1 <- filter(ind, neosho < 0.9)
+#ind_rest2 <- filter(ind_rest1, northern < 0.9)
+#ind_nor <- ind_nor[,-c(4:5)]
+
+#nor <- data.frame(rep("northern", times = 125))
+#colnames(nor) <- "range"
+#ind_nor <- cbind(ind_nor, nor)
+#neo <- data.frame(rep("neosho", times = 199))
+#colnames(neo) <- "range"
+#ind_neo <- cbind(ind_neo, neo)
+#ind_neo <- ind_neo[,-c(3:4)]
+#colnames(ind_neo) <- c("id", "pop", "gen_prop", "range")
+#colnames(ind_nor) <- c("id", "pop", "gen_prop", "range")
+#ind_props <- rbind(ind_nor, ind_neo)
+
+
+#Formatting for Principal component analysis and PERMANOVA
+
+#gen_all <- gen_all %>% mutate(sample_id = as.character(sample_id), range_id = as.factor(range_id), gen_id = as.factor(gen_id), condition = as.factor(condition))
+#gen_all_noray <- gen_all[-c(99),]
+
+
+#gen_all_log <- gen_all_noray %>% mutate(tl = log10(tl), sl = log10(sl), ol = log10(ol), hl = log10(hl), bd = log10(bd))
+#gen_all_log <- gen_all_noray %>% mutate(tl = log10(tl), sl = log10(sl), ol = log10(ol), hl = log10(hl), bd = log10(bd))
+#gen_all_log$fin_ray[gen_all_log$fin_ray == "12"] <- "13"
+#gen_all_log$fin_ray[gen_all_log$fin_ray == "15"] <- "14"
+
+#morph_raw <- gen_all_log[,-c(2:7)] #keep only the morphological columns and the sample ids
+#morph_raw <- morph_raw[,-c(2,8)] #same as above (could have done in one step, but had to perform additional steps because of changing the data file slightly (keeping the condition column from the original morphological data set))
+
+#morph_labs <- gen_all_log[,-c(2:3, 9:14)] #keep only the labels from the morphological data set (do not keep any of the actual data. Just the metadata)
+
+#Data cleaning
+
+#morph_labs_range <- morph_labs[,3] #only lists the range of collection
+#morph_labs_range <- morph_labs_range[-69,] #get rid of duplicate sample (BP13)
+#morph_labs_gen <- morph_labs[,4] #only lists the genetic id
+#morph_labs_gen <- morph_labs_gen[-69,]#get rid of dupplicate sample (BP13)
+
+#More data cleaning
+
+#morph_raw <- as.data.frame(morph_raw)
+#morph_raw <- morph_raw[-69,]
+#rownames(morph_raw) <- morph_raw[,1]
+#morph_raw <- morph_raw[,-1]
+
+#Format morphological data to run PERMANOVA, which will tell whether the clusters seen in PCA are significantly different, both at the subspecies level by range and at the subspecies level by genetic assignment
+
+#Data preparation
+#veg_morph <- vegdist(morph_raw, "bray")
+#morph_ado <- cbind(morph_labs_range, morph_raw)
+#morph_ado <- as.data.frame(morph_ado)
+#morph_ado_gen <- cbind(morph_labs_gen, morph_raw)
+#morph_ado_gen <- as.data.frame(morph_ado_gen)
+
+#ado1 <- adonis(veg_morph ~ range_id, morph_ado, permutations = 9999, distance = "bray")
+
+#ado2 <- adonis(veg_morph ~ gen_id, morph_ado_gen, permutations = 9999, distance = "bray")
+
+
+```
+
+###Raw Morphometric Analysis - Principal Components Analysis II
+
+```{R}
+#Principal componenet analysis on raw morphological data (this will be for all comparisons used in the final manuscript, visualized by range and by genetic id. Pink indicates admixed individuals)
+
+#colnames(gen_all_log) <- c("samp","east", "north", "northprop", "range", "gen", "condition", "rc", "tl", "sl", "ol", "hl", "bd")
+#gen_all_log
+
+#Range <- factor(gen_all_log$range)
+#Ray <- factor(gen_all_log$rc)
+#Genetics <- factor(gen_all_log$gen)
+#condition <- factor(gen_all_log$condition)
+
+#PCA Function and Summary
+#neopca <- prcomp(~ tl + sl + ol + hl + bd, data = gen_all_log, center = TRUE, scale. = TRUE) 
+
+
+#extract eigenvalues and examine Kaiser's Rule
+#eigen <- neopca$sdev^2
+
+#plot(eigen)
+#abline(h = 1, col = "blue")
+
+###OR###
+#fviz_eig(neopca) #This is from the "factoextra" package
+
+#Format data for PCA
+#pc1and2 <- as.data.frame(neopca$x[,c(1,2)])
+#pc2and3 <- as.data.frame(neopca$x[,c(2,3)])
+
+#pc1and3 <- as.data.frame(neopca$x[,c(1,3)])
+#pc3and4 <- as.data.frame(neopca$x[,c(3,4)])
+
+#Visualize loadings of individual morphometrics 
+#biplot(neopca, choices = c(1,2))
+#biplot(neopca, choices = c(1,3))
+
+#PCA Plotsa
+#all_range_plot <- ggplot(pc1and2, aes(PC1, PC2, color = Range, shape = Ray)) + geom_point(show.legend = F, size = 3) + labs(x = "PC1 (77.1 %)", y = "PC2 (17.4 %)") + scale_color_manual(values = c("springgreen3", "mediumpurple"))
+
+#all_gen_plot <- ggplot(pc1and2, aes(PC1, PC2, color = Genetics, shape = Ray)) + geom_point(show.legend = F, size = 3) + labs(x = "PC1 (80.9 %)", y = "PC2 (12.8 %)") + scale_color_manual(values = c("lightpink", "springgreen3", "mediumpurple")) 
+
+#Visualize
+
+#neo_all_grid <- plot_grid(all_range_plot, all_gen_plot, nrow = 1, labels = c("A","B"))
+
+#jpeg("/Users/joegunn/Desktop/Grad School Stuff/Projects/Smallmouth Bass/Microsatellites/Analyses_in_R/Microsat_analyses/gen_morphology.jpeg", width=7000, height=6000, units='px', res=900) 
+
+#plot_grid(neo_all_grid, neo90_grid, nrow = 2)
+
+#dev.off()
+
+# NSMB DIVERGENCE - GENETIC DIVERSITY
+
+Purpose: I am assessing differences in genetic diversity between Northern Smallmouth Bass and Neosho Smallmouth Bass. I am specifically calculating five genetic diversity metrics (rarefied allelic richness, observed heterozygosity, expected heterozygosity, private allele frequency, and common allele frequency) at the level of collection site (43 total collection sites) across my Smallmouth Bass samples (N = 766 total samples). Allelic richness (AR) and private allele frequency (AP) were both calculated using the software program HP-RARE, which is not built into R. Values across sampling sites were manually imported into Excel, along with the calculations conducted for allelic richness, heterozygosity, and common allele frequency, which were then all separately imported into R for downstream analysis. I am then testing for differences in these metrics using linear mixed ANOVA models at the subspecies level. 
+
+Data Used:
+
+    ###All microsatellite data: 766 Samples, 14 microsatellite loci
+
+# Libraries Needed For Analysis
+```{r Libraries, echo = FALSE, include = FALSE}
+
+library(riverdist)
+library(sp)
+library(readxl)
+library(popgraph)
+library(tidyverse)
+library(gstudio)
+library(ade4)
+library(adegenet)
+library(cowplot)
+library(nlme)
+library(poppr)
+library(PopGenReport)
+library(maps)
+library(mapdata)
+library(stringr)
+library(rgdal)
+library(sf)
+library(ggsn)
+library(raster)
+library(lme4)
+library(factoextra)
+library(MASS)
+library(logihist)
+library(pophelper)
+library(ggpubr)
+library(DescTools)
+library(vegan)
+library(ggstatsplot)
+```
+
+## Metadata
+```{r}
+smb_metadata_geo <- read_excel("../../data/metadata/smb_metadata_geo.xlsx")
+smb_metadata_geo_nor <- smb_metadata_geo[c(617:766),]
+smb_metadata_neo <- read_excel("../../data/metadata/smb_metadata_nonGEO.xlsx")
+```
+
+## Read in genetic data and clean data.
+```{r}
+gen_data <- read_population("../../data/microsatellite_data//micros_blank_river.csv", type = "column", locus.columns = 6:33)
+
+#Data Cleaning:
+#Change categorical variables to factors
+gen_data$Population_Name <- as.factor(gen_data$Population_Name)
+gen_data$Sample_ID <- as.factor(gen_data$Sample_ID)
+```
+
+#Calculate Genetic Diversity Metrics
+```{r}
+#Common Allele Frequency
+A_95 <- genetic_diversity(gen_data, mode = "A95") # frequency of non-rare alleles by locus
+
+A_95_bypop <- genetic_diversity(gen_data, mode = "A95", stratum = "Population_Name") # non-rare allele frequency by individual
+A_95_bypop <- A_95_bypop %>% 
+  group_by(Stratum) %>% 
+  summarize (mean_A95 = mean(A95)) # average non-rare allele frequency by population
+
+#Heterozygosity
+Ho_pop <- genetic_diversity(gen_data, stratum = "Population_Name", mode = c("Ho")) # calculate observed heterozygosity across populations 
+He_pop <- genetic_diversity(gen_data, stratum = "Population_Name", mode = c("He")) # calculate expected heterozygosity across populations
+
+Ho_pop_ave <- Ho_pop %>% 
+  group_by(Stratum) %>% 
+  summarize(mean_Ho = mean(Ho)) # calculate average observed heterozygosity for populations
+
+He_pop_ave <- He_pop %>% 
+  group_by(Stratum) %>% 
+  summarize(mean_He = mean(He)) # calculate average expected heterozygosity for populations
+```
+
+# Read-in new data file compiled in Excel and clean dataframe to compute averages of each metric by collection site. All of the information in the dataframe imported below were calculated in the above section (Calculate Genetic Diversity Metrics) or in outside software programs not built into R.
+```{r}
+#read-in new data file compiled in Excel from data frames above
+options(scipen = 999)
+div <- read_excel("../../data/excel_data/div_CERC.xls")
+
+#Clean and organize data files by subspecies range
+div_ave <- div %>% 
+  group_by(Range) %>% 
+  summarize(meanAR = mean(AR), meanAE = mean(AE), mean95 = mean(A95), meanAP = mean(AP), meanHO = mean(HO), meanHE = mean(HE)) # calculate mean of diversity metrics at subsepecies level
+
+div_sd <- div %>% 
+  group_by(Range) %>% 
+  summarize(sdAR = sd(AR), sdAE = sd(AE), sd95 = sd(A95), sdAP = sd(AP), sdHO = sd(HO), sdHE = sd(HE)) # calculate standard deviation of diversity metrics at subspecies level
+div_nospb <- div[-c(41:43),]
+
+div_neo <- div %>% 
+  filter(Range == "Neosho") #create data file for Neosho samples only
+
+div_nor <- div %>% 
+  filter(Range == "Northern") #create data file for Northern only
+
+div_spb <- div %>% 
+  filter(Range == "Spotted") #create data file for Spotted only
+
+div_neo_ave <- div_neo %>% 
+  group_by(Range) %>% 
+  summarize(AR = mean(AR), A95 = mean(A95), AP = mean(AP), HO = mean(HO), HE = mean(HE))
+
+div_nor_ave <- div_nor %>% 
+  group_by(Range) %>% 
+  summarize(AR = mean(AR), A95 = mean(A95), AP = mean(AP), HO = mean(HO), HE = mean(HE))
+
+div_neo_sd <- div_neo %>% 
+  summarize(AR = sd(AR), A95 = sd(A95), AP = sd(AP), HO = sd(HO), HE = sd(HE))
+
+div_nor_sd <- div_nor %>% 
+  summarize(AR = sd(AR), A95 = sd(A95), AP = sd(AP), HO = sd(HO), HE = sd(HE))
+
+div_neo_sd <- t(div_neo_sd)
+div_neo_sd <- as.data.frame(div_neo_sd)
+div_neo_sd <- div_neo_sd %>% 
+  rownames_to_column("metric")
+colnames(div_neo_sd) <- c("metric", "sd")
+
+div_neo_ave <- t(div_neo_ave)
+div_neo_ave <- as.data.frame(div_neo_ave)
+div_neo_ave <- div_neo_ave %>% 
+  rownames_to_column("metric")
+colnames(div_neo_ave) <- c("metric", "mean")
+div_neo_ave <- div_neo_ave[-1,]
+
+div_nor_sd <- t(div_nor_sd)
+div_nor_sd <- as.data.frame(div_nor_sd)
+div_nor_sd <- div_nor_sd %>% 
+  rownames_to_column("metric")
+colnames(div_nor_sd) <- c("metric", "sd")
+
+div_nor_ave <- t(div_nor_ave)
+div_nor_ave <- as.data.frame(div_nor_ave)
+div_nor_ave <- div_nor_ave %>% 
+  rownames_to_column("metric")
+colnames(div_nor_ave) <- c("metric", "mean")
+div_nor_ave <- div_nor_ave[-1,]
+
+neo_metrics <- merge(div_neo_ave, div_neo_sd, by = "metric")
+nor_metrics <- merge(div_nor_ave, div_nor_sd, by = "metric")
+nor_labels <- c(rep("Northern", 5))
+nor_labels <- as.data.frame(nor_labels)
+colnames(nor_labels) <- c("range")
+
+neo_labels <- c(rep("Neosho", 5))
+neo_labels <- as.data.frame(neo_labels)
+colnames(neo_labels) <- c("range")
+
+neo_metrics <- cbind(neo_labels, neo_metrics)
+nor_metrics <- cbind(nor_labels, nor_metrics)
+genetic_metrics <- rbind(neo_metrics, nor_metrics)
+```
+
+## Run linear models to test for significant differences in genetic diversity at the subspecies level
+```{r}
+lm1 <- aov(HO ~ Range, data = div_nospb) # observed heterozygosity
+summary(lm1)
+
+lm2 <- lm(HE ~ Range, data = div_nospb) # expected heterozygosity
+summary(lm2)
+
+lm3 <- lm(AR ~ Range, data = div_nospb) # rarefied allelic richness (taken from rarefied allelic richness run in HP-Rare)
+summary(lm3)
+
+lm5 <- lm(A95 ~ Range, data = div_nospb) # non-rare allele frequency
+summary(lm5)
+
+lm6 <- lm(AP ~ Range, data = div_nospb) # private (rare) allele frequency (taken from private allele frequency run in HP-Rare)
+summary(lm6)
+```
+
+## Calculate 95 % confidence intervals for each metric
+```{r}
+e95neo <- qt(0.975,df=30)*0.82168581/sqrt(30)
+eAPneo <- qt(0.975,df=30)*0.03961101/sqrt(30)
+eARneo <- qt(0.975,df=30)*0.57309329/sqrt(30)
+eHEneo <- qt(0.975,df=30)*0.09935171/sqrt(30)
+eHOneo <- qt(0.975,df=30)*0.09809077/sqrt(30)
+e95nor <- qt(0.975,df=8)*0.91145228/sqrt(8)
+eAPnor <- qt(0.975,df=8)*0.05897269/sqrt(8)
+eARnor <- qt(0.975,df=8)*0.48365794/sqrt(8)
+eHEnor <- qt(0.975,df=8)*0.06055186/sqrt(8)
+eHOnor <- qt(0.975,df=8)*0.05367262/sqrt(8)
+
+error <- c(e95neo, eAPneo, eARneo, eHEneo, eHOneo, e95nor, eAPnor, eARnor, eHEnor, eHOnor)
+error <- as.data.frame(error)
+genetic_metrics <- cbind(genetic_metrics, error)
+
+A95_data <- genetic_metrics %>% 
+  filter(metric == "A95")
+
+A95_data <- A95_data %>% 
+  mutate(mean = as.character(mean)) %>% 
+  mutate(mean = as.numeric(mean))
+
+AP_data <- genetic_metrics %>% 
+  filter(metric == "AP")
+
+AP_data <- AP_data %>% 
+  mutate(mean = as.character(mean)) %>% 
+  mutate(mean = as.numeric(mean))
+
+AR_data <- genetic_metrics %>% 
+  filter(metric == "AR")
+
+AR_data <- AR_data %>% 
+  mutate(mean = as.character(mean)) %>% 
+  mutate(mean = as.numeric(mean))
+
+HO_data <- genetic_metrics %>% 
+  filter(metric == "HO")
+
+HO_data <- HO_data %>% 
+  mutate(mean = as.character(mean)) %>% 
+  mutate(mean = as.numeric(mean))
+
+HE_data <- genetic_metrics %>% 
+  filter(metric == "HE")
+
+HE_data <- HE_data %>% 
+  mutate(mean = as.character(mean)) %>% 
+  mutate(mean = as.numeric(mean))
+```
+
+## Plot 95% confidence intervals by Range for each genetic metric
+```{r}
+#Allelic Richness Plot
+AR_plot <- ggplot(AR_data, aes(x = range, y = mean)) + 
+  geom_point(size = 3, show.legend = F) + 
+  geom_errorbar(aes(ymin = mean - error, ymax = mean + error, width = 0.3), show.legend = F) + 
+  labs(x = "Range", y = "Mean AR") + 
+  theme(axis.text.x = element_text(angle = 30, hjust = 1)) + 
+  labs(x = "Range", y = "Mean AR") + 
+  theme(axis.text = element_text(size = 20), axis.title = element_text(size = 20)) + 
+  theme(axis.title.x = element_blank())
+
+#Private Allele Frequency Plot
+AP_plot <- ggplot(AP_data, aes(x = range, y = mean)) + 
+  geom_point(size = 3, show.legend = F) + 
+  geom_errorbar(aes(ymin = mean - error, ymax = mean + error, width = 0.3), show.legend = F) + 
+  labs(x = "Range", y = "Mean AP") + 
+  labs(x = "Range", y = "Mean AP") + 
+  theme(axis.text.x = element_text(angle = 30, hjust = 1)) + 
+  theme(axis.text = element_text(size = 20), axis.title = element_text(size = 20)) + 
+  theme(axis.title.x = element_blank())
+
+#Common Allele Frequency Plot
+A95_plot <- ggplot(A95_data, aes(x = range, y = mean)) + 
+  geom_point(size = 3, show.legend = F) + 
+  geom_errorbar(aes(ymin = mean - error, ymax = mean + error, width = 0.3), show.legend = F) + 
+  labs(x = "Range", y = "Mean A95") + 
+  theme(axis.text.x = element_text(angle = 30, hjust = 1)) +
+  theme(axis.text = element_text(size = 20), axis.title = element_text(size = 20)) + 
+  theme(axis.title.x = element_blank())
+
+#Observed Heterozygosity Plot
+HO_plot <- ggplot(HO_data, aes(x = range, y = mean)) + 
+  geom_point(size = 3, show.legend = F) + 
+  geom_errorbar(aes(ymin = mean - error, ymax = mean + error, width = 0.3), show.legend = F) + 
+  labs(x = "Range", y = "Mean HO") + 
+  theme(axis.text.x = element_text(angle = 30, hjust = 1)) + 
+  labs(x = "Range", y = "Mean HO") + 
+  theme(axis.text = element_text(size = 20), axis.title = element_text(size = 20)) + 
+  theme(axis.title.x = element_blank())
+
+#Expected Heterozygosity Plot
+HE_plot <- ggplot(HE_data, aes(x = range, y = mean)) + 
+  geom_point(size = 3, show.legend = F) + 
+  geom_errorbar(aes(ymin = mean - error, ymax = mean + error, width = 0.3), show.legend = F) + 
+  labs(x = "Range", y = "Mean HE") + 
+  labs(x = "Range", y = "Mean HE") + 
+  theme(axis.text.x = element_text(angle = 30, hjust = 1)) + 
+  theme(axis.text = element_text(size = 20), axis.title = element_text(size = 20)) + 
+  theme(axis.title.x = element_blank())
+
+#Combine all 95% confidence interval plots 
+pdf("/Users/joegunn/Desktop/Grad_School_Stuff/Research/Projects/Smallmouth_Bass_Microsatellites/analysis/visualization/genetic_diversity_figures/95_confidence_intervals.pdf", width=12, height=8) 
+
+plot_grid(HO_plot, HE_plot, AR_plot, A95_plot, AP_plot, nrow = 2, ncol = 3, labels = c("A", "B", "C", "D", "E"), label_size = 25)
+
+dev.off()
+```
+
+###Genetic Diversity Randomization Test
+
+```{r}
+##Since we have a very imbalanced data set, with many more neosho populations than northern populations, I am running a randomization procedure on the genetic diversity data to see the frequency at which there are still significant differences between populations for each of our six metrics. I am specifically iterating a one-way ANOVA for either 100 or 1000 different subsets of the Neosho data that are equal in sample size to the Northern data (N = 9, for a total of N = 18). I am then calculating the proportion of p values that are lower than 0.05 for each test
+
+div %>% filter(Range == "Neosho") %>% 
+  count() #31 Neosho populations
+div %>% filter(Range == "Northern") %>% 
+  count() #9 Northern populations 
+
+div_neo <- div %>% 
+  filter(Range == "Neosho") #create data file for Neosho samples only
+
+div_nor <- div %>% 
+  filter(Range == "Northern") #create data file for Northern only
+
+div_spb <- div %>% 
+  filter(Range == "Spotted") #create data file for Spotted only
+
+n.iter <- 1000 #iterations to run 
+p_vals <- data.frame("HO" = numeric(n.iter), "HE" = numeric(n.iter), "AR" = numeric(n.iter), "AE" = numeric(n.iter), "A95" = numeric(n.iter), "AP" = numeric(n.iter))
+
+freqs <- data.frame("HO_freq" = numeric(length = 1), "HE_freq" = numeric(length = 1), "AR_freq" = numeric(length = 1), "AE_freq" = numeric(length = 1), "A95_freq" = numeric(length = 1), "AP_freq" = numeric(length = 1))
+
+#data frame with enough rows to hold p values for each ANOVA for each variable
+
+for (ii in 1:n.iter) {
+  
+  div_subset <- rbind((sample_n(div_neo, 9)), div_nor) #combine subset of Neosho data      with all Northern data, and repeat for the number of iterations specified above
+
+  #ANOVA for each variable
+  obs_lm1 <- lm(HO ~ Range, data = div_subset)
+  obs_lm2 <- lm(HE ~ Range, data = div_subset)
+  obs_lm3 <- lm(AR ~ Range, data = div_subset)
+  obs_lm4 <- lm(AE ~ Range, data = div_subset)
+  obs_lm5 <- lm(A95 ~ Range, data = div_subset)
+  obs_lm6 <- lm(AP ~ Range, data = div_subset)
+
+  #Extract p-value from summary table of each ANOVA run
+  HO_p <- summary(obs_lm1)$coefficients[2,4]
+  HE_p <- summary(obs_lm2)$coefficients[2,4]
+  AR_p <- summary(obs_lm3)$coefficients[2,4]
+  AE_p <- summary(obs_lm4)$coefficients[2,4]
+  A95_p <- summary(obs_lm5)$coefficients[2,4]
+  AP_p <- summary(obs_lm6)$coefficients[2,4]
+
+  
+  #Populate data frame constructed above with p-values from all iterations at all metrics
+  p_vals[ii, "HO"] <- HO_p
+  p_vals[ii, "HE"] <- HE_p
+  p_vals[ii, "AR"] <- AR_p
+  p_vals[ii, "AE"] <- AE_p
+  p_vals[ii, "A95"] <- A95_p
+  p_vals[ii, "AP"] <- AP_p
+  
+  #calculate frequency of p-values under 0.05 for each metric
+  HO_sig_freq <- p_vals %>% filter(HO < 0.05) %>% count() #100%, 100%
+  HE_sig_freq <- p_vals %>% filter(HE < 0.05) %>% count() #78%, 70.9%
+  AR_sig_freq <- p_vals %>% filter(AR < 0.05) %>% count() #25%, #20%
+  AE_sig_freq <- p_vals %>% filter(AE < 0.05) %>% count() #15%, 13.3%
+  A95_sig_freq <- p_vals %>% filter(A95 < 0.05) %>% count() #29%, 21.9%
+  AP_sig_freq <- p_vals %>% filter(AP < 0.05) %>% count() #99, #98.7
+  
+  #Populate data frame constructed above with frequencies of p-values from all iterations   at all metrics
+  freqs["HO_freq"] <- HO_sig_freq
+  freqs["HE_freq"] <- HE_sig_freq
+  freqs["AR_freq"] <- AR_sig_freq
+  freqs["AE_freq"] <- AE_sig_freq
+  freqs["A95_freq"] <- A95_sig_freq
+  freqs["AP_freq"] <- AP_sig_freq
+  
+} #end for loop
+
+freqs
+
+#Visualize the frequency of each p-value across all iterations for each variable. There is a red line at p = 0.05
+
+pdf("/Users/joegunn/Desktop/Grad_School_Stuff/Projects/Smallmouth_Bass_Microsatellites/randomization_HO.pdf", width = 10, height = 9) 
+
+ggplot(p_vals, aes(x = HO)) + geom_density(alpha = 0.3) + geom_vline(xintercept = 0.05, color = "red")
+
+dev.off()
+
+#######################################################################################
+
+pdf("/Users/joegunn/Desktop/Grad_School_Stuff/Projects/Smallmouth_Bass_Microsatellites/randomization_HE.pdf", width = 10, height = 9) 
+
+ggplot(p_vals, aes(x = HE)) + geom_density(alpha = 0.3) + geom_vline(xintercept = 0.05, color = "red")
+
+dev.off()
+
+#######################################################################################
+
+pdf("/Users/joegunn/Desktop/Grad_School_Stuff/Projects/Smallmouth_Bass_Microsatellites/randomization_AR.jpeg", width=10, height=9) 
+
+
+ggplot(p_vals, aes(x = AR)) + geom_density(alpha = 0.3) + geom_vline(xintercept = 0.05, color = "red")
+
+dev.off()
+
+#######################################################################################
+
+pdf("/Users/joegunn/Desktop/Grad_School_Stuff/Projects/Smallmouth_Bass_Microsatellites/randomization_AE.pdf", width = 10, height = 9) 
+
+ggplot(p_vals, aes(x = AE)) + geom_density(alpha = 0.3) + geom_vline(xintercept = 0.05, color = "red")
+
+dev.off()
+
+#######################################################################################
+
+pdf("/Users/joegunn/Desktop/Grad_School_Stuff/Projects/Smallmouth_Bass_Microsatellites/randomization_A95.pdf", width = 10, height = 9) 
+
+ggplot(p_vals, aes(x = A95)) + geom_density(alpha = 0.3) + geom_vline(xintercept = 0.05, color = "red")
+
+dev.off()
+
+#######################################################################################
+
+pdf("/Users/joegunn/Desktop/Grad_School_Stuff/Projects/Smallmouth_Bass_Microsatellites/randomization_AP.pdf", width = 10, height = 9) 
+
+ggplot(p_vals, aes(x = AP)) + geom_density(alpha = 0.3) + geom_vline(xintercept = 0.05, color = "red")
+
+dev.off()
+
+
+#Calculate proportion of p-values that are significant (below 0.05) for all metrics. The first number indicated is at 100 iterations, the second is at 1000
+
+HO_sig_freq <- p_vals %>% 
+  filter(HO < 0.05) %>% 
+  count() #100%, 100%
+
+HE_sig_freq <- p_vals %>% 
+  filter(HE < 0.05) %>% 
+  count() #78%, 70.9%
+
+AR_sig_freq <- p_vals %>% 
+  filter(AR < 0.05) %>% 
+  count() #25%, #20%
+
+AE_sig_freq <- p_vals %>% 
+  filter(AE < 0.05) %>% 
+  count() #15%, 13.3%
+
+A95_sig_freq <- p_vals %>% 
+  filter(A95 < 0.05) %>% 
+  count() #29%, 21.9%
+
+AP_sig_freq <- p_vals %>% 
+  filter(AP < 0.05) %>% 
+  count() #99, #98.7
+
+
+```
+# NSMB DIVERGENCE - MORPHOLOGY
+
+## Libraries Needed For Analysis
+```{r Libraries, echo = FALSE, include = FALSE}
+
+library(riverdist)
+library(sp)
+library(readxl)
+library(popgraph)
+library(tidyverse)
+library(gstudio)
+library(ade4)
+library(adegenet)
+library(cowplot)
+library(nlme)
+library(poppr)
+library(PopGenReport)
+library(maps)
+library(mapdata)
+library(stringr)
+library(rgdal)
+library(sf)
+library(ggsn)
+library(raster)
+library(lme4)
+library(factoextra)
+library(MASS)
+library(logihist)
+library(pophelper)
+library(ggpubr)
+library(DescTools)
+library(vegan)
+```
+
+## Metadata
+```{r}
+smb_metadata_geo <- read_excel("../../data/metadata/smb_metadata_geo.xlsx")
+smb_metadata_geo_nor <- smb_metadata_geo[c(617:766),]
+smb_metadata_neo <- read_excel("../../data/metadata/smb_metadata_nonGEO.xlsx")
+```
+
+Data Info:
+
+Here I provide summary information for my morphological analysis for easy access in the manuscript writing process. I give the number of samples with morphological data, and within those, the number of Northern SMB and Neosho SMB samples. I also give the number of individual samples that assigned 90 % or more to any one cluster and also had morphological data.
+
+OMITTED AR24 BECAUSE IT ASSIGNS ALMOST 98 PERCENT TO SPOTTED BASS
+
+############################################################################################################
+SAMPLE SIZES
+
+Total samples with morphological data = 249
+Total Northern Range = 65
+Total Neosho Range = 184
+
+Total samples with both morphological data and genetic data = 185
+Total samples assigning 90 % or more to neosho or northern = 88
+Total Pure Neosho = 17
+Total Pure Northern = 71
+Total Admixed = 97
+
+Total Length Data
+
+Samples with Total Length data = 385
+Neosho samples with Total Length data = 320
+Northern samples with Total Length data = 65
+Pure neosho Total Length samples = 55
+Pure northern Total Length samples = 82
+############################################################################################################
+
+## Morphological Analysis 
+## Read in data and clean
+### Read in files, including the raw morphometric data for all samples, excluding any samples that have NA in the place of any morphometric measurements, as well as the proportion of the genotype assigning to each cluster within the K = 3 result, major clusters only (Neosho, Northern, or Spotted Bass)
+```{r}
+#All morphometric samples (even with those not used in genetic analysis because of poor amplification; see above for sample size)
+morph_all <- read_excel("../../data/excel_data/all_morph_withpop.xlsx") #all morphological data for all samples
+all_tl <- read_excel("../../data/excel_data/all_tl.xlsx") #only total length data for all samples (there are more of these individuals, because total length was taken on most samples, while all other measurements were only taken for a subset of samples)
+
+morph_with_pop <- merge(smb_metadata_geo, morph_all, by = "sample_id") #merge morphological data with metadata for populations
+
+#Neosho and Northern Range samples from full dataset
+morph_all_neo <- morph_all %>% 
+    filter(range == "Neosho")
+
+morph_all_nor <- morph_all %>% 
+    filter(range == "Northern")
+
+#Total Length Samples 
+tl_neo <- all_tl %>% 
+    filter(range == "Neosho")
+
+tl_nor <- all_tl %>% 
+    filter(range == "Northern")
+```
+
+```{r}
+all_samples_k3_proportions <- read_excel("../../data/excel_data/CERC_k3_proportions.xlsx")
+
+morph_all_noTBLR <- morph_all[-c(234:249),]
+```
+
+## Make data files for Pure Neosho and Northern based on K = 3
+```{r}
+#Merge all morphometric samples with genetic samples (to include only those samples used in STRUCTURE analysis)
+morph_gen_k3 <- merge(all_samples_k3_proportions, morph_all, by = "sample_id")
+morph_gen_k3$rays <- as.integer(morph_gen_k3$rays)
+
+#Just Total Length
+tl_gen_k3 <- merge(all_samples_k3_proportions, all_tl, by = "sample_id")
+tl_neo_90_k3 <- tl_gen_k3 %>% 
+    subset(neosho_prop > 0.9)
+
+tl_nor_90_k3 <- tl_gen_k3 %>% 
+    subset(northern_prop > 0.9)
+
+tl_neo_90_k3 <- as.data.frame(tl_neo_90_k3) #55
+tl_nor_90_k3 <- as.data.frame(tl_nor_90_k3) #82
+tl_neo_90_k3$gid <- as.factor(c(rep("Neosho", times = 55)))
+tl_nor_90_k3$gid <- as.factor(c(rep("Northern", times = 82)))
+tl_90_neo_nor_k3 <- rbind(tl_neo_90_k3, tl_nor_90_k3)
+
+#Determine which samples assign over 90% to a given cluster to analyze genetic-morphological correlation
+morph_neo_90_k3 <- morph_gen_k3  %>% subset(neosho_prop > 0.9)
+morph_nor_90_k3 <- morph_gen_k3  %>% subset(northern_prop > 0.9)
+
+morph_neo_90_k3 <- as.data.frame(morph_neo_90_k3)
+morph_nor_90_k3 <- as.data.frame(morph_nor_90_k3)
+
+morph_neo_90_k3$gid <- as.factor(c(rep("Neosho", times = 17)))
+morph_nor_90_k3$gid <- as.factor(c(rep("Northern", times = 71)))
+
+morph_neo_90_k3 <- morph_neo_90_k3 [, -c(2:4)]
+morph_nor_90_k3 <- morph_nor_90_k3 [, -c(2:4)]
+
+#Determine how many samples are "admixed": neither 90 percent northern or 90 percent neosho
+morph_admix_k3 <- morph_gen_k3 %>% 
+    subset(neosho_prop < 0.9)
+
+morph_admix_k3 <- morph_admix_k3 %>% 
+    subset(spotted_prop < 0.9)
+
+morph_admix_k3 <- morph_admix_k3 %>% 
+    subset(northern_prop < 0.9)
+
+morph_admix_k3$gid <- as.factor(c(rep("admixed", times = 97)))
+morph_admix_k3 <- morph_admix_k3 [, -c(2:4)]
+
+colnames(morph_neo_90_k3) <- c("sample_id", "river", "range", "tl", "sl", "ol", "hl", "bd", "ray", "logtl", "logsl", "logol", "loghl", "logbd", "gid")
+colnames(morph_nor_90_k3) <- c("sample_id", "river", "range", "tl", "sl", "ol", "hl", "bd", "ray", "logtl", "logsl", "logol", "loghl", "logbd", "gid")
+colnames(morph_admix_k3) <- c("sample_id", "river", "range", "tl", "sl", "ol", "hl", "bd", "ray", "logtl", "logsl", "logol", "loghl", "logbd", "gid")
+
+morph_90_nor_neo_k3 <- rbind(morph_neo_90_k3, morph_nor_90_k3)
+morph_90_all_k3 <- rbind(morph_neo_90_k3, morph_nor_90_k3, morph_admix_k3 )
+
+#Calculate real (log-transformed) means for each morphometric trait
+
+#Means for morphometrics by RANGE
+morph_all <- morph_all %>% 
+    mutate(range = factor(range), river = factor(river))
+
+sl_range_mean <- morph_all %>% 
+    group_by(range) %>% 
+    summarize(mean = mean(logsl))
+
+ol_range_mean <- morph_all %>% 
+    group_by(range) %>% 
+    summarize(mean = mean(logol))
+
+hl_range_mean <- morph_all %>%
+    group_by(range) %>% 
+    summarize(mean = mean(loghl))
+
+bd_range_mean <- morph_all %>% 
+    group_by(range) %>% 
+    summarize(mean = mean(logbd))
+
+#Means for morphometrics by GENETIC ASSIGNMENT
+morph_90_nor_neo_k3  <- morph_90_nor_neo_k3 %>% 
+    mutate(gid = factor(gid), river = factor(river))
+
+sl_gen_mean_k3 <- morph_90_nor_neo_k3 %>% 
+    group_by(gid) %>% summarize(mean = mean(logsl))
+
+ol_gen_mean_k3 <- morph_90_nor_neo_k3 %>% 
+    group_by(gid) %>% summarize(mean = mean(logol))
+
+hl_gen_mean_k3 <- morph_90_nor_neo_k3 %>% 
+    group_by(gid) %>% summarize(mean = mean(loghl))
+
+bd_gen_mean_k3 <- morph_90_nor_neo_k3 %>% 
+    group_by(gid) %>% summarize(mean = mean(logbd)) 
+
+morph_90_all_k3_means <- morph_90_all_k3 %>% 
+    group_by(gid) %>% 
+    summarize(mean_tl = mean(logtl), mean_sl = mean(logsl), mean_ol = mean(logol), mean_hl = mean(loghl), mean_bd = mean(logbd))
+
+morph_all_gen_lme1 <- lme(logol ~ logtl + gid, random = ~1|river, data = morph_90_all_k3)
+summary(morph_all_gen_lme1)
+
+ggplot(morph_90_all_k3, aes(x = logtl, y = logol, color = gid)) + 
+    geom_point() + 
+    geom_smooth(method = "lm")
+
+```
+
+# Check for multicollinearity in total length. Is Total Length different between groups by RANGE or by GENETIC ASSIGNMENT?
+
+```{r}
+
+tl_90_neo_nor_k3_merge <- merge(tl_90_neo_nor_k3, smb_metadata_geo, by = "sample_id")
+all_tl_merge <- merge(all_tl, smb_metadata_geo, by = "sample_id")
+
+lm_tl_gen_k3  <- (lme(logtl ~ gid, random = ~1|population, tl_90_neo_nor_k3_merge)) #NOT SIGNIFICANT
+lm_tl_range <- (lme(logtl ~ range, random = ~1|population, all_tl_merge)) #NOT SIGNIFICANT
+
+summary(lm_tl_gen_k3) #not significant (p = 0.109, F = 2.60)
+summary(lm_tl_range) #not significant (p = 0.634, F = 0.23)
+
+#Graph the collinearity
+tl_range_diff <- ggplot(all_tl, aes(x = range, y = logtl)) +
+    geom_point(position = position_jitter(width = 0.2), alpha = 0.4, size = 3) + 
+    labs(x = "Range", y = "Log10 of Total Length (mm)", Title = "Range of Collection") + 
+    stat_summary(fun.y = mean, geom = "point", color = "blue", size = 4) + 
+    stat_summary(fun.data = mean_sd, geom = "errorbar", width = 0.2, color = "blue", size = 2) + 
+    theme(axis.title = element_text(size = 20)) + 
+    theme(axis.text = element_text(size = 20))
+
+tl_gen_diff_k3  <- ggplot(tl_90_neo_nor_k3, aes(x = gid, y = logtl)) +
+    geom_point(position = position_jitter(width = 0.2), alpha = 0.4, size = 3) + 
+    labs(x = "Assignment", Title = "Genetic Assignment") +
+    stat_summary(fun.y = mean, geom = "point", color = "blue", size = 4) + 
+    stat_summary(fun.data = mean_sd, geom = "errorbar", width = 0.2, color = "blue", size = 2) + 
+    theme(axis.title.y = element_blank()) + 
+    theme(axis.title = element_text(size = 20)) + 
+    theme(axis.text = element_text(size = 20))
+
+#Test for Collinearity Assumption
+
+pdf("/Users/joegunn/Desktop/Grad_School_Stuff/Projects/Smallmouth_Bass_Microsatellites/tl_collinearity_plots_k3.pdf", width = 13, height = 8)
+
+plot_grid(tl_range_diff, tl_gen_diff_k3, nrow = 1, labels = c("A", "B"), label_size = 25)
+
+dev.off()
+
+#gid = genetic identification (which subspecies did the sample assign over 90 percent to)
+```
+
+## Check for deviations from normality in the data 
+```{r}
+
+#Check for Normality in subspecies RANGES
+#Shapiro-Wilk - if the p-value is above 0.05, it does not vary from normality
+
+#Neosho Range
+tl_neo_norm_test_range <- shapiro.test(morph_all_neo$logtl) #normal
+sl_neo_norm_test_range <- shapiro.test(morph_all_neo$logsl) #normal
+ol_neo_norm_test_range <- shapiro.test(morph_all_neo$logol) #not normal
+hl_neo_norm_test_range <- shapiro.test(morph_all_neo$loghl) #normal
+bd_neo_norm_test_range <- shapiro.test(morph_all_neo$logbd) #normal
+
+#Northern Range
+tl_nor_norm_test_range <- shapiro.test(morph_all_nor$logtl) #normal
+sl_nor_norm_test_range <- shapiro.test(morph_all_nor$logsl) #normal
+ol_nor_norm_test_range <- shapiro.test(morph_all_nor$logol) #normal
+hl_nor_norm_test_range <- shapiro.test(morph_all_nor$loghl) #not normal
+bd_nor_norm_test_range <- shapiro.test(morph_all_nor$logbd) #normal
+
+#Neosho Genetics
+tl_neo_norm_test_gen <- shapiro.test(morph_neo_90_k3$logtl) #normal
+sl_neo_norm_test_gen <- shapiro.test(morph_neo_90_k3$logsl) #normal
+ol_neo_norm_test_gen <- shapiro.test(morph_neo_90_k3$logol) #normal
+hl_neo_norm_test_gen <- shapiro.test(morph_neo_90_k3$loghl) #normal
+bd_neo_norm_test_gen <- shapiro.test(morph_neo_90_k3$logbd) #normal
+
+#Northern Genetics
+tl_nor_norm_test_gen <- shapiro.test(morph_nor_90_k3$logtl) #normal
+sl_nor_norm_test_gen <- shapiro.test(morph_nor_90_k3$logsl) #normal
+ol_nor_norm_test_gen <- shapiro.test(morph_nor_90_k3$logol) #normal
+hl_nor_norm_test_gen <- shapiro.test(morph_nor_90_k3$loghl) #not normal
+bd_nor_norm_test_gen <- shapiro.test(morph_nor_90_k3$logbd) #normal
+
+```
+
+# #QQ-Plots for Normality Test
+```{r}
+#Normality within Neosho
+tl_neo_range_norm <- ggqqplot(morph_all_neo$logtl) + 
+    labs(y = "Total Length Sample", title = "Neosho Range") + 
+    theme_set(theme_cowplot(12)) + theme(axis.title.x = element_blank()) + 
+    theme(plot.title = element_text(hjust = 0.5)) + 
+    theme(axis.title.y = element_text(size = 20)) + 
+    theme(plot.title = element_text(size = 20)) #good
+
+sl_neo_range_norm <- ggqqplot(morph_all_neo$logsl) + 
+    labs(y = "Standard Length Sample") + 
+    theme_set(theme_cowplot(12)) + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.title.y = element_text(size = 20)) #good
+
+ol_neo_range_norm <- ggqqplot(morph_all_neo$logol) + 
+    labs(y = "Orbital Length Sample") + 
+    theme_set(theme_cowplot(12)) + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.title.y = element_text(size = 20))#one weird sample
+
+hl_neo_range_norm <- ggqqplot(morph_all_neo$loghl) + 
+    labs(y = "Head Length Sample") + 
+    theme_set(theme_cowplot(12)) + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.title.y = element_text(size = 20)) #good
+
+bd_neo_range_norm <- ggqqplot(morph_all_neo$logbd) + 
+    labs(y = "Body Depth Sample", x = "Theoretical") + 
+    theme_set(theme_cowplot(12)) + 
+    theme(axis.title.y = element_text(size = 20)) + 
+    theme(axis.title.x = element_text(size = 20)) #good
+    
+#Normality within Northern
+tl_nor_range_norm <- ggqqplot(morph_all_nor$logtl) + 
+    labs(title = "Northern Range") + 
+    theme_set(theme_cowplot(12)) + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.title.y = element_blank()) + 
+    theme(plot.title = element_text(hjust = 0.5)) + 
+    theme(plot.title = element_text(size = 20)) #good
+
+sl_nor_range_norm <- ggqqplot(morph_all_nor$logsl) + 
+    theme_set(theme_cowplot(12)) + 
+    theme(axis.title.x = element_blank()) +
+    theme(axis.title.y = element_blank()) #good
+
+ol_nor_range_norm <- ggqqplot(morph_all_nor$logol) + 
+    theme_set(theme_cowplot(12)) + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.title.y = element_blank()) #good
+
+hl_nor_range_norm <- ggqqplot(morph_all_nor$loghl) + 
+    theme_set(theme_cowplot(12)) + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.title.y = element_blank()) #4 weird samples
+
+bd_nor_range_norm <- ggqqplot(morph_all_nor$logbd) + 
+    labs(x = "Theoretical") + 
+    theme_set(theme_cowplot(12)) + 
+    theme(axis.title.x = element_text(size = 20)) + 
+    theme(axis.title.y = element_blank())  #good
+    
+#Check for Normality in subspecies GENETIC ASSIGNMENTS
+    
+    #Within Neosho
+tl_neo_genetics_norm <- ggqqplot(morph_neo_90_k3$logtl) + 
+    labs(title = "Neosho Genetic Assignment") + 
+    theme_set(theme_cowplot(12)) + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.title.y = element_blank()) + 
+    theme(plot.title = element_text(hjust = 0.5)) + 
+    theme(plot.title = element_text(size = 20)) #good
+
+sl_neo_genetics_norm <- ggqqplot(morph_neo_90_k3$logsl) + 
+    theme_set(theme_cowplot(12)) +
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.title.y = element_blank())  #good
+
+ol_neo_genetics_norm <- ggqqplot(morph_neo_90_k3$logol) + 
+    theme_set(theme_cowplot(12)) + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.title.y = element_blank())  #good
+
+hl_neo_genetics_norm <- ggqqplot(morph_neo_90_k3$loghl) + 
+    theme_set(theme_cowplot(12)) + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.title.y = element_blank())  #good
+
+bd_neo_genetics_norm <- ggqqplot(morph_neo_90_k3$logbd) + 
+    labs(x = "Theoretical") + theme_set(theme_cowplot(12)) +
+    theme(axis.title.y = element_blank()) +
+    theme(axis.title.x = element_text(size = 20)) #good
+    
+#Within Northern
+tl_nor_genetics_norm <- ggqqplot(morph_nor_90_k3$logtl) + 
+    labs(title = "Northern Genetic Assignment") + 
+    theme_set(theme_cowplot(12)) + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.title.y = element_blank()) + 
+    theme(plot.title = element_text(hjust = 0.5)) + 
+    theme(plot.title = element_text(size = 20)) #good
+
+sl_nor_genetics_norm <- ggqqplot(morph_nor_90_k3$logsl) + 
+    theme_set(theme_cowplot(12)) + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.title.y = element_blank())  #good
+
+ol_nor_genetics_norm <- ggqqplot(morph_nor_90_k3$logol) +
+    theme_set(theme_cowplot(12)) + 
+    theme(axis.title.x = element_blank()) +
+    theme(axis.title.y = element_blank())  #good
+
+hl_nor_genetics_norm <- ggqqplot(morph_nor_90_k3$loghl) + 
+    theme_set(theme_cowplot(12)) + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.title.y = element_blank())  #two weird samples
+
+bd_nor_genetics_norm <- ggqqplot(morph_nor_90_k3$logbd) + 
+    theme_set(theme_cowplot(12)) + 
+    labs(x = "Theoretical") + 
+    theme(axis.title.y = element_blank()) + 
+    theme(axis.title.x = element_text(size = 20)) #one weird sample
+    
+
+
+#Put all of them together
+neo_range_norm <- plot_grid(tl_neo_range_norm, sl_neo_range_norm, ol_neo_range_norm, hl_neo_range_norm, bd_neo_range_norm, nrow = 5, labels = c("p = 0.079", "p = 0.090", "p < 0.001 ", "p = 0.165", "p = 0.599"), label_x = 0.5, label_y = 0.35, label_size = 20)
+
+nor_range_norm <- plot_grid(tl_nor_range_norm, sl_nor_range_norm, ol_nor_range_norm, hl_nor_range_norm, bd_nor_range_norm, nrow = 5, labels = c("p = 0.458", "p = 0.297", "p = 0.519 ", "p < 0.001", "p = 0.297"), label_x = 0.5, label_y = 0.35, label_size = 20)
+
+neo_gen_norm <- plot_grid(tl_neo_genetics_norm, sl_neo_genetics_norm, ol_neo_genetics_norm, hl_neo_genetics_norm, bd_neo_genetics_norm, nrow = 5, labels = c("p = 0.446", "p = 0.521", "p = 0.509 ", "p = 0.685", "p = 0.203"), label_x = 0.5, label_y = 0.35, label_size = 20)
+
+nor_gen_norm <- plot_grid(tl_nor_genetics_norm, sl_nor_genetics_norm, ol_nor_genetics_norm, hl_nor_genetics_norm, bd_nor_genetics_norm, nrow = 5, labels = c("p = 0.598", "p = 0.783", "p = 0.468", "p < 0.001 ", "p = 0.642"), label_x = 0.5, label_y = 0.35, label_size = 20)
+
+
+
+pdf("/Users/joegunn/Desktop/Grad_School_Stuff/Projects/Smallmouth_Bass_Microsatellites/qq_plots.pdf", width=17, height=17)
+
+plot_grid(neo_range_norm, nor_range_norm, neo_gen_norm, nor_gen_norm, ncol = 4)
+
+dev.off()
+
+
+```
+
+## Morphometric ANCOVA by RANGE and GENETIC ASSIGNMENT
+```{r}
+#Information on method
+#The iSMSC Method from Berner 2010 suggests that each individual morphometric trait be independently regressed onto a variable of body size (in my case, total length) in order to partial out the effect of that size trait. Once each trait has been analyzed in a general linear model (ANCOVA) against total length, you can find the grand mean of total length across all pooled samples (including samples from every group analyzed - ie. ranges), and you can calculate the average value of each morphometric trait at THAT grand mean value of total length. This will allow direct comparison between populations (using the unique slope and intercept coefficients for each population), without the biasing effect of total length
+
+```
+
+###RANGE###
+
+## one-way ANOVA on all traits (for RANGE samples) and density distributions
+```{r}
+anova_tl_range <- lm(logtl ~ range, data = morph_all)
+anova_sl_range <- lm(logsl ~ range, data = morph_all)
+anova_ol_range <- lm(logol ~ range, data = morph_all)
+anova_hl_range <- lm(loghl ~ range, data = morph_all) 
+anova_bd_range <- lm(logbd ~ range, data = morph_all)
+
+#summary(anova_tl_range)
+#summary(anova_sl_range) #significant
+#summary(anova_ol_range) 
+#summary(anova_hl_range) #almost significant
+#summary(anova_bd_range)
+
+#In case you need a dataset with an even number of neosho and northern samples
+morph_neo_65 <- sample_n(morph_all_neo, 65)
+morph_even <- rbind(morph_neo_65, morph_all_nor)
+
+#Probability density distributions
+tl_density <- ggplot(morph_even, aes(logtl, fill = range)) + geom_density()
+sl_density <- ggplot(morph_even, aes(logsl, fill = range)) + geom_density() 
+ol_density <- ggplot(morph_even, aes(logol, fill = range)) + geom_density()
+hl_density <- ggplot(morph_even, aes(loghl, fill = range)) + geom_density()
+bd_density <- ggplot(morph_even, aes(logbd, fill = range)) + geom_density()
+
+
+```
+
+## Univariate ANCOVA with Total Length as the covariate
+```{r}
+
+#ALL MORPHOMETRIC DATA (N = 248) BY RANGE
+
+#ANCOVA interaction models
+ancova_sl_range_interaction <- lme(logsl ~ logtl*range, random = ~1|river, data = morph_all)
+ancova_ol_range_interaction <- lme(logol ~ logtl*range, random = ~1|river, data = morph_all)
+ancova_hl_range_interaction <- lme(loghl ~ logtl*range, random = ~1|river, data = morph_all)
+ancova_bd_range_interaction <- lme(logbd ~ logtl*range, random = ~1|river, data = morph_all)
+
+
+anova(ancova_sl_range_interaction) #no interaction (p = 0.271), F = 1.200
+anova(ancova_ol_range_interaction) #interaction (p < 0.001), F = 30.628
+anova(ancova_hl_range_interaction) #no interaction (p = 0.636), F = 0.220
+anova(ancova_bd_range_interaction) #no interaction (p = 0.289), F = 1.13
+
+#ANCOVA additive models
+
+ancova_sl_range_additive <- lme(logsl ~ logtl + range, random = ~1|river, data = morph_all)
+ancova_ol_range_additive <- lme(logol ~ logtl + range, random = ~1|river, data = morph_all)
+ancova_hl_range_additive <- lme(loghl ~ logtl + range, random = ~1|river, data = morph_all) 
+ancova_bd_range_additive <- lme(logbd ~ logtl + range, random = ~1|river, data = morph_all)
+
+anova(ancova_sl_range_additive) #not significant (p = 0.166), F = 2.100
+anova(ancova_ol_range_additive) #not significant (p = 0.7443), F = 0.110
+anova(ancova_hl_range_additive) #significant (p = 0.001), F = 14.070
+anova(ancova_bd_range_additive) #not significant (p = 0.696), F = 0.160
+
+
+sl_res_random <- ancova_sl_range_additive$residuals
+sl_res_random <- as.data.frame(sl_res_random)
+sl_res_random <- cbind(morph_all, sl_res_random)
+sl_res_random <- sl_res_random[,-c(2)]
+
+hl_res_random <- ancova_hl_range_additive$residuals
+hl_res_random <- as.data.frame(hl_res_random)
+hl_res_random <- cbind(morph_all, hl_res_random)
+hl_res_random <- hl_res_random[,-c(2)]
+
+ggplot(hl_res_random, aes(x = range, y = river)) + geom_boxplot()
+```
+
+## Get residuals from linear models
+```{r}
+#Get residuals from linear regression on significant (non-interacting traits) on total length
+
+#Linear Regressions
+sl_tl <- lm(logsl ~ logtl, data = morph_all)
+hl_tl <- lm(loghl ~ logtl, data = morph_all)
+bd_tl <- lm(logbd ~ logtl, data = morph_all)
+
+#STANDARD LENGTH RESIDUALS
+sl_res <- sl_tl$residuals
+sl_res <- as.data.frame(sl_res)
+colnames(sl_res) <- c("sl_res")
+sl_res_data <- cbind(morph_all, sl_res)
+sl_res_range <- ggplot(sl_res_data, aes(x = range, y = sl_res)) + 
+    geom_point(position = position_jitter(width = 0.1))
+
+
+#HEAD LENGTH RESIDUALS
+hl_res <- hl_tl$residuals
+hl_res <- as.data.frame(hl_res)
+colnames(hl_res) <- c("hl_res")
+hl_res_data <- cbind(morph_all, hl_res)
+hl_res_range <- ggplot(hl_res_data, aes(x = range, y = hl_res)) + 
+    geom_boxplot()
+
+#BODY DEPTH RESIDUALS
+bd_res <- bd_tl$residuals
+bd_res <- as.data.frame(bd_res)
+colnames(bd_res) <- c("bd_res")
+bd_res_data <- cbind(morph_all, bd_res)
+bd_res_range <- ggplot(bd_res_data, aes(x = range, y = bd_res)) + 
+    geom_boxplot()
+
+lm(sl_res ~ range, sl_res_data)
+summary(lm(sl_res ~ range, sl_res_data))
+
+residual_data <- cbind(morph_all, sl_res, hl_res, bd_res)
+residual_data <- residual_data[,-c(4:14)]
+
+residual_data_means <- residual_data %>% 
+    group_by(range) %>% 
+    summarize(mean_sl_res = mean(sl_res), mean_hl_res = mean(hl_res), mean_bd_res = mean(bd_res), sd_sl_res = sd(sl_res), sd_hl_res = sd(hl_res), sd_bd_res = sd(bd_res))
+
+
+#Calculate Error for 95% confidence intervals
+sl_error_neo <- qt(0.975,df=183)*0.01517489/sqrt(184)
+sl_error_nor <- qt(0.975,df=64)*0.01487127/sqrt(65)
+hl_error_neo <- qt(0.975,df=183)*0.01897185/sqrt(184)
+hl_error_nor <- qt(0.975,df=64)*0.06264095/sqrt(65)
+bd_error_neo <- qt(0.975,df=183)*0.03752034/sqrt(184)
+bd_error_nor <- qt(0.975,df=64)*0.03887447/sqrt(65)
+
+
+#Hacky way to get eveything into a single dataset
+res_error <- c(sl_error_neo, hl_error_neo, bd_error_neo, sl_error_nor, hl_error_nor, bd_error_nor)
+res_error <- as.data.frame(res_error)
+res_means <- c(residual_data_means[1,2], residual_data_means[1,3], residual_data_means[1,4], residual_data_means[2,2], residual_data_means[2,3], residual_data_means[2,4])
+res_means <- as.data.frame(res_means)
+res_means <- t(res_means)
+res_means <- as.data.frame(res_means)
+rownames(res_means) <- c()
+colnames(res_means) <- c("mean")
+trait <- as.data.frame(c("sl_res", "hl_res", "bd_res", "sl_res", "hl_res", "bd_res"))
+colnames(trait) <- c("trait_res")
+subspecies <- as.data.frame(c(rep("Neosho", times = 3), rep("Northern", times = 3)))
+colnames(subspecies) <- c("subspecies")
+morph_all_cis <- cbind(subspecies, trait, res_means, res_error)
+
+sl_cis <- morph_all_cis %>% 
+    filter(trait_res == "sl_res")
+
+hl_cis <- morph_all_cis %>% 
+    filter(trait_res == "hl_res")
+
+bd_cis <- morph_all_cis %>% 
+    filter(trait_res == "bd_res")
+
+
+#Plot confidence intervals on the residuals 
+sl_cis_plot <- ggplot(sl_cis, aes(x = subspecies, y = mean)) + 
+    geom_point(size = 2, show.legend = F) + 
+    geom_errorbar(aes(ymin = mean - res_error, ymax = mean + res_error, width = 0.2), show.legend = F) + 
+    labs(x = "Range", y = "SL Residuals (mm)") + 
+    theme(axis.text.x = element_text(angle = 30, hjust = 1)) + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.title.y = element_text(size = 20)) + 
+    theme(axis.text.x = element_blank()) + 
+    theme(axis.text.y = element_text(size = 15)) + 
+    labs(title = " Range of Collection") + 
+    theme(plot.title = element_text(size = 20))
+
+hl_cis_plot <- ggplot(hl_cis, aes(x = subspecies, y = mean)) + 
+    geom_point(size = 2, show.legend = F) + 
+    geom_errorbar(aes(ymin = mean - res_error, ymax = mean + res_error, width = 0.2), show.legend = F) + 
+    labs(x = "Range", y = "HL Residuals (mm)") + 
+    theme(axis.text.x = element_text(angle = 30, hjust = 1)) + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.title.y = element_text(size = 20)) + 
+    theme(axis.text.x = element_blank()) + 
+    theme(axis.text.y = element_text(size = 15))
+
+bd_cis_plot <- ggplot(bd_cis, aes(x = subspecies, y = mean)) +
+    geom_point(size = 2, show.legend = F) +
+    geom_errorbar(aes(ymin = mean - res_error, ymax = mean + res_error, width = 0.2), show.legend = F) + 
+    labs(x = "Range", y = "BD Residuals (mm)") + 
+    theme(axis.text.x = element_text(angle = 30, hjust = 1, size = 15)) +
+    theme(axis.title.y = element_text(size = 20)) + 
+    theme(axis.text.y = element_text(size = 15)) + 
+    theme(axis.title.x = element_blank())
+```
+
+## Get coefficients from ancovas
+```{r}
+
+#testing each morphometric without the influence of the tablerock lake samples - there is NO difference in significance in any of the comparisons.
+glm_sl_range_noTBLR <- lm(logsl ~ logtl*range, data = morph_all_noTBLR)
+glm_ol_range_noTBLR <- lm(logol ~ logtl*range, data = morph_all_noTBLR)
+glm_hl_range_noTBLR <- lm(loghl ~ logtl*range, data = morph_all_noTBLR)
+glm_bd_range_noTBLR <- lm(logbd ~ logtl*range, data = morph_all_noTBLR)
+morph_90_nor_neo_k3_noTBLR <- morph_90_nor_neo_k3[-c(78:88),]
+
+#slope and intercept information for each range
+coefficients_sl_range <- lmList(logsl ~ logtl|range, data = morph_all)
+coefficients_ol_range <- lmList(logol ~ logtl|range, data = morph_all)
+coefficients_hl_range <- lmList(loghl ~ logtl|range, data = morph_all)
+coefficients_bd_range <- lmList(logbd ~ logtl|range, data = morph_all)
+
+tl_grandmean_all <- morph_all %>% summarize(g_mean = mean(logtl)) #tl grandmean = 2.452
+
+summary(coefficients_sl_range)
+    #Neosho intercept = -0.103
+    #Neosho slope = 1.007
+    #Northern intercept = -0.019
+    #Northern slope = 0.977
+    #t value (range) = 1.143
+    #t value (interaction) = -1.013
+    #P (range, additive model) = <0.001
+    #P (interaction) = 0.312
+    #R2 = 0.961
+    #Residual standard error = 0.015
+    #Calculated Neosho Average = 
+    #Calculated Northern Average = 
+
+summary(coefficients_ol_range)
+    #Neosho intercept = -0.264
+    #Neosho slope = 0.576
+    #Northern intercept = 1.237
+    #Northern slope = -0.033
+    #t value (range) = 5.240
+    #t value (interaction) = -.5228
+    #P (interaction) = < 0.001
+    #R2 = 0.284
+    #Residual standard error = 0.059
+    #Calculated Neosho Average = 
+    #Calculated Northern Average = 
+
+summary(coefficients_hl_range)
+    #Neosho intercept = -0.426
+    #Neosho slope = 0.949
+    #Northern intercept = -0.523
+    #Northern slope = 0.974
+    #t value (range) = -0.550
+    #t value (interaction) = 0.353
+    #P (range, additive model) = <0.001
+    #P (interaction) = 0.724
+    #R2 = 0.799
+    #Residual standard error = 0.036
+    #Calculated Neosho Average = 
+    #Calculated Northern Average = 
+
+summary(coefficients_bd_range)
+    #Neosho intercept = -0.950
+    #Neosho slope = 1.129
+    #Northern intercept = -1.299
+    #Northern slope = 1.269
+    #t value (range) = -1.896
+    #t value (interaction) = 1.862
+    #P (range, additive model) = 0.224
+    #P (interaction) = 0.064
+    #R2 = 0.841
+    #Residual standard error = 0.038
+    #Calculated Neosho Average = 
+    #Calculated Northern Average = 
+
+############################################################################################################################################
+
+```
+
+###GENETIC ASSIGNMENT###
+
+## one-way ANOVA on all traits (for GENETIC ASSIGNMENT samples) and density distributions
+```{r}
+#GENETICALLY PURE DATA (N = 87)
+anova_tl_gen <- lm(logtl ~ gid, data = morph_90_nor_neo_k3)
+anova_sl_gen <- lm(logsl ~ gid, data = morph_90_nor_neo_k3)
+anova_ol_gen <- lm(logol ~ gid, data = morph_90_nor_neo_k3)
+anova_hl_gen <- lm(loghl ~ gid, data = morph_90_nor_neo_k3) 
+anova_bd_gen <- lm(logbd ~ gid, data = morph_90_nor_neo_k3)
+View(morph_90_nor_neo_k3)
+#summary(anova_tl_gen) #very significant
+#summary(anova_sl_gen) #very significant
+#summary(anova_ol_gen) 
+#summary(anova_hl_gen) 
+#summary(anova_bd_gen) #very significant
+
+
+#Probability density distributions
+tl_density_gen <- ggplot(morph_90_nor_neo_k3, aes(logtl, fill = gid)) + geom_density()
+sl_density_gen <- ggplot(morph_90_nor_neo_k3, aes(logsl, fill = gid)) + geom_density() 
+ol_density_gen <- ggplot(morph_90_nor_neo_k3, aes(logol, fill = gid)) + geom_density()
+hl_density_gen <- ggplot(morph_90_nor_neo_k3, aes(loghl, fill = gid)) + geom_density()
+bd_density_gen <- ggplot(morph_90_nor_neo_k3, aes(logbd, fill = gid)) + geom_density()
+
+
+```
+
+## ANCOVAs with total length as a covariate
+```{r}
+
+#ANCOVA interaction models
+ancova_sl_gen_interaction <- lme(logsl ~ logtl*gid, random = ~1|river, data = morph_90_nor_neo_k3)
+ancova_ol_gen_interaction <- lme(logol ~ logtl*gid, random = ~1|river, data = morph_90_nor_neo_k3)
+ancova_hl_gen_interaction <- lme(loghl ~ logtl*gid, random = ~1|river, data = morph_90_nor_neo_k3)
+ancova_bd_gen_interaction <- lme(logbd ~ logtl*gid, random = ~1|river, data = morph_90_nor_neo_k3)
+
+anova(ancova_sl_gen_interaction) #no interaction (p = 0.181), F = 1.800
+anova(ancova_ol_gen_interaction) #no interaction (p = 0.158), F = 2.041
+anova(ancova_hl_gen_interaction) #no interaction (p = 0.728), F = 0.120
+anova(ancova_bd_gen_interaction) #no interaction (p = 0.693), F = 0.160
+
+#ANCOVA additive models
+ancova_sl_gen_additive <- lme(logsl ~ logtl + gid, random = ~1|river, data = morph_90_nor_neo_k3)
+ancova_ol_gen_additive <- lme(logol ~ logtl + gid, random = ~1|river, data = morph_90_nor_neo_k3)
+ancova_hl_gen_additive <- lme(loghl ~ logtl + gid, random = ~1|river, data = morph_90_nor_neo_k3)
+ancova_bd_gen_additive <- lme(logbd ~ logtl + gid, random = ~1|river, data = morph_90_nor_neo_k3)
+
+anova(ancova_sl_gen_additive) #not significant (p = 0.620), F = 0.300
+anova(ancova_ol_gen_additive) #not significant (p = 0.756), F = 0.100
+anova(ancova_hl_gen_additive) #not significant (p = 0.097), F = 3.140
+anova(ancova_bd_gen_additive) #not significant (p = 0.681), F = 0.180
+```
+
+## Extract Residuals
+```{r}
+#Get residuals from linear regression on significant (non-interacting traits) on total length
+#ol, hl, bd
+
+#Linear Regressions
+ol_tl_gen <- lm(logol ~ logtl, data = morph_90_nor_neo_k3)
+hl_tl_gen <- lm(loghl ~ logtl, data = morph_90_nor_neo_k3)
+bd_tl_gen <- lm(logbd ~ logtl, data = morph_90_nor_neo_k3)
+
+#ORBITAL LENGTH RESIDUALS
+ol_res_gen <- ol_tl_gen$residuals
+ol_res_gen <- as.data.frame(ol_res_gen)
+colnames(ol_res_gen) <- c("ol_res_gen")
+ol_res_data_gen <- cbind(morph_90_nor_neo_k3, ol_res_gen)
+
+#HEAD LENGTH RESIDUALS
+hl_res_gen <- hl_tl_gen$residuals
+hl_res_gen <- as.data.frame(hl_res_gen)
+colnames(hl_res_gen) <- c("hl_res_gen")
+hl_res_data_gen <- cbind(morph_90_nor_neo_k3, hl_res_gen)
+
+#BODY DEPTH RESIDUALS
+bd_res_gen <- bd_tl_gen$residuals
+bd_res_gen <- as.data.frame(bd_res_gen)
+colnames(bd_res_gen) <- c("bd_res_gen")
+bd_res_data_gen <- cbind(morph_90_nor_neo_k3, bd_res_gen)
+
+
+residual_data_gen <- cbind(morph_90_nor_neo_k3, ol_res_gen, hl_res_gen, bd_res_gen)
+residual_data_gen <- residual_data_gen[,-c(4:14)]
+residual_data_gen <- residual_data_gen[,-c(1:3)]
+
+residual_data_gen_means <- residual_data_gen %>% 
+    group_by(gid) %>% 
+    summarize(mean_ol_res_gen = mean(ol_res_gen), mean_hl_res_gen = mean(hl_res_gen), mean_bd_res_gen = mean(bd_res_gen), sd_ol_res_gen = sd(ol_res_gen), sd_hl_res_gen = sd(hl_res_gen), sd_bd_res_gen = sd(bd_res_gen))
+residual_data_gen_means
+
+
+#Calculate Error for 95% confidence intervals
+ol_gen_error_neo <- qt(0.975,df=16)*0.05690505/sqrt(17)
+ol_gen_error_nor <- qt(0.975,df=70)*0.06800337/sqrt(71)
+hl_gen_error_neo <- qt(0.975,df=16)*0.02196840/sqrt(17)
+hl_gen_error_nor <- qt(0.975,df=70)*0.05695555/sqrt(71)
+bd_gen_error_neo <- qt(0.975,df=16)*0.04330161/sqrt(17)
+bd_gen_error_nor <- qt(0.975,df=70)*0.04274684/sqrt(71)
+
+#Hacky way to get eveything into a single dataset
+res_error_gen <- c(ol_gen_error_neo, hl_gen_error_neo, bd_gen_error_neo, ol_gen_error_nor, hl_gen_error_nor, bd_gen_error_nor)
+
+res_error_gen <- as.data.frame(res_error_gen)
+
+res_means_gen <- c(residual_data_gen_means[1,2], residual_data_gen_means[1,3], residual_data_gen_means[1,4], residual_data_gen_means[2,2], residual_data_gen_means[2,3], residual_data_gen_means[2,4])
+
+res_means_gen <- as.data.frame(res_means_gen)
+res_means_gen <- t(res_means_gen)
+res_means_gen <- as.data.frame(res_means_gen)
+rownames(res_means_gen) <- c()
+colnames(res_means_gen) <- c("mean_gen")
+
+trait_gen <- as.data.frame(c("ol_res_gen", "hl_res_gen", "bd_res_gen", "ol_res_gen", "hl_res_gen", "bd_res_gen"))
+
+colnames(trait_gen) <- c("trait_res_gen")
+
+subspecies_gen <- as.data.frame(c(rep("Neosho", times = 3), rep("Northern", times = 3)))
+colnames(subspecies_gen) <- c("subspecies")
+
+morph_gen_cis <- cbind(subspecies, trait_gen, res_means_gen, res_error_gen)
+ol_gen_cis <- morph_gen_cis %>% 
+    filter(trait_res_gen == "ol_res_gen")
+
+hl_gen_cis <- morph_gen_cis %>% 
+    filter(trait_res_gen == "hl_res_gen")
+
+bd_gen_cis <- morph_gen_cis %>% 
+    filter(trait_res_gen == "bd_res_gen")
+
+#Plot confidence intervals on the residuals 
+ol_gen_cis_plot <- ggplot(ol_gen_cis, aes(x = subspecies, y = mean_gen)) + 
+    geom_point(size = 2, show.legend = F) + 
+    geom_errorbar(aes(ymin = mean_gen - res_error_gen, ymax = mean_gen + res_error_gen, width = 0.2), show.legend = F) + 
+    labs(x = "Genetic Assignment", y = "OL Residuals (mm)") + 
+    theme(axis.text.x = element_text(angle = 30, hjust = 1)) + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.title.y = element_text(size = 20)) + 
+    theme(axis.text.x = element_blank()) + 
+    theme(axis.text.y = element_text(size = 15)) + 
+    labs(title = "Genetic Assignment") + 
+    theme(plot.title = element_text(size = 20))
+
+hl_gen_cis_plot <- ggplot(hl_gen_cis, aes(x = subspecies, y = mean_gen)) +
+    geom_point(size = 2, show.legend = F) + 
+    geom_errorbar(aes(ymin = mean_gen - res_error_gen, ymax = mean_gen + res_error_gen, width = 0.2), show.legend = F) + 
+    labs(x = "Genetic Assignment", y = "HL Residuals (mm)") + 
+    theme(axis.text.x = element_text(angle = 30, hjust = 1)) + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.title.y = element_text(size = 20)) + 
+    theme(axis.text.x = element_blank()) + 
+    theme(axis.text.y = element_text(size = 15))
+
+bd_gen_cis_plot <- ggplot(bd_gen_cis, aes(x = subspecies, y = mean_gen)) + 
+    geom_point(size = 2, show.legend = F) + 
+    geom_errorbar(aes(ymin = mean_gen - res_error_gen, ymax = mean_gen + res_error_gen, width = 0.2), show.legend = F) + 
+    labs(y = "BD Residuals (mm)") + 
+    theme(axis.text.x = element_text(angle = 30, hjust = 1, size = 15)) + 
+    theme(axis.title.y = element_text(size = 20)) + 
+    theme(axis.text.y = element_text(size = 15)) + 
+    theme(axis.title.x = element_blank())
+
+
+range_residuals <- plot_grid(sl_cis_plot, hl_cis_plot, bd_cis_plot, nrow = 3, labels = c("A", "B", "C"), label_size = 25)
+
+gen_residuals <- plot_grid(ol_gen_cis_plot, hl_gen_cis_plot, bd_gen_cis_plot, nrow = 3, labels = c("D", "E", "F"), label_size = 25)
+
+
+
+pdf("/Users/joegunn/Desktop/Grad_School_Stuff/Projects/Smallmouth_Bass_Microsatellites/residual_cis.pdf", width=13, height=12)
+
+plot_grid(range_residuals, gen_residuals, ncol = 2)
+
+dev.off()
+
+
+```
+
+```{r}
+#test without tablerock samples
+glm_sl_gen_noTBLR <- lm(logsl ~ logtl*gid, data = morph_90_nor_neo_k3_noTBLR)
+glm_ol_gen_noTBLR <- lm(logol ~ logtl*gid, data = morph_90_nor_neo_k3_noTBLR)
+glm_hl_gen_noTBLR <- lm(loghl ~ logtl*gid, data = morph_90_nor_neo_k3_noTBLR)
+glm_bd_gen_noTBLR <- lm(logbd ~ logtl*gid, data = morph_90_nor_neo_k3_noTBLR)
+
+#slope and intercept information for each range
+coefficients_sl_gen <- lmList(logsl ~ logtl|gid, data = morph_90_nor_neo_k3)
+coefficients_ol_gen <- lmList(logol ~ logtl|gid, data = morph_90_nor_neo_k3)
+coefficients_hl_gen <- lmList(loghl ~ logtl|gid, data = morph_90_nor_neo_k3)
+coefficients_bd_gen <- lmList(logbd ~ logtl|gid, data = morph_90_nor_neo_k3)
+
+tl_grandmean_gen <- morph_90_nor_neo_k3 %>% summarize(g_mean = mean(logtl)) #tl grandmean = 2.447
+
+
+summary(coefficients_sl_gen)
+    #Neosho intercept = -0.435
+    #Neosho slope = 1.145
+    #Northern intercept = -0.066
+    #Northern slope = 0.996
+    #t value (range) = 2.306
+    #t value (interaction) = -2.248
+    #P (range) = 0.024
+    #P (interaction) = 0.027
+    #R2 = 0.963
+    #Residual standard error = 0.014
+    #Calculated Neosho Average = 
+    #Calculated Northern Average = 
+
+summary(coefficients_ol_gen)
+    #Neosho intercept = 0.056
+    #Neosho slope = 0.452
+    #Northern intercept = 0.862
+    #Northern slope = 0.122
+    #t value (range) = 1.092
+    #t value (interaction) = -1.076
+    #P (range) = 0.278
+    #P (interaction) = 0.285
+    #R2 = 0.026
+    #Residual standard error = 0.066
+    #Calculated Neosho Average = 
+    #Calculated Northern Average = 
+
+summary(coefficients_hl_gen)
+    #Neosho intercept = -0.412 
+    #Neosho slope = 0.945
+    #Northern intercept = -0.620
+    #Northern slope = 1.019
+    #t value (range) = -0.355
+    #t value (interaction) = 0.303
+    #P (range) = 0.723
+    #P (interaction) = 0.763
+    #R2 = 0.624
+    #Residual standard error = 0.053
+    #Calculated Neosho Average = 
+    #Calculated Northern Average = 
+
+summary(coefficients_bd_gen)
+    #Neosho intercept = -1.618
+    #Neosho slope = 1.407
+    #Northern intercept = -1.177
+    #Northern slope = 1.219
+    #t value (range) = 0.921
+    #t value (interaction) = -0.942
+    #P (range) = 0.359
+    #P (interaction) = 0.349
+    #R2 = 0.804
+    #Residual standard error = 0.043
+    #Calculated Neosho Average = 
+    #Calculated Northern Average = 
+
+```
+
+## Graph Distributions
+```{r}
+#Distributions labeled by RANGE
+tl_dist_range <- ggplot(morph_all, aes(x = logtl, fill = range)) + 
+    geom_density(show.legend = T) + 
+    theme_set(theme_cowplot(12)) + 
+    scale_fill_manual(values = c("springgreen3", "mediumpurple")) + 
+    labs(fill = "Range", y = "Probability Density") + 
+    theme(legend.position = c(0.6,0.9), legend.background = element_blank()) + 
+    theme(legend.text = element_text(size = 15), legend.title = element_text(size = 20)) + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.title.y = element_text(size = 20)) + 
+    theme(axis.text = element_text(size = 20))
+
+sl_dist_range <- ggplot(morph_all, aes(x = logsl, fill = range)) + 
+    geom_density( show.legend = F) + 
+    theme_set(theme_cowplot(12)) + 
+    scale_fill_manual(values = c("springgreen3", "mediumpurple")) + 
+    theme(axis.title.y = element_blank()) + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.text = element_text(size = 20))
+
+ol_dist_range <- ggplot(morph_all, aes(x = logol, fill = range)) + 
+    geom_density( show.legend = F) + 
+    theme_set(theme_cowplot(12)) + 
+    scale_fill_manual(values = c("springgreen3", "mediumpurple")) + 
+    theme(axis.title.y = element_blank()) + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.text = element_text(size = 20)) + 
+    theme(axis.text = element_text(size = 20))
+
+hl_dist_range <- ggplot(morph_all, aes(x = loghl, fill = range)) + 
+    geom_density( show.legend = F) + 
+    theme_set(theme_cowplot(12)) + 
+    scale_fill_manual(values = c("springgreen3", "mediumpurple")) + 
+    theme(axis.title.y = element_blank()) + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.text = element_text(size = 20))
+
+bd_dist_range <- ggplot(morph_all, aes(x = logbd, fill = range)) + 
+    geom_density( show.legend = F) + 
+    theme_set(theme_cowplot(12)) + 
+    scale_fill_manual(values = c("springgreen3", "mediumpurple")) + 
+    theme(axis.title.x = element_blank()) + theme(axis.title.y = element_blank()) + 
+    theme(axis.text = element_text(size = 20))
+
+range_dist <- plot_grid(tl_dist_range, sl_dist_range, ol_dist_range, hl_dist_range, bd_dist_range, nrow = 1, labels = c("  a", "b", "c", "d", "e"), label_x = 0.1, label_y = 0.95, label_size = 25)
+
+
+#Distributions labeled by GENETIC ASSIGNMENT
+levels(morph_90_nor_neo_k3$gid) <- c("Neosho", "Northern")
+
+tl_dist_gen <- ggplot(morph_90_nor_neo_k3, aes(x = logtl, fill = gid)) + 
+    geom_density( show.legend = T) + 
+    theme_set(theme_cowplot(12)) + 
+    scale_fill_manual(values = c("springgreen3", "mediumpurple")) + 
+    labs(fill = "Assignment", y = "Probability Density", x = "Total Length (mm)") + 
+    theme(legend.position = c(0.6,0.9), legend.background = element_blank()) + 
+    theme(legend.text = element_text(size = 15), legend.title = element_text(size = 20)) + 
+    theme(axis.title = element_text(size = 20)) + 
+    theme(axis.text = element_text(size = 20))
+
+sl_dist_gen <- ggplot(morph_90_nor_neo_k3, aes(x = logsl, fill = gid)) + 
+    geom_density( show.legend = F) + 
+    theme_set(theme_cowplot(12)) + 
+    scale_fill_manual(values = c("springgreen3", "mediumpurple")) + 
+    labs(x = "Standard Length (mm)") + 
+    theme(axis.title.y = element_blank()) + 
+    theme(axis.title.x = element_text(size = 20)) + 
+    theme(axis.text = element_text(size = 20))
+
+ol_dist_gen <- ggplot(morph_90_nor_neo_k3, aes(x = logol, fill = gid)) + 
+    geom_density( show.legend = F) + 
+    theme_set(theme_cowplot(12)) + 
+    scale_fill_manual(values = c("springgreen3", "mediumpurple")) + 
+    labs(x = "Orbital Length (mm)") + 
+    theme(axis.title.y = element_blank()) + 
+    theme(axis.title.x = element_text(size = 20)) + 
+    theme(axis.text = element_text(size = 20))
+
+hl_dist_gen <- ggplot(morph_90_nor_neo_k3, aes(x = loghl, fill = gid)) + 
+    geom_density( show.legend = F) + 
+    theme_set(theme_cowplot(12)) + 
+    scale_fill_manual(values = c("springgreen3", "mediumpurple")) + 
+    labs(x = "Head Length (mm)") + 
+    theme(axis.title.y = element_blank()) + 
+    theme(axis.title.x = element_text(size = 20)) + 
+    theme(axis.text = element_text(size = 20))
+
+bd_dist_gen <- ggplot(morph_90_nor_neo_k3, aes(x = logbd, fill = gid)) + 
+    geom_density( show.legend = F) + 
+    theme_set(theme_cowplot(12)) + 
+    scale_fill_manual(values = c("springgreen3", "mediumpurple")) + 
+    labs(x = "Body Depth (mm)") + 
+    theme(axis.title.y = element_blank()) + 
+    theme(axis.title.x = element_text(size = 20)) + 
+    theme(axis.text = element_text(size = 20))
+
+gen_dist <- plot_grid(tl_dist_gen, sl_dist_gen, ol_dist_gen, hl_dist_gen, bd_dist_gen, nrow = 1, labels = c("   f", "g", "h", "i", "j"), label_x = 0.1, label_y = 0.95, label_size = 25)
+
+
+############################################################################################################################################
+
+###Plot everything together
+pdf("/Users/joegunn/Desktop/Grad_School_Stuff/Projects/Smallmouth_Bass_Microsatellites/morph_distributions.pdf", width=20, height=8)
+
+plot_grid(range_dist, gen_dist, nrow = 2)
+
+dev.off()
+
+```
+
+## PLOT ANCOVA
+```{r}
+############################################################################################################################################
+
+
+#All morphological samples 
+sl_tl_range <- ggplot(morph_all, aes(x = logtl, y = logsl, color = range, shape = range)) + 
+    geom_point(show.legend = T, size = 3.5) + 
+    geom_smooth(show.legend = F, method = "lm") +
+    theme_set(theme_cowplot(12)) + 
+    scale_color_manual("Range", values = c("springgreen3", "mediumpurple")) + 
+    scale_shape_manual("Range", values = c(16,17)) + 
+    labs(color = "Range", title = "Range of Collection", y = "Standard Length (mm)") + 
+    theme(axis.title.x = element_blank()) + 
+    theme(plot.title = element_text(hjust = 0.5)) + 
+    theme(legend.position = c(0.02,0.75), legend.title = element_text(size = 20), legend.background = element_blank(), legend.text = element_text(size = 20)) + 
+    theme(axis.text = element_text(size = 20)) + 
+    theme(axis.title.y = element_text(size = 20)) + 
+    theme(plot.title = element_text(size = 20))
+
+ol_tl_range <- ggplot(morph_all, aes(x = logtl, y = logol, color = range, shape = range)) + 
+    geom_point(show.legend = F, size = 3.5) + 
+    geom_smooth(show.legend = F, method = "lm") +
+    theme_set(theme_cowplot(12)) + 
+    scale_color_manual(values = c("springgreen3", "mediumpurple")) + 
+    labs(y = "Orbital Length (mm)") + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.text = element_text(size = 20)) + 
+    theme(axis.title.y = element_text(size = 20))
+
+hl_tl_range <- ggplot(morph_all, aes(x = logtl, y = loghl, color = range, shape = range)) + 
+    geom_point(show.legend = F, size = 3.5) +
+    theme_set(theme_cowplot(12)) + 
+    geom_smooth(show.legend = F, method = "lm") + 
+    scale_color_manual(values = c("springgreen3", "mediumpurple")) + 
+    labs(y = "Head Length (mm)") +
+    theme(axis.title.x = element_blank()) +
+    theme(axis.text = element_text(size = 20)) +
+    theme(axis.title = element_text(size = 20)) 
+
+bd_tl_range <- ggplot(morph_all, aes(x = logtl, y = logbd, color = range, shape = range)) + 
+    geom_point(show.legend = F, size = 3.5) + 
+    geom_smooth(show.legend = F, method = "lm") + 
+    theme_set(theme_cowplot(12)) + 
+    scale_color_manual(values = c("springgreen3", "mediumpurple")) + 
+    labs(x = "Total Length (mm)", y = "Body Depth (mm)") + 
+    theme(axis.text = element_text(size = 20)) +
+    theme(axis.title.y = element_text(size = 20)) + 
+    theme(axis.title.x = element_text(size = 20))
+
+range_grid <- plot_grid(sl_tl_range, ol_tl_range, hl_tl_range, bd_tl_range, nrow = 4, labels = c("a","b","c","d"), label_x = 0.15, label_y = 0.95, label_size = 25)
+
+
+    
+#Only pure samples
+levels(morph_90_nor_neo_k3$gid) <- c("Neosho", "Northern") 
+sl_tl_gen <- ggplot(morph_90_nor_neo_k3, aes(x = logtl, y = logsl, color = gid, shape = gid)) + 
+    geom_point(show.legend = T, size = 3.5) + 
+    geom_smooth(show.legend = F, method = "lm") + 
+    scale_color_manual("Assignment", values = c("springgreen3", "mediumpurple")) + 
+    scale_shape_manual("Assignment", values = c(16,17)) + 
+    labs(color = "Assignment", title = "Genetic Assignment") + 
+    theme(axis.title.x = element_blank()) + 
+    theme(plot.title = element_text(hjust = 0.5)) + 
+    theme(axis.title.y = element_blank()) + 
+    theme(legend.position = c(0.02,0.75), legend.title = element_text(size = 20), legend.background = element_blank(), legend.text = element_text(size = 20)) + 
+    theme(axis.text = element_text(size = 20)) + 
+    theme(plot.title = element_text(size = 20))
+
+ol_tl_gen <- ggplot(morph_90_nor_neo_k3, aes(x = logtl, y = logol, color = gid, shape = gid)) + 
+    geom_point(show.legend = F, size = 3.5) + 
+    geom_smooth(show.legend = F, method = "lm") + 
+    scale_color_manual(values = c("springgreen3", "mediumpurple")) + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.title.y = element_blank()) + 
+    theme(axis.text = element_text(size = 20))
+
+hl_tl_gen <- ggplot(morph_90_nor_neo_k3, aes(x = logtl, y = loghl, color = gid, shape = gid)) + 
+    geom_point(show.legend = F, size = 3.5) + 
+    geom_smooth(show.legend = F, method = "lm") + 
+    scale_color_manual(values = c("springgreen3", "mediumpurple")) + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.title.y = element_blank()) + 
+    theme(axis.text = element_text(size = 20))
+
+bd_tl_gen <- ggplot(morph_90_nor_neo_k3, aes(x = logtl, y = logbd, color = gid, shape = gid)) + 
+    geom_point(show.legend = F, size = 3.5) + 
+    geom_smooth(show.legend = F, method = "lm") + 
+    scale_color_manual(values = c("springgreen3", "mediumpurple")) + 
+    labs(x = "Total Length (mm)") + 
+    theme(axis.title.y = element_blank()) + 
+    theme(axis.text = element_text(size = 20)) + 
+    theme(axis.title.x = element_text(size = 20))
+
+gen_grid <- plot_grid(sl_tl_gen, ol_tl_gen, hl_tl_gen, bd_tl_gen, nrow = 4, labels = c("e","f","g","h"), label_x = 0.1, label_y = 0.95, label_size = 25)
+
+
+
+############################################################################################################################################
+
+###Plot everything together
+pdf("/Users/joegunn/Desktop/Grad_School_Stuff/Projects/Smallmouth_Bass_Microsatellites/morph_size_corrections.pdf", width=12, height=20)
+
+plot_grid(range_grid, gen_grid, ncol = 2)
+
+dev.off()
+
+
+#extra pdf for presentation (TWS-AFS 2019 in Reno, NV)
+pdf("/Users/joegunn/Desktop/Grad_School_Stuff/Projects/Smallmouth_Bass_Microsatellites/hl_graph_for_presentation.pdf", width=7, height=5)
+
+ggplot(morph_all, aes(x = logtl, y = loghl, color = range)) + 
+    theme_set(theme_cowplot(12)) + 
+    geom_point(show.legend = F, size = 2) + 
+    geom_smooth(show.legend = F, method = "lm") + 
+    scale_color_manual(values = c("springgreen3", "mediumpurple")) + 
+    labs(y = "Head Length (mm)", x = "Total Length (mm)") + 
+    theme(axis.text = element_text(size = 20)) + 
+    theme(axis.title = element_text(size = 20)) + 
+    theme(plot.background = element_rect(fill = "black")) +
+    theme(axis.line = element_line(color = "white")) + 
+    theme(axis.ticks = element_line(color = "white")) +
+    theme(axis.title = element_text(color = "white")) + 
+    theme(axis.text = element_text(color = "white"))
+
+dev.off()
+
+```
+
+
+## Principal Components Analysis
+```{r}
+
+ray <- factor(morph_all$rays)
+range <- factor(morph_all$range)
+
+#PCA Function and Summary
+neopca_all <- prcomp(~ logtl + logsl + logol + logbd + loghl, data = morph_all, center = TRUE, scale. = TRUE) #The "center" and "scale" arguments are a method of preprossessing, or autoscaling, the data. Often variables in PCA are not reported in the same units or on the same scale. Centering the data substracts the variable mean from each individual observation within a variable, and scaling divides each centered data point by it's respective standard deviation.
+
+fviz_eig(neopca_all) #This is from the "factoextra" package
+#Use Kaiser's rule to determine that the principal components with eigenvectors above 1 are to be used in PCA
+#summary(neopca_90_c)
+
+#Format data for PCA
+pc1and2 <- as.data.frame(neopca_all$x[,c(1,2)])
+pc2and3 <- as.data.frame(neopca_all$x[,c(2,3)])
+
+pc1and3 <- as.data.frame(neopca_all$x[,c(1,3)])
+pc3and4 <- as.data.frame(neopca_all$x[,c(3,4)])
+
+#Visualize loadings of individual morphometrics 
+biplot(neopca_all, choices = c(1,2))
+biplot(neopca_all, choices = c(1,3))
+
+#Plot PCA
+ggplot(pc1and2, aes(x = PC1, y = PC2, color = range)) + geom_point()
+
+#Extract PC1 as common principal component
+cpc_all <- pc1and2$PC1
+cpc_all <- as.data.frame(cpc_all)
+colnames(cpc_all) <- c("cpc1")
+morph_cpc_all <- cbind(cpc_all, morph_all)
+
+
+#Run Linear models (interaction and additive) with cpc1 as covariate instead of total length
+
+glm_sl_range_cpc1 <- lm(logsl ~ cpc1 + range, data = morph_cpc_all) #very significant, with and without interaction term - interaction is not significant
+glm_ol_range_cpc1 <- lm(logol ~ cpc1*range, data = morph_cpc_all) #very significant interaction
+glm_hl_range_cpc1 <- lm(loghl ~ cpc1*range, data = morph_cpc_all) #significant interaction
+glm_tl_range_cpc1 <- lm(logtl ~ cpc1 + range, data = morph_cpc_all) #very significant, with and without interaction term - interaction is not significant
+glm_bd_range_cpc1 <- lm(logbd ~ cpc1*range, data = morph_cpc_all) #significant interaction
+
+
+
+tl_range_cpc1_plot <- ggplot(morph_cpc_all, aes(x = cpc1, y = logtl, color = range)) + geom_point() + geom_smooth(show.legend = F, method = "lm")
+tl_range_cpc1_plot
+
+
+
+
+
+
+
+
+
+
+ray_gen <- factor(morph_90_nor_neo_k3$rays)
+gen <- factor(morph_90_nor_neo_k3$gid)
+
+neopca_90 <- prcomp(~ logtl + logsl + logol + logbd + loghl, data = morph_90_nor_neo_k3, center = TRUE, scale. = TRUE) 
+
+fviz_eig(neopca_90)
+
+pc1and2_gen <- as.data.frame(neopca_90$x[,c(1,2)])
+pc2and3_gen <- as.data.frame(neopca_90$x[,c(2,3)])
+
+pc1and3_gen <- as.data.frame(neopca_90$x[,c(1,3)])
+pc3and4_gen <- as.data.frame(neopca_90$x[,c(3,4)])
+
+biplot(neopca_90, choices = c(1,2))
+biplot(neopca_90, choices = c(1,3))
+
+
+ggplot(pc1and2_gen, aes(x = PC1, y = PC2, color = gen)) + geom_point()
+
+
+
+
+```
+
+## Raw Morphometric Analysis - Discriminant Function Analysis
+```{r}
+#Discriminant Function Analysis of morphological traits
+
+#DFA for RANGE 
+morph_all_dfa <- morph_all[,-c(1,4:8)]
+morph_all_dfa <- as.data.frame(morph_all_dfa)
+morph_all_dfa <- morph_all_dfa %>% drop_na()
+
+#RUN DFA
+ldafm_range <- lda(range ~ logtl + logsl + logol + loghl + logbd, data = morph_all_dfa) 
+
+
+
+lda.range.p<-predict(ldafm_range,CV=TRUE,morph_all_dfa[c(4:8)])$class
+table(lda.range.p, morph_all_dfa[,2])
+tab<-table(lda.range.p,morph_all_dfa[,2])
+summary(tab)
+diag(prop.table(tab,1))
+sum(diag(prop.table(tab)))
+
+
+#################################################################################################################3
+
+#DFA for GENETIC ASSIGNMENT
+morph_90_dfa <- morph_90_nor_neo_k3[,-c(1:9)]
+morph_90_dfa <- as.data.frame(morph_90_dfa)
+morph_90_dfa <- morph_90_dfa %>% 
+    drop_na()
+
+
+ldafm_gen <- lda(gid ~ logtl + logsl + logol + loghl + logbd, data = morph_90_dfa)
+ldafm_gen_cv <- lda(gid ~ logtl + logsl + logol + loghl + logbd, data = morph_90_dfa, CV = TRUE) 
+
+lda.gen.p<-predict(ldafm_gen,CV=TRUE,morph_90_dfa[c(1:5)])$class
+tab_gen <- table(lda.gen.p, morph_90_dfa[,6])
+summary(tab_gen)
+diag(prop.table(tab_gen,1))
+sum(diag(prop.table(tab_gen)))
+```
+
+## Logistic Regression of Fin Ray Data
+```{r}
+
+#Do a logistic regression for fin ray count assessed by the proportion of the genotype assigning to the Neosho cluster. What is the probability that higher genomic proportion assigning to Neosho results in fin ray count closer to 13 (as we would expect?)
+
+logitTransform <- function(x) { #function to produce logistic regression values
+  log(x/(1-x))
+}
+
+
+morph_gen_logit <- morph_gen_k3 %>%
+    mutate(logitNeo = logitTransform(neosho_prop))
+
+morph_gen_logit$rays[morph_gen_logit$rays == "13"] <- "1"
+morph_gen_logit$rays[morph_gen_logit$rays == "14"] <- "0"
+morph_gen_logit <- morph_gen_logit %>% mutate(rays = as.numeric(rays))
+
+
+
+#Run logistic regression general linear model. This model will show the probability of having 13 or 14 soft dorsal fin rays based on the genetic assignment of individuals to either Northern or Neosho Smallmouth Bass. 
+
+
+logistic_rays <- glm(rays ~ neosho_prop, data = morph_gen_logit, family = binomial(link = "logit"))
+summary(logistic_rays)
+PseudoR2(logistic_rays)
+
+#plot logistic regression
+
+pdf("/Users/joegunn/Desktop/Grad_School_Stuff/Projects/Smallmouth_Bass_Microsatellites/fin_logistic_regression.pdf", width=12, height=8)
+
+ggplot(morph_gen_logit, aes(x=neosho_prop, y=rays)) + 
+    geom_point(show.legend = F, size = 4) + 
+    geom_smooth(method="glm", method.args = list(family = "binomial"), show.legend = TRUE, color = "red") + 
+    labs(x = "Genotypic Proportion Assigned to the Neosho Cluster", y = "Probability of Fin Ray Count") + 
+    theme(axis.text = element_text(size = 20), axis.title = element_text(size = 20))
+
+dev.off()
+```

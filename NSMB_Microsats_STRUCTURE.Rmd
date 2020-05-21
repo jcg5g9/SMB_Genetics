@@ -1,0 +1,508 @@
+---
+title: "NSMB_Microsats_STRUCTURE"
+author: "Joe Gunn"
+date: "7/25/2019"
+output: html_document
+---
+    
+###Libraries Needed For Analysis
+```{r Libraries, echo = FALSE, include = FALSE}
+
+library(riverdist)
+library(sp)
+library(readxl)
+library(popgraph)
+library(tidyverse)
+library(gstudio)
+library(ade4)
+library(adegenet)
+library(cowplot)
+library(nlme)
+library(poppr)
+library(PopGenReport)
+library(maps)
+library(mapdata)
+library(stringr)
+library(rgdal)
+library(sf)
+library(ggsn)
+library(raster)
+library(lme4)
+library(factoextra)
+library(MASS)
+library(logihist)
+library(pophelper)
+library(ggpubr)
+library(DescTools)
+library(vegan)
+```
+
+## Metadata 
+```{r}
+smb_metadata_geo <- read_excel("../../data/metadata/smb_metadata_geo.xlsx")
+smb_metadata_geo_nor <- smb_metadata_geo[c(617:766),]
+smb_metadata_neo <- read_excel("../../data/metadata/smb_metadata_nonGEO.xlsx")
+```
+
+# STRUCTURE PLOTTING  
+### All Population Structure analyses were originally run in the program STRUCTURE and plotted using the package pophelper in R
+## DEFAULT STRUCTURE PARAMETERS - DELTA K: All Samples
+```{r}
+cerc_all_sfiles <- list.files(path = "/Users/joegunn/Desktop/Grad_School_Stuff/Research/Projects/Smallmouth_Bass_Microsatellites/data/structure_data/default_structure/raw_data/NSMB_ALL_500K_1M/Results_major", full.names=T)
+
+#All samples
+cerc_all_slist <- readQ(cerc_all_sfiles)
+cerc_all_tab <- tabulateQ(cerc_all_slist)
+cerc_all_summary <- summariseQ(cerc_all_tab)
+
+options(scipen = 999)
+cerc_all_evanno_info <- evannoMethodStructure(cerc_all_summary, returnplot = F)
+
+cerc_all_evanno_plot <- ggplot(cerc_all_evanno_info, aes(x = k, y = deltaK)) + geom_line()
+
+#Run Clumpp (only need to do this once)
+
+#clumppExport(cerc_all_slist, parammode = 3, paramrep = 10000, useexe=T)
+
+cerc_all_aligned_Q_merged_k2 <- readQ("../../data/structure_data/default_structure/clumpp_data/all_samples_major/pop_K2/pop_K2-combined-merged.txt")
+cerc_all_aligned_Q_merged_k3 <- readQ("../../data/structure_data/default_structure/clumpp_data/all_samples_major/pop_K3/pop_K3-combined-merged.txt")
+cerc_all_aligned_Q_merged_k9 <- readQ("../../data/structure_data/default_structure/clumpp_data/all_samples_major/pop_K9/pop_K9-combined-merged.txt")
+
+#K = 2 Plot
+plotQ(cerc_all_aligned_Q_merged_k2,
+      grplab = smb_metadata_geo,
+      showindlab = F, 
+      ordergrp = F,
+      selgrp = "population",
+      showgrplab = F,
+      showlegend = F, 
+      showsp = F, 
+      showdiv = T, 
+      divsize = 2, 
+      divtype = 1,
+      divcol = "black",  
+      grplabsize = 4, 
+      legendkeysize = 15, 
+      legendtextsize = 10, 
+      linesize = 0.05, 
+      pointsize = 4, 
+      barbordercolour = "black",
+      barbordersize = 0.1, 
+      clustercol = c("mediumpurple", "springgreen3"),
+      outputfilename = "../../visualization/structure_plots/cerc_all_k2_ind_plot_major",
+      imgtype = "pdf",
+      imgoutput = "sep",
+      height = 10, width = 100)
+
+#K = 3 Plot
+plotQ(cerc_all_aligned_Q_merged_k3,
+      grplab = smb_metadata_geo,
+      showindlab = F, 
+      ordergrp = F,
+      selgrp = "population",
+      showgrplab = F,
+      showlegend = F, 
+      showsp = F, 
+      showdiv = T, 
+      divsize = 2, 
+      divtype = 1,
+      divcol = "black",  
+      grplabsize = 4, 
+      legendkeysize = 15, 
+      legendtextsize = 10, 
+      linesize = 0.05, 
+      pointsize = 4, 
+      barbordercolour = "black",
+      barbordersize = 0.1, 
+      clustercol = c("firebrick3","springgreen3","mediumpurple"),
+      outputfilename = "../../visualization/structure_plots/cerc_all_k3_ind_plot_major",
+      imgtype = "pdf",
+      imgoutput = "sep",
+      height = 10, width = 100)
+
+#K = 9 Plot
+plotQ(cerc_all_aligned_Q_merged_k9,
+      grplab = smb_metadata_geo,
+      showindlab = F, 
+      ordergrp = F,
+      selgrp = "population",
+      showlegend = F, 
+      showgrplab = F,
+      showsp = F, 
+      showdiv = T, 
+      divsize = 2, 
+      divcol = "black",  
+      divtype = 1,
+      grplabsize = 4, 
+      legendkeysize = 15, 
+      legendtextsize = 10, 
+      linesize = 0.05, 
+      pointsize = 4, 
+      barbordercolour = "black",
+      barbordersize = 0.1, 
+      clustercol = c("mediumblue", "goldenrod1", "forestgreen", "cadetblue1", "maroon1", "chocolate1", "firebrick3", "mediumpurple1", "lightpink1"),
+      outputfilename = "../../visualization/structure_plots/cerc_all_k9_ind_plot_major",
+      imgtype = "pdf",
+      imgoutput = "sep",
+      height = 10, width = 100)
+```
+
+## DEFAULT STRUCTURE PARAMETERS - DELTA K: Only Northern and Spotted Bass Samples 
+```{R}
+nor_spb_sfiles <- list.files(path = "/Users/joegunn/Desktop/Grad_School_Stuff/Research/Projects/Smallmouth_Bass_Microsatellites/data/structure_data/default_structure/raw_data/NSMB_NOR_SPB_500K_1M/Results", full.names=T) #creates R-readable structure files that can be organized and run in the program clumpp
+
+nor_spb_slist <- readQ(nor_spb_sfiles)
+nor_spb_tab <- tabulateQ(nor_spb_slist)
+nor_spb_summary <- summariseQ(nor_spb_tab)
+
+#Determine most probable number of K using the deltaK method 
+nor_evanno_info <- evannoMethodStructure(nor_spb_summary, returnplot = F)
+nor_evanno_plot <- ggplot(nor_evanno_info, aes(x = k, y = deltaK)) + geom_line()
+
+#Run Clumpp (only need to do this once)
+
+#clumppExport(nor_spb_slist, parammode = 3, paramrep = 10000, useexe=T) ##This command runs a built-in executable for the program Clumpp, which takes multiple replicate runs for multiple values of k to create a consensus assignment for all individuals at each value of K. Once it runs once, it doesn't need to run again because the data set produced in Clumpp is saved in the working directory.
+
+nor_spb_aligned_Q_merged_k2 <- readQ("../../data/structure_data/default_structure/clumpp_data/northern_spotted_major/pop_K2/pop_K2-combined-merged.txt")
+
+plotQ(nor_spb_aligned_Q_merged_k2,
+      grplab = smb_metadata_geo_nor,
+      showindlab = F, 
+      ordergrp = F,
+      selgrp = "population",
+      showgrplab = F,
+      showlegend = F, 
+      showsp = F, 
+      showdiv = T, 
+      divsize = 3, 
+      divtype = 1,
+      divcol = "black",  
+      grplabsize = 4, 
+      legendkeysize = 15, 
+      legendtextsize = 10, 
+      linesize = 0.05, 
+      pointsize = 4, 
+      barbordercolour = "black",
+      barbordersize = 0.1, 
+      clustercol = c("firebrick3", "mediumpurple"),
+      outputfilename = "../../visualization/structure_plots/nor_spb_ind_plot",
+      imgtype = "pdf",
+      imgoutput = "sep",
+      height = 10, width = 30)
+```
+
+## DEFAULT STRUCTURE PARAMETERS - DELTA K: Only Neosho Samples
+```{r}
+neo_sfiles <- list.files(path = "/Users/joegunn/Desktop/Grad_School_Stuff/Research/Projects/Smallmouth_Bass_Microsatellites/data/structure_data/default_structure/NSMB_NEO_500K_1M/Results_major", full.names=T) 
+
+neo_slist <- readQ(neo_sfiles)
+neo_tab <- tabulateQ(neo_slist)
+neo_summary <- summariseQ(neo_tab)
+
+neo_evanno_info <- evannoMethodStructure(neo_summary, returnplot = F)
+neo_evanno_plot <- ggplot(neo_evanno_info, aes(x = k, y = deltaK)) + geom_line()
+
+#Run Clumpp (only need to do this once)
+
+#clumppExport(neo_slist, parammode = 3, paramrep = 10000, useexe=T) ##This command runs a built-in executable for the program Clumpp, which takes multiple replicate runs for multiple values of k to create a consensus assignment for all individuals at each value of K. Once it runs once, it doesn't need to run again because the data set produced in Clumpp is saved in the working directory.
+
+neo_aligned_Q_merged_k2 <- readQ("../../data/structure_data/default_structure/neosho_only_major/pop_K2/pop_K2-combined-merged.txt")
+
+plotQ(neo_aligned_Q_merged_k2,
+      grplab = smb_metadata_neo,
+      showindlab = F, 
+      ordergrp = T,
+      selgrp = "population",
+      subsetgrp = c("Center Creek", "Shoal Creek 1", "Shoal Creek 2", "Shoal Creek 3", "Sycamore Creek", "Buffalo Creek", "Indian Creek 1", "Indian Creek 2", "Big Sugar Creek 1", "Big Sugar Creek 2", "Big Sugar Creek 3", "Little Sugar Creek",   "Elk River 1", "Elk River 2", "Elk River 3", "Honey Creek", "Spavinaw Creek", "Illinois River 1", "Illinois River 2", "Illinois River 3", "Illinois River 4", "Baron Fork 1", "Baron Fork 2", "Caney Creek 1", "Caney Creek 2", "Caney Creek 3", "Lee Creek", "Mulberry River", "Big Piney River  AR", "Illinois Bayou River 1", "Illinois Bayou River 2"),
+      showgrplab = F,
+      showlegend = F, 
+      showsp = F, 
+      showdiv = T, 
+      divsize = 2, 
+      divtype = 1,
+      divcol = "black",  
+      grplabsize = 4, 
+      legendkeysize = 15, 
+      legendtextsize = 10, 
+      linesize = 0.05, 
+      pointsize = 4, 
+      barbordercolour = "black",
+      barbordersize = 0.1, 
+      clustercol = c("springgreen3", "mediumpurple"),
+      outputfilename = "../../visualization/structure_plots/neo_ind_plot_major",
+      imgtype = "pdf",
+      imgoutput = "sep",
+      height = 10, width = 70)
+```
+
+The STRUCTURE PUECHMAILLE METHOD was a different way of inferring population structure after running default parameters in STRUCTURE. Instead of using Delta K, the Puechmaille method involves assessing the best number of K clusters using 4 alternative metrics. Thus, I used the DEFAULT STRUCTURE PARAMETERS plots listed above with the Puechmaille method and did not rerun those plots.
+
+## WANG STRUCTURE PARAMETERS - DELTA K: All Samples
+```{r}
+wang_sfiles <- list.files(path = "/Users/joegunn/Desktop/Grad_School_Stuff/Research/Projects/Smallmouth_Bass_Microsatellites/data/structure_data/wang_structure/raw_data/NSMB_WANG_ALL_500K_1M/Results_major", full.names=T)
+
+#All samples
+wang_slist <- readQ(wang_sfiles)
+wang_tab <- tabulateQ(wang_slist)
+wang_summary <- summariseQ(wang_tab)
+
+wang_evanno_info <- evannoMethodStructure(wang_summary, returnplot = F)
+wang_evanno_plot <- ggplot(wang_evanno_info, aes(x = k, y = deltaK)) + geom_line()
+
+#Run Clumpp (only need to do this once)
+
+#clumppExport(wang_slist, parammode = 3, paramrep = 10000, useexe=T)
+
+wang_aligned_Q_merged_k3 <- readQ("../../data/structure_data/wang_structure/clumpp_data/wang_all_major/pop_K3/pop_K3-combined-merged.txt")
+wang_aligned_Q_merged_k5 <- readQ("../../data/structure_data/wang_structure/clumpp_data/wang_all_major/pop_K5/pop_K5-combined-merged.txt")
+
+#K = 3 Plot
+plotQ(wang_aligned_Q_merged_k3,
+      grplab = smb_metadata_geo,
+      showindlab = F, 
+      ordergrp = F,
+      selgrp = "population",
+      showgrplab = F,
+      showlegend = F, 
+      showsp = F, 
+      showdiv = T, 
+      divsize = 2, 
+      divtype = 1,
+      divcol = "black",  
+      grplabsize = 4, 
+      legendkeysize = 15, 
+      legendtextsize = 10, 
+      linesize = 0.05, 
+      pointsize = 4, 
+      barbordercolour = "black",
+      barbordersize = 0.1, 
+      clustercol = c("firebrick3", "mediumpurple", "springgreen3"),
+      outputfilename = "../../visualization/structure_plots/wang_k3_ind_plot_major",
+      imgtype = "pdf",
+      imgoutput = "sep",
+      height = 10, width = 100)
+
+#K = 5 Plot
+plotQ(wang_aligned_Q_merged_k5,
+      grplab = smb_metadata_geo,
+      showindlab = F, 
+      ordergrp = F,
+      selgrp = "population",
+      showgrplab = F,
+      showlegend = F, 
+      showsp = F, 
+      showdiv = T, 
+      divsize = 2, 
+      divtype = 1,
+      divcol = "black",  
+      grplabsize = 4, 
+      legendkeysize = 15, 
+      legendtextsize = 10, 
+      linesize = 0.05, 
+      pointsize = 4, 
+      barbordercolour = "black",
+      barbordersize = 0.1, 
+      clustercol = c("chocolate1", "mediumblue", "forestgreen", "firebrick3", "springgreen3"),
+      outputfilename = "../../visualization/structure_plots/wang_k5_ind_plot_major",
+      imgtype = "pdf",
+      imgoutput = "sep",
+      height = 10, width = 100)
+```
+
+## Plot Minor Clusters
+```{r}
+#Default Parameters
+cerc_all_minorclusters_Q_aligned_k2 <- readQ("../../data/structure_data/default_structure/clumpp_data/all_samples_minor/pop_K2/pop_K2-combined-aligned.txt")
+cerc_all_minorclusters_Q_aligned_k3 <- readQ("../../data/structure_data/default_structure/clumpp_data/all_samples_minor/pop_K3/pop_K3-combined-aligned.txt")
+cerc_all_minorclusters_Q_aligned_k9 <- readQ("../../data/structure_data/default_structure/clumpp_data/all_samples_minor/pop_K9/pop_K9-combined-aligned.txt")
+
+#K = 2 Plot
+plotQ(cerc_all_minorclusters_Q_aligned_k2,
+      grplab = smb_metadata_geo,
+      showindlab = F, 
+      ordergrp = F,
+      selgrp = "population",
+      showgrplab = F,
+      showlegend = F, 
+      showsp = F, 
+      showdiv = T, 
+      divsize = 2, 
+      divtype = 1,
+      divcol = "black",  
+      grplabsize = 4, 
+      legendkeysize = 15, 
+      legendtextsize = 10, 
+      linesize = 0.05, 
+      pointsize = 4, 
+      barbordercolour = "black",
+      barbordersize = 0.1, 
+      clustercol = c("springgreen3", "mediumpurple"),
+      outputfilename = "../../visualization/structure_plots/cerc_all_k2_ind_plot_minorclusters",
+      imgtype = "pdf",
+      imgoutput = "join",
+      height = 10, width = 100)
+
+#K = 3 Plot
+plotQ(cerc_all_minorclusters_Q_aligned_k3,
+      grplab = smb_metadata_geo,
+      showindlab = F, 
+      ordergrp = F,
+      selgrp = "population",
+      showgrplab = F,
+      showlegend = F, 
+      showsp = F, 
+      showdiv = T, 
+      divsize = 2, 
+      divtype = 1,
+      divcol = "black",  
+      grplabsize = 4, 
+      legendkeysize = 15, 
+      legendtextsize = 10, 
+      linesize = 0.05, 
+      pointsize = 4, 
+      barbordercolour = "black",
+      barbordersize = 0.1, 
+      clustercol = c("firebrick3","springgreen3","mediumpurple"),
+      outputfilename = "../../visualization/structure_plots/cerc_all_k3_ind_plot_minorclusters",
+      imgtype = "pdf",
+      imgoutput = "join",
+      height = 10, width = 100)
+
+#K = 9 Plot
+plotQ(cerc_all_minorclusters_Q_aligned_k9,
+      grplab = smb_metadata_geo,
+      showindlab = F, 
+      ordergrp = F,
+      selgrp = "population",
+      showlegend = F, 
+      showgrplab = F,
+      showsp = F, 
+      showdiv = T, 
+      divsize = 2, 
+      divcol = "black",  
+      divtype = 1,
+      grplabsize = 4, 
+      legendkeysize = 15, 
+      legendtextsize = 10, 
+      linesize = 0.05, 
+      pointsize = 4, 
+      barbordercolour = "black",
+      barbordersize = 0.1, 
+      clustercol = c("mediumblue", "goldenrod1", "forestgreen", "cadetblue1", "palegreen2", "chocolate1", "firebrick3",        "mediumpurple1", "lightpink1"),
+      outputfilename = "../../visualization/structure_plots/cerc_all_k9_ind_plot_minorclusters",
+      imgtype = "pdf",
+      imgoutput = "join",
+      height = 10, width = 100)
+
+#WANG PARAMTERS
+wang_minorclusters_Q_aligned_k3 <- readQ("../../data/structure_data/wang_structure/clumpp_data/wang_all_minor/pop_K3/pop_K3-combined-aligned.txt")
+wang_minorclusters_Q_aligned_k5 <- readQ("../../data/structure_data/wang_structure/clumpp_data/wang_all_minor/pop_K5/pop_K5-combined-aligned.txt")
+wang_minorclusters_Q_aligned_k4 <- readQ("../../data/structure_data/wang_structure/clumpp_data/wang_all_minor/pop_K4/pop_K4-combined-aligned.txt")
+wang_minorclusters_Q_aligned_k6 <- readQ("../../data/structure_data/wang_structure/clumpp_data/wang_all_minor/pop_K6/pop_K6-combined-aligned.txt")
+
+
+#K = 3 Plot
+plotQ(wang_minorclusters_Q_aligned_k3,
+      grplab = smb_metadata_geo,
+      showindlab = F, 
+      ordergrp = F,
+      selgrp = "population",
+      showgrplab = F,
+      showlegend = F, 
+      showsp = F, 
+      showdiv = T, 
+      divsize = 2, 
+      divtype = 1,
+      divcol = "black",  
+      grplabsize = 4, 
+      legendkeysize = 15, 
+      legendtextsize = 10, 
+      linesize = 0.05, 
+      pointsize = 4, 
+      barbordercolour = "black",
+      barbordersize = 0.1, 
+      clustercol = c("springgreen3", "mediumpurple", "firebrick3"),
+      outputfilename = "../../visualization/structure_plots/wang_k3_ind_plot_joined",
+      imgtype = "pdf",
+      imgoutput = "join",
+      height = 10, width = 100)
+
+#K = 4 Plot
+plotQ(wang_minorclusters_Q_aligned_k4,
+      grplab = smb_metadata_geo,
+      showindlab = F, 
+      ordergrp = F,
+      selgrp = "population",
+      showgrplab = F,
+      showlegend = F, 
+      showsp = F, 
+      showdiv = T, 
+      divsize = 2, 
+      divtype = 1,
+      divcol = "black",  
+      grplabsize = 4, 
+      legendkeysize = 15, 
+      legendtextsize = 10, 
+      linesize = 0.05, 
+      pointsize = 4, 
+      barbordercolour = "black",
+      barbordersize = 0.1, 
+      clustercol = c("springgreen3", "chocolate1", "firebrick3", "mediumblue"),
+      outputfilename = "../../visualization/structure_plots/wang_k4_ind_plot_joined",
+      imgtype = "pdf",
+      imgoutput = "join",
+      height = 10, width = 100)
+
+#K = 5 Plot
+plotQ(wang_minorclusters_Q_aligned_k5,
+      grplab = smb_metadata_geo,
+      showindlab = F, 
+      ordergrp = F,
+      selgrp = "population",
+      showgrplab = F,
+      showlegend = F, 
+      showsp = F, 
+      showdiv = T, 
+      divsize = 2, 
+      divtype = 1,
+      divcol = "black",  
+      grplabsize = 4, 
+      legendkeysize = 15, 
+      legendtextsize = 10, 
+      linesize = 0.05, 
+      pointsize = 4, 
+      barbordercolour = "black",
+      barbordersize = 0.1, 
+      clustercol = c("springgreen3", "chocolate1", "firebrick3", "mediumblue", "forestgreen"),
+      outputfilename = "../../visualization/structure_plots/wang_k5_ind_plot_joined",
+      imgtype = "pdf",
+      imgoutput = "join",
+      height = 10, width = 100)
+
+#K = 6 Plot
+plotQ(wang_minorclusters_Q_aligned_k6,
+      grplab = smb_metadata_geo,
+      showindlab = F, 
+      ordergrp = F,
+      selgrp = "population",
+      showgrplab = F,
+      showlegend = F, 
+      showsp = F, 
+      showdiv = T, 
+      divsize = 2, 
+      divtype = 1,
+      divcol = "black",  
+      grplabsize = 4, 
+      legendkeysize = 15, 
+      legendtextsize = 10, 
+      linesize = 0.05, 
+      pointsize = 4, 
+      barbordercolour = "black",
+      barbordersize = 0.1, 
+      outputfilename = "../../visualization/structure_plots/wang_k6_ind_plot_joined",
+      imgtype = "pdf",
+      imgoutput = "join",
+      height = 10, width = 100)
+```
+
+
