@@ -124,6 +124,43 @@ colnames(morph_nor_90_k3) <- c("sample_id", "river", "range", "tl", "sl", "ol", 
 
 morph_90_nor_neo_k3 <- rbind(morph_neo_90_k3, morph_nor_90_k3)
 morph_90_all_k3 <- rbind(morph_neo_90_k3, morph_nor_90_k3)
+
+#Admixture Analysis differenes (for preliminary analysis of 3rd chapter)
+
+morph_no_northern <- morph_gen_k3 %>% 
+    filter(!(range == "Northern")) #132 total rows
+
+morph_pure_neo <- morph_no_northern %>%
+  subset(neosho_prop > 0.9)
+
+morph_admix_neo <- morph_no_northern %>%
+  subset(neosho_prop < 0.9)
+
+morph_pure_neo$gid <- factor(rep("pure", times = 17))
+morph_admix_neo$gid <- factor(rep("admix", times = 115))
+
+morph_pure_admix <- rbind(morph_pure_neo, morph_admix_neo)
+
+ggplot(morph_pure_admix, aes(x = gid, y = logtl)) +
+  geom_boxplot(show.legend = F, outlier.shape = NA, alpha = 0.6) +
+  geom_point(position = position_jitter(width = 0.2), alpha = 0.6, color = "black", pch = 21, show.legend = F)
+
+ggplot(morph_pure_admix, aes(x = logtl, y = logsl, fill = gid)) +
+  geom_point(size =3 , alpha = 0.6, color = "black", pch = 21, show.legend = F) +
+  geom_smooth(aes(color = gid), method = lm, se = F, show.legend = F) 
+
+ggplot(morph_pure_admix, aes(x = logtl, y = logol, fill = gid)) +
+  geom_point(size =3 , alpha = 0.6, color = "black", pch = 21, show.legend = F) +
+  geom_smooth(aes(color = gid), method = lm, se = F, show.legend = F) 
+
+ggplot(morph_pure_admix, aes(x = logtl, y = loghl, fill = gid)) +
+  geom_point(size =3 , alpha = 0.6, color = "black", pch = 21, show.legend = F) +
+  geom_smooth(aes(color = gid), method = lm, se = F, show.legend = F) 
+
+ggplot(morph_pure_admix, aes(x = logtl, y = logbd, fill = gid)) +
+  geom_point(size =3 , alpha = 0.6, color = "black", pch = 21, show.legend = F) +
+  geom_smooth(aes(color = gid), method = lm, se = F, show.legend = F) 
+
 ```
 
 ## Summarize trait values - Calculate real (log-transformed) means for each morphometric trait
