@@ -88,25 +88,15 @@ dev.off()
 ## Central Interior Highlands Map
 ```{r}
 
-pdf("/Users/joegunn/Desktop/Grad_School_Stuff/Research/Projects/Smallmouth_Bass_Microsatellites/visualization/map_figures/central_interior_highlands.pdf", width = 10, height = 9) #creates a jpeg at customized resolution
+pdf("/Users/joegunn/Desktop/Grad_School_Stuff/Research/Projects/Smallmouth_Bass_Microsatellites/visualization/map_figures/central_interior_highlands.pdf", width = 30, height = 27) #creates a jpeg at customized resolution
 
-plot(shape_state, col=alpha("white", 0.3), border = "black", axes = T, ylim = c(35,38), xlim = c(-96,-91), cex.axis = 2)
-plot(shape_smb, add = TRUE, col=alpha("mediumpurple", 0.4), border = F, axes=TRUE, ylim = c(35,38), xlim = c(-96,-91), cex.axis = 2)
-plot(shape_neosho, add = TRUE, col="darkseagreen1", border = F, axes = TRUE, ylim = c(35,38), xlim = c(-96,-91), cex.axis = 2)
-plot(shape_river, add = T, col="blue", border = F, axes = T, ylim = c(35,38), xlim = c(-96,-91), cex.axis = 2)
-scalebar(200, xy = c(-96, 34.8), type = "bar", divs = 4, cex = 2)
-
-dev.off()
-```
-
-## Fine-scale map of neosho smallmouth and northern smallmouth sample collections
-```{r}
-pdf("/Users/joegunn/Desktop/Grad_School_Stuff/Research/Projects/Smallmouth_Bass_Microsatellites/visualization/map_figures/nsmb_closeup.pdf", width = 5, height = 17)
-
-plot(shape_smb, col="seagreen2", border = F, axes=TRUE, ylim = c(35,39), xlim = c(-96,-92))
-plot(shape_neosho, add = TRUE, col ="darkorchid1", border = F, axes = TRUE, ylim = c(35,39), xlim = c(-96,-92))
-plot(shape_state, add = T, col=alpha("wheat1", 0.4), border = "black", axes = T, ylim = c(35,39), xlim = c(-96,-92))
-plot(shape_river, add = T, col="blue", border = F, axes = T, ylim = c(35,39), xlim = c(-96,-92))
+plot(shape_state, col=alpha("white", 0.3), border = "black", axes = T, ylim = c(35,38), xlim = c(-96,-91), cex.axis = 4)
+plot(shape_smb, add = TRUE, col=alpha("mediumpurple", 0.4), border = F, axes=TRUE, ylim = c(35,38), xlim = c(-96,-91), cex.axis = 4)
+plot(shape_neosho, add = TRUE, col="darkseagreen1", border = F, axes = TRUE, ylim = c(35,38), xlim = c(-96,-91), cex.axis = 4)
+plot(shape_river, add = T, col="blue", border = F, axes = T, ylim = c(35,38), xlim = c(-96,-91), cex.axis = 4)
+scalebar(200, xy = c(-96, 34.8), type = "bar", divs = 4, cex = 4)
 
 dev.off()
 ```
+
+
