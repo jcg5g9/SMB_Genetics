@@ -58,6 +58,8 @@ shape_river <- readOGR(dsn = "/Users/joegunn/Desktop/Grad_School_Stuff/Research/
 
 shape_smb <- readOGR(dsn = "/Users/joegunn/Desktop/Grad_School_Stuff/Research/Projects/Smallmouth_Bass_Microsatellites/data/map_data/Species_Distributions/northern_smb", layer = "NORTHERNSMB_Range") #shape file for the entire range of Smallmouth Bass
 
+shape_northern <- readOGR(dsn = "/Users/joegunn/Desktop/Grad_School_Stuff/Research/Projects/Smallmouth_Bass_Genomics/analysis/MAP_building/shape_file_data/Species_Distributions/northern_smb", layer = "NORTHERNSMB_Range") #shape file for the entire range of Smallmouth Bass
+
 shape_neosho <- readOGR(dsn = "/Users/joegunn/Desktop/Grad_School_Stuff/Research/Projects/Smallmouth_Bass_Microsatellites/data/map_data/Species_Distributions/neosho_smb", layer = "NEOSHOSMB_Range") #shape file for Neosho Smallmouth Bass native range
 ```
 
@@ -94,7 +96,32 @@ plot(shape_state, col=alpha("white", 0.3), border = "black", axes = T, ylim = c(
 plot(shape_smb, add = TRUE, col=alpha("mediumpurple", 0.4), border = F, axes=TRUE, ylim = c(35,38), xlim = c(-96,-91), cex.axis = 4)
 plot(shape_neosho, add = TRUE, col="darkseagreen1", border = F, axes = TRUE, ylim = c(35,38), xlim = c(-96,-91), cex.axis = 4)
 plot(shape_river, add = T, col="blue", border = F, axes = T, ylim = c(35,38), xlim = c(-96,-91), cex.axis = 4)
-scalebar(200, xy = c(-96, 34.8), type = "bar", divs = 4, cex = 4)
+scalebar(200, xy = c(-96, 34.8), type = "bar", divs = 4, cex = FALSE)
+
+dev.off()
+```
+
+## trying something else
+```{r}
+pdf("/Users/joegunn/Desktop/Grad_School_Stuff/Research/Projects/Smallmouth_Bass_Microsatellites/visualization/map_figures/central_interior_highlands_LARGE.pdf", width = 20, height = 18) #creates a jpeg at customized resolution
+
+plot(shape_state, col=alpha("white", 0.3), border = "black", axes = T, ylim = c(35,38), xlim = c(-96,-91.1), cex.axis = 2)
+plot(shape_smb, add = TRUE, col = "gray94", border = T, axes=TRUE, ylim = c(35,38), xlim = c(-96,-91), cex.axis = 2)
+plot(shape_neosho, add = TRUE, col = "grey67", border = T, axes = TRUE, ylim = c(35,38), xlim = c(-96,-91), cex.axis = 2)
+plot(shape_river, add = T, col="blue", border = T, axes = T, ylim = c(35,38), xlim = c(-96,-91), cex.axis = 2)
+scalebar(200, xy = c(-96, 34.85), type = "bar", adj = c(1, -1.2),  divs = 4, cex = 3)
+
+dev.off()
+```
+
+## Full USA Map
+```{r}
+pdf("/Users/joegunn/Desktop/Grad_School_Stuff/Research/Projects/Smallmouth_Bass_Microsatellites/visualization/map_figures/USA_map.pdf", width = 7, height = 5)
+
+plot(shape_state, col= alpha("white", 0.8), border = "black", axes = T, ylim = c(25,51), xlim = c(-126,-60)) #United States
+plot(shape_northern, add = TRUE, col = alpha("grey84", 0.8), border = T, axes = TRUE, ylim = c(20,48), xlim = c(-110,-60)) #Northern SMB Range
+plot(shape_neosho, add = TRUE, col = alpha("grey54", 0.9), border = T, axes = TRUE, ylim = c(30,48), xlim = c(-130,-60)) #Neosho SMB Range
+#legend(x = -129, y = 30, legend = c("Northern Range", "Neosho Range"), bty = "n", fill = c("grey84","grey54"), cex = 1.2) # Legend 
 
 dev.off()
 ```
