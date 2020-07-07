@@ -56,6 +56,8 @@ shape_canada <- readOGR(dsn = "/Users/joegunn/Desktop/Grad_School_Stuff/Research
 
 shape_river <- readOGR(dsn = "/Users/joegunn/Desktop/Grad_School_Stuff/Research/Projects/Smallmouth_Bass_Microsatellites/data/map_data/RIVERS", layer = "River_Data") #shape file for rivers used in this study
 
+shape_crooked_creek <- readOGR(dsn = "/Users/joegunn/Desktop/Grad_School_Stuff/Research/Projects/Smallmouth_Bass_Microsatellites/data/map_data/RIVERS", layer = "crooked_creek") #shape file for rivers used in this study
+
 shape_smb <- readOGR(dsn = "/Users/joegunn/Desktop/Grad_School_Stuff/Research/Projects/Smallmouth_Bass_Microsatellites/data/map_data/Species_Distributions/northern_smb", layer = "NORTHERNSMB_Range") #shape file for the entire range of Smallmouth Bass
 
 shape_northern <- readOGR(dsn = "/Users/joegunn/Desktop/Grad_School_Stuff/Research/Projects/Smallmouth_Bass_Genomics/analysis/MAP_building/shape_file_data/Species_Distributions/northern_smb", layer = "NORTHERNSMB_Range") #shape file for the entire range of Smallmouth Bass
@@ -109,6 +111,7 @@ plot(shape_state, col=alpha("white", 0.3), border = "black", axes = T, ylim = c(
 plot(shape_smb, add = TRUE, col = "gray94", border = T, axes=TRUE, ylim = c(35,38), xlim = c(-96,-91), cex.axis = 2)
 plot(shape_neosho, add = TRUE, col = "grey67", border = T, axes = TRUE, ylim = c(35,38), xlim = c(-96,-91), cex.axis = 2)
 plot(shape_river, add = T, col="blue", border = T, axes = T, ylim = c(35,38), xlim = c(-96,-91), cex.axis = 2)
+plot(shape_crooked_creek, add = T, col="blue", border = T, axes = T, ylim = c(35,38), xlim = c(-96,-91), cex.axis = 2)
 scalebar(200, xy = c(-96, 34.85), type = "bar", adj = c(1, -1.2),  divs = 4, cex = 3)
 
 dev.off()
