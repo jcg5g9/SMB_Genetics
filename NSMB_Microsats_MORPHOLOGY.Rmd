@@ -769,6 +769,7 @@ summary(coefficients_bd_gen)
 
 ## Plot ANCOVA
 ```{r}
+
 #All morphological samples 
 sl_tl_range <- ggplot(morph_all, aes(x = logtl, y = logsl, color = range, shape = range)) + 
     geom_point(show.legend = T, size = 3.5) + 
@@ -784,15 +785,22 @@ sl_tl_range <- ggplot(morph_all, aes(x = logtl, y = logsl, color = range, shape 
     theme(axis.title.y = element_text(size = 20)) + 
     theme(plot.title = element_text(size = 20))
 
-ol_tl_range <- ggplot(morph_all, aes(x = logtl, y = logol, color = range, shape = range)) + 
-    geom_point(show.legend = F, size = 3.5) + 
-    geom_smooth(show.legend = F, method = "lm") +
+ol_tl_range <- ggplot() + 
+    geom_point(data = morph_all_neo, aes(x = logtl, y = logol, fill = range, shape = range), size = 3.5, pch = 21, color = "black", show.legend = T) +
+      geom_smooth(data = morph_all_neo, aes(x = logtl, y = logol, color = range), show.legend = F, method = "lm") +
+    geom_point(data = morph_all_nor, aes(x = logtl, y = logol, fill = range, shape = range), size = 3.5, pch = 22, color = "black", show.legend = F) +
+      geom_smooth(data = morph_all_nor, aes(x = logtl, y = logol, color = range), show.legend = F, method = "lm") +
     theme_set(theme_cowplot(12)) + 
-    scale_color_manual(values = c("springgreen3", "mediumpurple")) + 
-    labs(y = "Orbital Length (mm)") + 
+    scale_fill_manual(values = c("springgreen3", "mediumpurple")) +
+    scale_color_manual(values = c("springgreen3", "mediumpurple")) +
+    labs(y = "Orbital Length (mm)", fill = "Range", color = "Range", shape = "Range") + 
     theme(axis.title.x = element_blank()) + 
     theme(axis.text = element_text(size = 20)) + 
-    theme(axis.title.y = element_text(size = 20))
+    theme(axis.title.y = element_text(size = 20)) +
+    theme(legend.position = c(0.05,0.15)) +
+    theme(legend.title = element_text(size = 20, face = "bold")) +
+    theme(legend.background = element_blank()) + 
+    theme(legend.text = element_text(size = 20))
 
 hl_tl_range <- ggplot(morph_all, aes(x = logtl, y = loghl, color = range, shape = range)) + 
     geom_point(show.legend = F, size = 3.5) +

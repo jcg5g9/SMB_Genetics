@@ -56,7 +56,13 @@ shape_canada <- readOGR(dsn = "/Users/joegunn/Desktop/Grad_School_Stuff/Research
 
 shape_river <- readOGR(dsn = "/Users/joegunn/Desktop/Grad_School_Stuff/Research/Projects/Smallmouth_Bass_Microsatellites/data/map_data/RIVERS", layer = "River_Data") #shape file for rivers used in this study
 
-shape_crooked_creek <- readOGR(dsn = "/Users/joegunn/Desktop/Grad_School_Stuff/Research/Projects/Smallmouth_Bass_Microsatellites/data/map_data/RIVERS", layer = "crooked_creek") #shape file for rivers used in this study
+shape_crooked_creek <- readOGR(dsn = "/Users/joegunn/Desktop/Grad_School_Stuff/Research/Projects/Smallmouth_Bass_Microsatellites/data/map_data/RIVERS", layer = "crooked_creek") #shape file for crooked creek used in this study
+
+shape_stockton_lake <- readOGR(dsn = "/Users/joegunn/Desktop/Grad_School_Stuff/Research/Projects/Smallmouth_Bass_Microsatellites/data/map_data/RIVERS", layer = "stockton_lake") #shape file for stockton lake used in this study
+
+shape_tablerock_creek <- readOGR(dsn = "/Users/joegunn/Desktop/Grad_School_Stuff/Research/Projects/Smallmouth_Bass_Microsatellites/data/map_data/RIVERS", layer = "tablerock_lake") #shape file for tablerock lake used in this study
+
+shape_skiatook_lake <- readOGR(dsn = "/Users/joegunn/Desktop/Grad_School_Stuff/Research/Projects/Smallmouth_Bass_Microsatellites/data/map_data/RIVERS", layer = "skiatook_lake") #shape file for skiatook lake used in this study
 
 shape_smb <- readOGR(dsn = "/Users/joegunn/Desktop/Grad_School_Stuff/Research/Projects/Smallmouth_Bass_Microsatellites/data/map_data/Species_Distributions/northern_smb", layer = "NORTHERNSMB_Range") #shape file for the entire range of Smallmouth Bass
 
