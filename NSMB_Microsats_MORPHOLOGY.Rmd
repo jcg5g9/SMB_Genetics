@@ -771,104 +771,135 @@ summary(coefficients_bd_gen)
 ```{r}
 
 #All morphological samples 
-sl_tl_range <- ggplot(morph_all, aes(x = logtl, y = logsl, color = range, shape = range)) + 
-    geom_point(show.legend = T, size = 3.5) + 
-    geom_smooth(show.legend = F, method = "lm") +
-    theme_set(theme_cowplot(12)) + 
-    scale_color_manual("Range", values = c("springgreen3", "mediumpurple")) + 
-    scale_shape_manual("Range", values = c(16,17)) + 
-    labs(color = "Range", title = "Range of Collection", y = "Standard Length (mm)") + 
-    theme(axis.title.x = element_blank()) + 
-    theme(plot.title = element_text(hjust = 0.5)) + 
-    theme(legend.position = c(0.02,0.75), legend.title = element_text(size = 20), legend.background = element_blank(), legend.text = element_text(size = 20)) + 
-    theme(axis.text = element_text(size = 20)) + 
-    theme(axis.title.y = element_text(size = 20)) + 
-    theme(plot.title = element_text(size = 20))
-
-ol_tl_range <- ggplot() + 
-    geom_point(data = morph_all_neo, aes(x = logtl, y = logol, fill = range, shape = range), size = 3.5, pch = 21, color = "black", show.legend = T) +
-      geom_smooth(data = morph_all_neo, aes(x = logtl, y = logol, color = range), show.legend = F, method = "lm") +
-    geom_point(data = morph_all_nor, aes(x = logtl, y = logol, fill = range, shape = range), size = 3.5, pch = 22, color = "black", show.legend = F) +
-      geom_smooth(data = morph_all_nor, aes(x = logtl, y = logol, color = range), show.legend = F, method = "lm") +
+sl_tl_range <- ggplot() + 
+    geom_point(data = morph_all_neo, aes(x = logtl, y = logsl, group = range, fill = range, shape = range), size = 3.5, pch = 21, color = "black", show.legend = T) +
+    geom_smooth(data = morph_all_neo, aes(x = logtl, y = logsl, color = range), show.legend = F, method = "lm") +
+    geom_point(data = morph_all_nor, aes(x = logtl, y = logsl, fill = range, shape = range), size = 3.5, pch = 22, color = "black", show.legend = F) +
+    geom_smooth(data = morph_all_nor, aes(x = logtl, y = logsl, color = range), show.legend = F, method = "lm") +
     theme_set(theme_cowplot(12)) + 
     scale_fill_manual(values = c("springgreen3", "mediumpurple")) +
     scale_color_manual(values = c("springgreen3", "mediumpurple")) +
-    labs(y = "Orbital Length (mm)", fill = "Range", color = "Range", shape = "Range") + 
+    scale_shape_manual(values = c("circle","square")) +
+    labs(y = "Standard Length (mm)", fill = "Range", color = "Range", shape = "Range", title = "Taxonomic Range") +
+    theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 20)) +
     theme(axis.title.x = element_blank()) + 
     theme(axis.text = element_text(size = 20)) + 
     theme(axis.title.y = element_text(size = 20)) +
-    theme(legend.position = c(0.05,0.15)) +
+    theme(legend.position = c(0.7,0.2)) +
     theme(legend.title = element_text(size = 20, face = "bold")) +
     theme(legend.background = element_blank()) + 
     theme(legend.text = element_text(size = 20))
 
-hl_tl_range <- ggplot(morph_all, aes(x = logtl, y = loghl, color = range, shape = range)) + 
-    geom_point(show.legend = F, size = 3.5) +
+ol_tl_range <- ggplot() + 
+    geom_point(data = morph_all_neo, aes(x = logtl, y = logol, group = range, fill = range, shape = range), size = 3.5, pch = 21, color = "black", show.legend = F) +
+    geom_smooth(data = morph_all_neo, aes(x = logtl, y = logol, color = range), show.legend = F, method = "lm") +
+    geom_point(data = morph_all_nor, aes(x = logtl, y = logol, fill = range, shape = range), size = 3.5, pch = 22, color = "black", show.legend = F) +
+    geom_smooth(data = morph_all_nor, aes(x = logtl, y = logol, color = range), show.legend = F, method = "lm") +
     theme_set(theme_cowplot(12)) + 
-    geom_smooth(show.legend = F, method = "lm") + 
-    scale_color_manual(values = c("springgreen3", "mediumpurple")) + 
-    labs(y = "Head Length (mm)") +
-    theme(axis.title.x = element_blank()) +
-    theme(axis.text = element_text(size = 20)) +
-    theme(axis.title = element_text(size = 20)) 
+    scale_fill_manual(values = c("springgreen3", "mediumpurple")) +
+    scale_color_manual(values = c("springgreen3", "mediumpurple")) +
+    scale_shape_manual(values = c("circle","square")) +
+    labs(y = "Orbital Length (mm)", fill = "Range", color = "Range", shape = "Range") + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.text = element_text(size = 20)) + 
+    theme(axis.title.y = element_text(size = 20))
 
-bd_tl_range <- ggplot(morph_all, aes(x = logtl, y = logbd, color = range, shape = range)) + 
-    geom_point(show.legend = F, size = 3.5) + 
-    geom_smooth(show.legend = F, method = "lm") + 
+hl_tl_range <- ggplot() + 
+    geom_point(data = morph_all_neo, aes(x = logtl, y = loghl, group = range, fill = range, shape = range), size = 3.5, pch = 21, color = "black", show.legend = F) +
+    geom_smooth(data = morph_all_neo, aes(x = logtl, y = loghl, color = range), show.legend = F, method = "lm") +
+    geom_point(data = morph_all_nor, aes(x = logtl, y = loghl, fill = range, shape = range), size = 3.5, pch = 22, color = "black", show.legend = F) +
+    geom_smooth(data = morph_all_nor, aes(x = logtl, y = loghl, color = range), show.legend = F, method = "lm") +
     theme_set(theme_cowplot(12)) + 
-    scale_color_manual(values = c("springgreen3", "mediumpurple")) + 
-    labs(x = "Total Length (mm)", y = "Body Depth (mm)") + 
-    theme(axis.text = element_text(size = 20)) +
-    theme(axis.title.y = element_text(size = 20)) + 
-    theme(axis.title.x = element_text(size = 20))
-
-range_grid <- plot_grid(sl_tl_range, ol_tl_range, hl_tl_range, bd_tl_range, nrow = 4, labels = c("a","b","c","d"), label_x = 0.15, label_y = 0.95, label_size = 25)
-
-#Only pure samples
-levels(morph_90_nor_neo_k3$gid) <- c("Neosho", "Northern") 
-sl_tl_gen <- ggplot(morph_90_nor_neo_k3, aes(x = logtl, y = logsl, color = gid, shape = gid)) + 
-    geom_point(show.legend = T, size = 3.5) + 
-    geom_smooth(show.legend = F, method = "lm") + 
-    scale_color_manual("Assignment", values = c("springgreen3", "mediumpurple")) + 
-    scale_shape_manual("Assignment", values = c(16,17)) + 
-    labs(color = "Assignment", title = "Genetic Assignment") + 
+    scale_fill_manual(values = c("springgreen3", "mediumpurple")) +
+    scale_color_manual(values = c("springgreen3", "mediumpurple")) +
+    scale_shape_manual(values = c("circle","square")) +
+    labs(y = "Head Length (mm)", fill = "Range", color = "Range", shape = "Range") +
     theme(axis.title.x = element_blank()) + 
-    theme(plot.title = element_text(hjust = 0.5)) + 
-    theme(axis.title.y = element_blank()) + 
-    theme(legend.position = c(0.02,0.75), legend.title = element_text(size = 20), legend.background = element_blank(), legend.text = element_text(size = 20)) + 
     theme(axis.text = element_text(size = 20)) + 
-    theme(plot.title = element_text(size = 20))
+    theme(axis.title.y = element_text(size = 20))
 
-ol_tl_gen <- ggplot(morph_90_nor_neo_k3, aes(x = logtl, y = logol, color = gid, shape = gid)) + 
-    geom_point(show.legend = F, size = 3.5) + 
-    geom_smooth(show.legend = F, method = "lm") + 
-    scale_color_manual(values = c("springgreen3", "mediumpurple")) + 
-    theme(axis.title.x = element_blank()) + 
-    theme(axis.title.y = element_blank()) + 
-    theme(axis.text = element_text(size = 20))
-
-hl_tl_gen <- ggplot(morph_90_nor_neo_k3, aes(x = logtl, y = loghl, color = gid, shape = gid)) + 
-    geom_point(show.legend = F, size = 3.5) + 
-    geom_smooth(show.legend = F, method = "lm") + 
-    scale_color_manual(values = c("springgreen3", "mediumpurple")) + 
-    theme(axis.title.x = element_blank()) + 
-    theme(axis.title.y = element_blank()) + 
-    theme(axis.text = element_text(size = 20))
-
-bd_tl_gen <- ggplot(morph_90_nor_neo_k3, aes(x = logtl, y = logbd, color = gid, shape = gid)) + 
-    geom_point(show.legend = F, size = 3.5) + 
-    geom_smooth(show.legend = F, method = "lm") + 
-    scale_color_manual(values = c("springgreen3", "mediumpurple")) + 
-    labs(x = "Total Length (mm)") + 
-    theme(axis.title.y = element_blank()) + 
+bd_tl_range <- ggplot() + 
+    geom_point(data = morph_all_neo, aes(x = logtl, y = logbd, group = range, fill = range, shape = range), size = 3.5, pch = 21, color = "black", show.legend = F) +
+    geom_smooth(data = morph_all_neo, aes(x = logtl, y = logbd, color = range), show.legend = F, method = "lm") +
+    geom_point(data = morph_all_nor, aes(x = logtl, y = logbd, fill = range, shape = range), size = 3.5, pch = 22, color = "black", show.legend = F) +
+    geom_smooth(data = morph_all_nor, aes(x = logtl, y = logbd, color = range), show.legend = F, method = "lm") +
+    theme_set(theme_cowplot(12)) + 
+    scale_fill_manual(values = c("springgreen3", "mediumpurple")) +
+    scale_color_manual(values = c("springgreen3", "mediumpurple")) +
+    scale_shape_manual(values = c("circle","square")) +
+    labs(y = "Body Depth (mm)", x = "Total Length (mm)", fill = "Range", color = "Range", shape = "Range") +
     theme(axis.text = element_text(size = 20)) + 
-    theme(axis.title.x = element_text(size = 20))
+    theme(axis.title = element_text(size = 20))
 
-gen_grid <- plot_grid(sl_tl_gen, ol_tl_gen, hl_tl_gen, bd_tl_gen, nrow = 4, labels = c("e","f","g","h"), label_x = 0.1, label_y = 0.95, label_size = 25)
+range_grid <- plot_grid(sl_tl_range, ol_tl_range, hl_tl_range, bd_tl_range, nrow = 4, labels = c("a","c","e","g"), label_x = 0.15, label_y = 0.95, label_size = 25)
 
 
+#Only Pure Samples
+sl_tl_gen <- ggplot() + 
+    geom_point(data = morph_neo_90_k3, aes(x = logtl, y = logsl, group = gid, fill = gid, shape = gid), size = 3.5, pch = 21, color = "black", show.legend = T) +
+    geom_smooth(data = morph_neo_90_k3, aes(x = logtl, y = logsl, color = gid), show.legend = F, method = "lm") +
+    geom_point(data = morph_nor_90_k3, aes(x = logtl, y = logsl, fill = gid, shape = gid), size = 3.5, pch = 22, color = "black", show.legend = F) +
+    geom_smooth(data = morph_nor_90_k3, aes(x = logtl, y = logsl, color = gid), show.legend = F, method = "lm") +
+    theme_set(theme_cowplot(12)) + 
+    scale_fill_manual(values = c("springgreen3", "mediumpurple")) +
+    scale_color_manual(values = c("springgreen3", "mediumpurple")) +
+    scale_shape_manual(values = c("circle","square")) +
+    labs(y = "Standard Length (mm)", fill = "Assignment", color = "Assignment", shape = "Assignment", title = "Genetic Assignment") +
+    theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 20)) +
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.text = element_text(size = 20)) + 
+    theme(axis.title.y = element_blank()) +
+    theme(legend.position = c(0.7,0.2)) +
+    theme(legend.title = element_text(size = 20, face = "bold")) +
+    theme(legend.background = element_blank()) + 
+    theme(legend.text = element_blank())
 
-############################################################################################################################################
+ol_tl_gen <- ggplot() + 
+    geom_point(data = morph_neo_90_k3, aes(x = logtl, y = logol, group = gid, fill = gid, shape = gid), size = 3.5, pch = 21, color = "black", show.legend = F) +
+    geom_smooth(data = morph_neo_90_k3, aes(x = logtl, y = logol, color = gid), show.legend = F, method = "lm") +
+    geom_point(data = morph_nor_90_k3, aes(x = logtl, y = logol, fill = gid, shape = gid), size = 3.5, pch = 22, color = "black", show.legend = F) +
+    geom_smooth(data = morph_nor_90_k3, aes(x = logtl, y = logol, color = gid), show.legend = F, method = "lm") +
+    theme_set(theme_cowplot(12)) + 
+    scale_fill_manual(values = c("springgreen3", "mediumpurple")) +
+    scale_color_manual(values = c("springgreen3", "mediumpurple")) +
+    scale_shape_manual(values = c("circle","square")) +
+    labs(y = "Orbital Length (mm)", fill = "gid", color = "gid", shape = "gid") + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.text = element_text(size = 20)) + 
+    theme(axis.title.y = element_blank())
+
+morph_nor_90_k3
+
+hl_tl_gen <- ggplot() + 
+    geom_point(data = morph_neo_90_k3, aes(x = logtl, y = loghl, group = gid, fill = gid, shape = gid), size = 3.5, pch = 21, color = "black", show.legend = F) +
+    geom_smooth(data = morph_neo_90_k3, aes(x = logtl, y = loghl, color = gid), show.legend = F, method = "lm") +
+    geom_point(data = morph_nor_90_k3, aes(x = logtl, y = loghl, fill = gid, shape = gid), size = 3.5, pch = 22, color = "black", show.legend = F) +
+    geom_smooth(data = morph_nor_90_k3, aes(x = logtl, y = loghl, color = gid), show.legend = F, method = "lm") +
+    theme_set(theme_cowplot(12)) + 
+    scale_fill_manual(values = c("springgreen3", "mediumpurple")) +
+    scale_color_manual(values = c("springgreen3", "mediumpurple")) +
+    scale_shape_manual(values = c("circle","square")) +
+    labs(y = "Head Length (mm)", fill = "gid", color = "gid", shape = "gid") +
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.text = element_text(size = 20)) + 
+    theme(axis.title.y = element_blank())
+
+bd_tl_gen <- ggplot() + 
+    geom_point(data = morph_neo_90_k3, aes(x = logtl, y = logbd, group = gid, fill = gid, shape = gid), size = 3.5, pch = 21, color = "black", show.legend = F) +
+    geom_smooth(data = morph_neo_90_k3, aes(x = logtl, y = logbd, color = gid), show.legend = F, method = "lm") +
+    geom_point(data = morph_nor_90_k3, aes(x = logtl, y = logbd, fill = gid, shape = gid), size = 3.5, pch = 22, color = "black", show.legend = F) +
+    geom_smooth(data = morph_nor_90_k3, aes(x = logtl, y = logbd, color = gid), show.legend = F, method = "lm") +
+    theme_set(theme_cowplot(12)) + 
+    scale_fill_manual(values = c("springgreen3", "mediumpurple")) +
+    scale_color_manual(values = c("springgreen3", "mediumpurple")) +
+    scale_shape_manual(values = c("circle","square")) +
+    labs(y = "Body Depth (mm)", x = "Total Length (mm)", fill = "gid", color = "gid", shape = "gid") +
+    theme(axis.text = element_text(size = 20)) + 
+    theme(axis.title.x = element_text(size = 20)) + 
+    theme(axis.title.y = element_blank())
+
+gen_grid <- plot_grid(sl_tl_gen, ol_tl_gen, hl_tl_gen, bd_tl_gen, nrow = 4, labels = c("b","d","f","h"), label_x = 0.1, label_y = 0.95, label_size = 25)
+
 
 ###Plot everything together
 pdf("/Users/joegunn/Desktop/Grad_School_Stuff/Research/Projects/Smallmouth_Bass_Microsatellites/visualization/morphology_figures/morph_size_corrections.pdf", width=12, height=20)
