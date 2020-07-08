@@ -111,15 +111,18 @@ dev.off()
 
 ## trying something else
 ```{r}
-pdf("/Users/joegunn/Desktop/Grad_School_Stuff/Research/Projects/Smallmouth_Bass_Microsatellites/visualization/map_figures/central_interior_highlands_LARGE.pdf", width = 20, height = 18) #creates a jpeg at customized resolution
+pdf("/Users/joegunn/Desktop/Grad_School_Stuff/Research/Projects/Smallmouth_Bass_Microsatellites/visualization/map_figures/central_interior_highlands_LARGE.pdf", width = 20, height = 18) #creates a pdf at customized resolution
 
-plot(shape_state, col=alpha("white", 0.3), border = "black", axes = T, ylim = c(35,38), xlim = c(-96,-91.1), cex.axis = 2)
-plot(shape_smb, add = TRUE, col = "gray94", border = T, axes=TRUE, ylim = c(35,38), xlim = c(-96,-91), cex.axis = 2)
-plot(shape_neosho, add = TRUE, col = "grey67", border = T, axes = TRUE, ylim = c(35,38), xlim = c(-96,-91), cex.axis = 2)
-plot(shape_river, add = T, col="blue", border = T, axes = T, ylim = c(35,38), xlim = c(-96,-91), cex.axis = 2)
-plot(shape_crooked_creek, add = T, col="blue", border = T, axes = T, ylim = c(35,38), xlim = c(-96,-91), cex.axis = 2)
-scalebar(200, xy = c(-96, 34.85), type = "bar", adj = c(1, -1.2),  divs = 4, cex = 3)
-
+plot(shape_smb, col = "gray94", border = T, axes=T, ylim = c(35,38), xlim = c(-96,-91), cex.axis = 2)
+plot(shape_neosho, add = T, col = "grey67", border = T, axes = T, ylim = c(35,38), xlim = c(-96,-91), cex.axis = 2)
+plot(shape_river, add = T, col = "blue", border = T, axes = T, ylim = c(35,38), xlim = c(-96,-91), cex.axis = 2)
+plot(shape_crooked_creek, add = T, col = "blue", border = T, axes = T, ylim = c(35,38), xlim = c(-96,-91), cex.axis = 2)
+plot(shape_tablerock_creek, col = "blue", add = T, axes = T, ylim = c(35,38), xlim = c(-96,-91), cex.axis = 2)
+plot(shape_skiatook_lake, add = T, col = "blue", border = T, ylim = c(35,38), xlim = c(-96,-91), cex.axis = 2)
+plot(shape_stockton_lake, add = T, col = "blue", border = T, ylim = c(35,38), xlim = c(-96,-91), cex.axis = 2)
+#scalebar(200, xy = c(-96, 34.85), type = "bar", adj = c(1, -1.2),  divs = 4, cex = 3)
+#c(-96,91)
+#xlim = c(-96,91), ylim = c(35,38)
 dev.off()
 ```
 
