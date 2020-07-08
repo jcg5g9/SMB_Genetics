@@ -780,12 +780,12 @@ sl_tl_range <- ggplot() +
     scale_fill_manual(values = c("springgreen3", "mediumpurple")) +
     scale_color_manual(values = c("springgreen3", "mediumpurple")) +
     scale_shape_manual(values = c("circle","square")) +
-    labs(y = "Standard Length (mm)", fill = "Range", color = "Range", shape = "Range", title = "Taxonomic Range") +
+    labs(y = "Standard Length (mm)", fill = "Subspecies", color = "Subspecies", shape = "Subspecies", title = "Taxonomic Range") +
     theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 20)) +
     theme(axis.title.x = element_blank()) + 
     theme(axis.text = element_text(size = 20)) + 
     theme(axis.title.y = element_text(size = 20)) +
-    theme(legend.position = c(0.7,0.2)) +
+    theme(legend.position = c(0.65,0.2)) +
     theme(legend.title = element_text(size = 20, face = "bold")) +
     theme(legend.background = element_blank()) + 
     theme(legend.text = element_text(size = 20))
@@ -831,12 +831,12 @@ bd_tl_range <- ggplot() +
     theme(axis.text = element_text(size = 20)) + 
     theme(axis.title = element_text(size = 20))
 
-range_grid <- plot_grid(sl_tl_range, ol_tl_range, hl_tl_range, bd_tl_range, nrow = 4, labels = c("a","c","e","g"), label_x = 0.15, label_y = 0.95, label_size = 25)
+range_grid <- plot_grid(sl_tl_range, ol_tl_range, hl_tl_range, bd_tl_range, nrow = 4, labels = c("a","c","e","g"), label_x = 0.15, label_y = 0.98, label_size = 25)
 
 
 #Only Pure Samples
 sl_tl_gen <- ggplot() + 
-    geom_point(data = morph_neo_90_k3, aes(x = logtl, y = logsl, group = gid, fill = gid, shape = gid), size = 3.5, pch = 21, color = "black", show.legend = T) +
+    geom_point(data = morph_neo_90_k3, aes(x = logtl, y = logsl, group = gid, fill = gid, shape = gid), size = 3.5, pch = 21, color = "black", show.legend = F) +
     geom_smooth(data = morph_neo_90_k3, aes(x = logtl, y = logsl, color = gid), show.legend = F, method = "lm") +
     geom_point(data = morph_nor_90_k3, aes(x = logtl, y = logsl, fill = gid, shape = gid), size = 3.5, pch = 22, color = "black", show.legend = F) +
     geom_smooth(data = morph_nor_90_k3, aes(x = logtl, y = logsl, color = gid), show.legend = F, method = "lm") +
@@ -868,8 +868,6 @@ ol_tl_gen <- ggplot() +
     theme(axis.text = element_text(size = 20)) + 
     theme(axis.title.y = element_blank())
 
-morph_nor_90_k3
-
 hl_tl_gen <- ggplot() + 
     geom_point(data = morph_neo_90_k3, aes(x = logtl, y = loghl, group = gid, fill = gid, shape = gid), size = 3.5, pch = 21, color = "black", show.legend = F) +
     geom_smooth(data = morph_neo_90_k3, aes(x = logtl, y = loghl, color = gid), show.legend = F, method = "lm") +
@@ -898,7 +896,7 @@ bd_tl_gen <- ggplot() +
     theme(axis.title.x = element_text(size = 20)) + 
     theme(axis.title.y = element_blank())
 
-gen_grid <- plot_grid(sl_tl_gen, ol_tl_gen, hl_tl_gen, bd_tl_gen, nrow = 4, labels = c("b","d","f","h"), label_x = 0.1, label_y = 0.95, label_size = 25)
+gen_grid <- plot_grid(sl_tl_gen, ol_tl_gen, hl_tl_gen, bd_tl_gen, nrow = 4, labels = c("b","d","f","h"), label_x = 0.1, label_y = 0.98, label_size = 25)
 
 
 ###Plot everything together
