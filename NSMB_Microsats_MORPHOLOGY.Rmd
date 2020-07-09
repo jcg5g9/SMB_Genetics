@@ -467,18 +467,18 @@ bd_density_gen <- ggplot(morph_90_nor_neo_k3, aes(logbd, fill = gid)) + geom_den
 ```{r}
 #Distributions labeled by RANGE
 tl_dist_range <- ggplot(morph_all, aes(x = logtl, fill = range)) + 
-    geom_density(show.legend = T) + 
+    geom_density(show.legend = T, alpha = 0.7) + 
     theme_set(theme_cowplot(12)) + 
     scale_fill_manual(values = c("springgreen3", "mediumpurple")) + 
     labs(fill = "Range", y = "Probability Density") + 
     theme(legend.position = c(0.6,0.9), legend.background = element_blank()) + 
-    theme(legend.text = element_text(size = 15), legend.title = element_text(size = 20)) + 
+    theme(legend.text = element_text(size = 15), legend.title = element_text(size = 20, face = "bold")) + 
     theme(axis.title.x = element_blank()) + 
     theme(axis.title.y = element_text(size = 20)) + 
     theme(axis.text = element_text(size = 20))
 
 sl_dist_range <- ggplot(morph_all, aes(x = logsl, fill = range)) + 
-    geom_density( show.legend = F) + 
+    geom_density(show.legend = F, alpha = 0.7) + 
     theme_set(theme_cowplot(12)) + 
     scale_fill_manual(values = c("springgreen3", "mediumpurple")) + 
     theme(axis.title.y = element_blank()) + 
@@ -486,7 +486,7 @@ sl_dist_range <- ggplot(morph_all, aes(x = logsl, fill = range)) +
     theme(axis.text = element_text(size = 20))
 
 ol_dist_range <- ggplot(morph_all, aes(x = logol, fill = range)) + 
-    geom_density( show.legend = F) + 
+    geom_density(show.legend = F, alpha = 0.7) + 
     theme_set(theme_cowplot(12)) + 
     scale_fill_manual(values = c("springgreen3", "mediumpurple")) + 
     theme(axis.title.y = element_blank()) + 
@@ -495,7 +495,7 @@ ol_dist_range <- ggplot(morph_all, aes(x = logol, fill = range)) +
     theme(axis.text = element_text(size = 20))
 
 hl_dist_range <- ggplot(morph_all, aes(x = loghl, fill = range)) + 
-    geom_density( show.legend = F) + 
+    geom_density(show.legend = F, alpha = 0.7) + 
     theme_set(theme_cowplot(12)) + 
     scale_fill_manual(values = c("springgreen3", "mediumpurple")) + 
     theme(axis.title.y = element_blank()) + 
@@ -503,7 +503,7 @@ hl_dist_range <- ggplot(morph_all, aes(x = loghl, fill = range)) +
     theme(axis.text = element_text(size = 20))
 
 bd_dist_range <- ggplot(morph_all, aes(x = logbd, fill = range)) + 
-    geom_density( show.legend = F) + 
+    geom_density(show.legend = F, alpha = 0.7) + 
     theme_set(theme_cowplot(12)) + 
     scale_fill_manual(values = c("springgreen3", "mediumpurple")) + 
     theme(axis.title.x = element_blank()) + theme(axis.title.y = element_blank()) + 
@@ -516,17 +516,17 @@ range_dist <- plot_grid(tl_dist_range, sl_dist_range, ol_dist_range, hl_dist_ran
 levels(morph_90_nor_neo_k3$gid) <- c("Neosho", "Northern")
 
 tl_dist_gen <- ggplot(morph_90_nor_neo_k3, aes(x = logtl, fill = gid)) + 
-    geom_density( show.legend = T) + 
+    geom_density(show.legend = T, alpha = 0.7) + 
     theme_set(theme_cowplot(12)) + 
     scale_fill_manual(values = c("springgreen3", "mediumpurple")) + 
     labs(fill = "Assignment", y = "Probability Density", x = "Total Length (mm)") + 
     theme(legend.position = c(0.6,0.9), legend.background = element_blank()) + 
-    theme(legend.text = element_text(size = 15), legend.title = element_text(size = 20)) + 
+    theme(legend.text = element_text(size = 15), legend.title = element_text(size = 20, face = "bold")) + 
     theme(axis.title = element_text(size = 20)) + 
     theme(axis.text = element_text(size = 20))
 
 sl_dist_gen <- ggplot(morph_90_nor_neo_k3, aes(x = logsl, fill = gid)) + 
-    geom_density( show.legend = F) + 
+    geom_density(show.legend = F, alpha = 0.7) + 
     theme_set(theme_cowplot(12)) + 
     scale_fill_manual(values = c("springgreen3", "mediumpurple")) + 
     labs(x = "Standard Length (mm)") + 
@@ -535,7 +535,7 @@ sl_dist_gen <- ggplot(morph_90_nor_neo_k3, aes(x = logsl, fill = gid)) +
     theme(axis.text = element_text(size = 20))
 
 ol_dist_gen <- ggplot(morph_90_nor_neo_k3, aes(x = logol, fill = gid)) + 
-    geom_density( show.legend = F) + 
+    geom_density(show.legend = F, alpha = 0.7) + 
     theme_set(theme_cowplot(12)) + 
     scale_fill_manual(values = c("springgreen3", "mediumpurple")) + 
     labs(x = "Orbital Length (mm)") + 
@@ -544,7 +544,7 @@ ol_dist_gen <- ggplot(morph_90_nor_neo_k3, aes(x = logol, fill = gid)) +
     theme(axis.text = element_text(size = 20))
 
 hl_dist_gen <- ggplot(morph_90_nor_neo_k3, aes(x = loghl, fill = gid)) + 
-    geom_density( show.legend = F) + 
+    geom_density(show.legend = F, alpha = 0.7) + 
     theme_set(theme_cowplot(12)) + 
     scale_fill_manual(values = c("springgreen3", "mediumpurple")) + 
     labs(x = "Head Length (mm)") + 
@@ -553,7 +553,7 @@ hl_dist_gen <- ggplot(morph_90_nor_neo_k3, aes(x = loghl, fill = gid)) +
     theme(axis.text = element_text(size = 20))
 
 bd_dist_gen <- ggplot(morph_90_nor_neo_k3, aes(x = logbd, fill = gid)) + 
-    geom_density( show.legend = F) + 
+    geom_density(show.legend = F, alpha = 0.7) + 
     theme_set(theme_cowplot(12)) + 
     scale_fill_manual(values = c("springgreen3", "mediumpurple")) + 
     labs(x = "Body Depth (mm)") + 
