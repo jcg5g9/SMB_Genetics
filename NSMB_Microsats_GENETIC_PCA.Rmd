@@ -85,51 +85,51 @@ pca_df_nospb <- data.frame(PC1 = pred_nospb[,1], PC2 = pred_nospb[,2], Taxon = g
 ## Plot PCA
 ```{r}
 #Taxon Level (Spotted Bass and Smallmouth Bass)
-species <- ggplot(pca_df_all, aes(x = PC1, y = PC2, color = Taxon)) + 
-  geom_point(size = 2.2, show.legend = T) + 
-  scale_color_manual(values = c("springgreen3", "mediumpurple", "firebrick3")) + 
-  labs(color = "Species", x = "PC1 (3.3 %)", y = "PC2 (2.8 %)") + 
+species <- ggplot(pca_df_all, aes(x = PC1, y = PC2, fill = Taxon)) + 
+  geom_point(aes(fill = Taxon), color = "black", pch = 21, size = 3, show.legend = T, alpha = 0.9) + 
+  scale_fill_manual(values = c("springgreen3", "mediumpurple", "firebrick3")) + 
+  labs(fill = "Species", color = "Species", x = "PC1 (3.3 %)", y = "PC2 (2.8 %)") + 
   theme_set(theme_cowplot(12)) + 
   theme(legend.position = c(0.01,0.15)) + 
   theme(axis.text = element_text(size = 20)) + 
   theme(axis.title = element_text(size = 20)) + 
-  theme(legend.text = element_text(size = 15)) + 
-  theme(legend.title = element_text(size = 15)) + 
+  theme(legend.text = element_text(size = 20)) + 
+  theme(legend.title = element_text(size = 20, face = "bold")) + 
   theme(legend.background = element_rect(linetype = "solid", size = 0.5, color = "black")) + 
   theme(legend.margin = margin(5, 5, 5, 5))
 
 #Subspecies Level (Northern Smallmouth Bass and Neosho Smallmouth Bass)
-sub <- ggplot(pca_df_nospb, aes(x = PC1, y = PC2, color = Taxon)) + 
-  geom_point(size = 2.2, show.legend = T) + 
-  scale_color_manual(values = c("springgreen3", "mediumpurple")) + 
-  labs(color = "Subspecies", x = "PC1 (3.5 %)", y = "PC2 (1.8 %)") + 
+sub <- ggplot(pca_df_nospb, aes(x = PC1, y = PC2, fill = Taxon)) + 
+  geom_point(aes(fill = Taxon), color = "black", pch = 21, size = 3, show.legend = T, alpha = 0.9) + 
+  scale_fill_manual(values = c("springgreen3", "mediumpurple")) + 
+  labs(fill = "Subspecies", color = "Subspecies", x = "PC1 (3.5 %)", y = "PC2 (1.8 %)") + 
   theme_set(theme_cowplot(12)) + 
   theme(legend.position = c(0.01,0.12)) + 
   theme(axis.text = element_text(size = 20)) + 
   theme(axis.title = element_text(size = 20)) + 
-  theme(legend.text = element_text(size = 15)) + 
-  theme(legend.title = element_text(size = 15)) + 
+  theme(legend.text = element_text(size = 20)) + 
+  theme(legend.title = element_text(size = 20, face = "bold")) + 
   theme(legend.background = element_rect(linetype = "solid", size = 0.5, color = "black")) + 
   theme(legend.margin = margin(5, 5, 5, 5))
 
 #Drainage Level (Arkansas River Basin, Missouri River Tributaries, and White River Tributaries)
-drain <- ggplot(pca_df_nospb, aes(x = PC1, y = PC2, color = Wang_Structure_Parameters)) + 
-  geom_point(size = 2.2, show.legend = T) + 
-  scale_color_manual(values = c("springgreen3", "forestgreen", "chocolate1","mediumblue")) + 
-  labs(color = "Drainage", x = "PC1 (3.5 %)", y = "PC2 (1.8 %)") + 
+drain <- ggplot(pca_df_nospb, aes(x = PC1, y = PC2, fill = Wang_Structure_Parameters)) + 
+  geom_point(aes(fill = Wang_Structure_Parameters), color = "black", pch = 21, size = 3, show.legend = T, alpha = 0.9) + 
+  scale_fill_manual(values = c("springgreen3", "forestgreen", "chocolate1","mediumblue")) + 
+  labs(fill = "River System", color = "River System", x = "PC1 (3.5 %)", y = "PC2 (1.8 %)") + 
   theme_set(theme_cowplot(12)) + 
   theme(legend.position = c(0.01,0.17)) + 
   theme(axis.text = element_text(size = 20)) + 
   theme(axis.title = element_text(size = 20)) + 
-  theme(legend.text = element_text(size = 15)) + 
-  theme(legend.title = element_text(size = 15)) + 
+  theme(legend.text = element_text(size = 20)) + 
+  theme(legend.title = element_text(size = 20, face = "bold")) + 
   theme(legend.background = element_rect(linetype = "solid", size = 0.5, color = "black")) + 
   theme(legend.margin = margin(5, 5, 5, 5))
 
 #Population Level (Smallmouth Bass populations)
-pop <- ggplot(pca_df_nospb, aes(x = PC1, y = PC2, color = Pop)) + 
-  geom_point(size = 2.2, show.legend = F) + 
-  scale_color_manual(values = c("forestgreen", "lightskyblue", "darkorchid1", "blue", "chocolate1", "gold1", "maroon1", "lightpink1")) +
+pop <- ggplot(pca_df_nospb, aes(x = PC1, y = PC2, fill = Pop)) + 
+  geom_point(aes(fill = Pop), color = "black", pch = 21, size = 3, show.legend = F, alpha = 0.9) + 
+  scale_fill_manual(values = c("forestgreen", "lightskyblue", "darkorchid1", "blue", "chocolate1", "gold1", "maroon1", "lightpink1")) +
   labs(x = "PC1 (3.5 %)", y = "PC2 (1.8 %)") + 
   theme_set(theme_cowplot(12)) + 
   theme(axis.text = element_text(size = 20)) + 
@@ -137,9 +137,9 @@ pop <- ggplot(pca_df_nospb, aes(x = PC1, y = PC2, color = Pop)) +
 
 
 #Combine all PCA plots
-pdf("/Users/joegunn/Desktop/Grad_School_Stuff/Research/Projects/Smallmouth_Bass_Microsatellites/visualization/genetic_pca_figures/genpcas_manuscript.pdf", width=15, height=12)
+pdf("/Users/joegunn/Desktop/Grad_School_Stuff/Research/Projects/Smallmouth_Bass_Microsatellites/visualization/genetics_pca_figures/genpcas_manuscript.pdf", width=15, height=12)
 
-plot_grid(species, sub, drain, pop, nrow = 2, ncol = 2, labels = c("A", "B", "C", "D"), label_size = 25)
+plot_grid(species, sub, drain, pop, nrow = 2, ncol = 2, labels = c("a", "b", "c", "d"), label_size = 35)
 
 dev.off()
 ```
