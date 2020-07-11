@@ -123,8 +123,6 @@ plot(shape_stockton_lake, add = T, col = "blue", border = F, ylim = c(35.5,37.5)
 scalebar(200, xy = c(-96, 34.85), type = "bar", adj = c(0.4, -1),  divs = 4, cex = 3)
 #c(-96,91)
 
-shape_tablerock_creek@proj4string
-
 dev.off()
 ```
 
