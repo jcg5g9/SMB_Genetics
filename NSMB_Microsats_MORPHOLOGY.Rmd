@@ -171,19 +171,19 @@ morph_all <- morph_all %>%
 
 sl_range_mean <- morph_all %>% 
     group_by(range) %>% 
-    summarize(mean = mean(logsl))
+    summarize(mean_log = mean(logsl), mean_raw = mean(standard_length))
 
 ol_range_mean <- morph_all %>% 
     group_by(range) %>% 
-    summarize(mean = mean(logol))
+    summarize(mean_log = mean(logol), mean_raw = mean(orbital_length))
 
 hl_range_mean <- morph_all %>%
     group_by(range) %>% 
-    summarize(mean = mean(loghl))
+    summarize(mean_log = mean(loghl), mean_raw = mean(head_length))
 
 bd_range_mean <- morph_all %>% 
     group_by(range) %>% 
-    summarize(mean = mean(logbd))
+    summarize(mean_log = mean(logbd), mean_raw = mean(body_depth))
 
 morph_range_means <- morph_all %>% 
     group_by(range) %>% 
@@ -195,16 +195,16 @@ morph_90_nor_neo_k3 <- morph_90_nor_neo_k3 %>%
     mutate(gid = factor(gid), river = factor(river))
 
 sl_gen_mean_k3 <- morph_90_nor_neo_k3 %>% 
-    group_by(gid) %>% summarize(mean = mean(logsl))
+    group_by(gid) %>% summarize(mean_log = mean(logsl), mean_raw = mean(sl))
 
 ol_gen_mean_k3 <- morph_90_nor_neo_k3 %>% 
-    group_by(gid) %>% summarize(mean = mean(logol))
+    group_by(gid) %>% summarize(mean_log = mean(logol), mean_raw = mean(ol))
 
 hl_gen_mean_k3 <- morph_90_nor_neo_k3 %>% 
-    group_by(gid) %>% summarize(mean = mean(loghl))
+    group_by(gid) %>% summarize(mean_log = mean(loghl), mean_raw = mean(hl))
 
 bd_gen_mean_k3 <- morph_90_nor_neo_k3 %>% 
-    group_by(gid) %>% summarize(mean = mean(logbd)) 
+    group_by(gid) %>% summarize(mean_log = mean(logbd), mean_raw = mean(bd)) 
 
 morph_90_all_k3_means <- morph_90_all_k3 %>% 
     group_by(gid) %>% 
