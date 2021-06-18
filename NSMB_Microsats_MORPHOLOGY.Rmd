@@ -8,7 +8,6 @@ output: html_document
 ## Libraries Needed For Analysis
 ```{r Libraries, echo = FALSE, include = FALSE}
 
-library(riverdist)
 library(sp)
 library(readxl)
 library(popgraph)
@@ -19,11 +18,9 @@ library(adegenet)
 library(cowplot)
 library(nlme)
 library(poppr)
-library(PopGenReport)
 library(maps)
 library(mapdata)
 library(stringr)
-library(rgdal)
 library(sf)
 library(ggsn)
 library(raster)
@@ -306,34 +303,52 @@ bd_nor_norm_test_gen <- shapiro.test(morph_nor_90_k3$logbd) #normal
 #Normality within Neosho
 tl_neo_range_norm <- ggqqplot(morph_all_neo$logtl) + 
     labs(y = "Total Length Sample", title = "Neosho Range") + 
-    theme_set(theme_cowplot(12)) + theme(axis.title.x = element_blank()) + 
+    theme_set(theme_cowplot(12)) + 
+    theme(axis.title.x = element_blank()) + 
     theme(plot.title = element_text(hjust = 0.5)) + 
     theme(axis.title.y = element_text(size = 20)) + 
-    theme(plot.title = element_text(size = 20)) #good
+    theme(plot.title = element_text(size = 20)) + 
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
 
 sl_neo_range_norm <- ggqqplot(morph_all_neo$logsl) + 
     labs(y = "Standard Length Sample") + 
     theme_set(theme_cowplot(12)) + 
     theme(axis.title.x = element_blank()) + 
-    theme(axis.title.y = element_text(size = 20)) #good
+    theme(axis.title.y = element_text(size = 20)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
 
 ol_neo_range_norm <- ggqqplot(morph_all_neo$logol) + 
     labs(y = "Orbital Length Sample") + 
     theme_set(theme_cowplot(12)) + 
     theme(axis.title.x = element_blank()) + 
-    theme(axis.title.y = element_text(size = 20))#one weird sample
+    theme(axis.title.y = element_text(size = 20)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
 
 hl_neo_range_norm <- ggqqplot(morph_all_neo$loghl) + 
     labs(y = "Head Length Sample") + 
     theme_set(theme_cowplot(12)) + 
     theme(axis.title.x = element_blank()) + 
-    theme(axis.title.y = element_text(size = 20)) #good
+    theme(axis.title.y = element_text(size = 20))  +
+    theme(panel.border = element_rect(colour =  "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
+
 
 bd_neo_range_norm <- ggqqplot(morph_all_neo$logbd) + 
     labs(y = "Body Depth Sample", x = "Theoretical") + 
     theme_set(theme_cowplot(12)) + 
     theme(axis.title.y = element_text(size = 20)) + 
-    theme(axis.title.x = element_text(size = 20)) #good
+    theme(axis.title.x = element_text(size = 20))  +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
+
     
 #Normality within Northern
 tl_nor_range_norm <- ggqqplot(morph_all_nor$logtl) + 
@@ -342,29 +357,45 @@ tl_nor_range_norm <- ggqqplot(morph_all_nor$logtl) +
     theme(axis.title.x = element_blank()) + 
     theme(axis.title.y = element_blank()) + 
     theme(plot.title = element_text(hjust = 0.5)) + 
-    theme(plot.title = element_text(size = 20)) #good
+    theme(plot.title = element_text(size = 20))  +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
 
 sl_nor_range_norm <- ggqqplot(morph_all_nor$logsl) + 
     theme_set(theme_cowplot(12)) + 
     theme(axis.title.x = element_blank()) +
-    theme(axis.title.y = element_blank()) #good
+    theme(axis.title.y = element_blank()) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
 
-ol_nor_range_norm <- ggqqplot(morph_all_nor$logol) + 
+ol_nor_range_norm <- ggqqplot(morph_all_nor$logol) +  
     theme_set(theme_cowplot(12)) + 
     theme(axis.title.x = element_blank()) + 
-    theme(axis.title.y = element_blank()) #good
+    theme(axis.title.y = element_blank()) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
 
 hl_nor_range_norm <- ggqqplot(morph_all_nor$loghl) + 
     theme_set(theme_cowplot(12)) + 
     theme(axis.title.x = element_blank()) + 
-    theme(axis.title.y = element_blank()) #4 weird samples
+    theme(axis.title.y = element_blank()) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
 
 bd_nor_range_norm <- ggqqplot(morph_all_nor$logbd) + 
     labs(x = "Theoretical") + 
     theme_set(theme_cowplot(12)) + 
     theme(axis.title.x = element_text(size = 20)) + 
-    theme(axis.title.y = element_blank())  #good
-    
+    theme(axis.title.y = element_blank())  +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
+
+  
 #Check for Normality in subspecies GENETIC ASSIGNMENTS
     
     #Within Neosho
@@ -374,28 +405,44 @@ tl_neo_genetics_norm <- ggqqplot(morph_neo_90_k3$logtl) +
     theme(axis.title.x = element_blank()) + 
     theme(axis.title.y = element_blank()) + 
     theme(plot.title = element_text(hjust = 0.5)) + 
-    theme(plot.title = element_text(size = 20)) #good
+    theme(plot.title = element_text(size = 20)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
 
 sl_neo_genetics_norm <- ggqqplot(morph_neo_90_k3$logsl) + 
     theme_set(theme_cowplot(12)) +
     theme(axis.title.x = element_blank()) + 
-    theme(axis.title.y = element_blank())  #good
+    theme(axis.title.y = element_blank()) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
 
 ol_neo_genetics_norm <- ggqqplot(morph_neo_90_k3$logol) + 
     theme_set(theme_cowplot(12)) + 
     theme(axis.title.x = element_blank()) + 
-    theme(axis.title.y = element_blank())  #good
+    theme(axis.title.y = element_blank()) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
 
 hl_neo_genetics_norm <- ggqqplot(morph_neo_90_k3$loghl) + 
     theme_set(theme_cowplot(12)) + 
     theme(axis.title.x = element_blank()) + 
-    theme(axis.title.y = element_blank())  #good
+    theme(axis.title.y = element_blank()) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
 
 bd_neo_genetics_norm <- ggqqplot(morph_neo_90_k3$logbd) + 
     labs(x = "Theoretical") + theme_set(theme_cowplot(12)) +
     theme(axis.title.y = element_blank()) +
-    theme(axis.title.x = element_text(size = 20)) #good
-    
+    theme(axis.title.x = element_text(size = 20)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
+
+  
 #Within Northern
 tl_nor_genetics_norm <- ggqqplot(morph_nor_90_k3$logtl) + 
     labs(title = "Northern Genetic Assignment") + 
@@ -403,28 +450,44 @@ tl_nor_genetics_norm <- ggqqplot(morph_nor_90_k3$logtl) +
     theme(axis.title.x = element_blank()) + 
     theme(axis.title.y = element_blank()) + 
     theme(plot.title = element_text(hjust = 0.5)) + 
-    theme(plot.title = element_text(size = 20)) #good
+    theme(plot.title = element_text(size = 20)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
 
 sl_nor_genetics_norm <- ggqqplot(morph_nor_90_k3$logsl) + 
     theme_set(theme_cowplot(12)) + 
     theme(axis.title.x = element_blank()) + 
-    theme(axis.title.y = element_blank())  #good
+    theme(axis.title.y = element_blank()) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
 
 ol_nor_genetics_norm <- ggqqplot(morph_nor_90_k3$logol) +
     theme_set(theme_cowplot(12)) + 
     theme(axis.title.x = element_blank()) +
-    theme(axis.title.y = element_blank())  #good
+    theme(axis.title.y = element_blank()) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
 
 hl_nor_genetics_norm <- ggqqplot(morph_nor_90_k3$loghl) + 
     theme_set(theme_cowplot(12)) + 
     theme(axis.title.x = element_blank()) + 
-    theme(axis.title.y = element_blank())  #two weird samples
+    theme(axis.title.y = element_blank()) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
 
 bd_nor_genetics_norm <- ggqqplot(morph_nor_90_k3$logbd) + 
     theme_set(theme_cowplot(12)) + 
     labs(x = "Theoretical") + 
     theme(axis.title.y = element_blank()) + 
-    theme(axis.title.x = element_text(size = 20)) #one weird sample
+    theme(axis.title.x = element_text(size = 20)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
+
     
 
 
@@ -470,12 +533,15 @@ tl_dist_range <- ggplot(morph_all, aes(x = logtl, fill = range)) +
     geom_density(show.legend = T, alpha = 0.7) + 
     theme_set(theme_cowplot(12)) + 
     scale_fill_manual(values = c("springgreen3", "mediumpurple")) + 
-    labs(fill = "Range", y = "Probability Density") + 
-    theme(legend.position = c(0.6,0.9), legend.background = element_blank()) + 
+    labs(fill = "Range", y = "Probability Density", fill = "Subspecies") + 
+    theme(legend.position = c(0.6,0.85), legend.background = element_blank()) + 
     theme(legend.text = element_text(size = 15), legend.title = element_text(size = 20, face = "bold")) + 
     theme(axis.title.x = element_blank()) + 
     theme(axis.title.y = element_text(size = 20)) + 
-    theme(axis.text = element_text(size = 20))
+    theme(axis.text = element_text(size = 20)) +
+    scale_x_continuous(expand = c(0,0)) +
+    scale_y_continuous(expand = c(0,0)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1))
 
 sl_dist_range <- ggplot(morph_all, aes(x = logsl, fill = range)) + 
     geom_density(show.legend = F, alpha = 0.7) + 
@@ -483,7 +549,10 @@ sl_dist_range <- ggplot(morph_all, aes(x = logsl, fill = range)) +
     scale_fill_manual(values = c("springgreen3", "mediumpurple")) + 
     theme(axis.title.y = element_blank()) + 
     theme(axis.title.x = element_blank()) + 
-    theme(axis.text = element_text(size = 20))
+    theme(axis.text = element_text(size = 20)) +
+    scale_x_continuous(expand = c(0,0)) +
+    scale_y_continuous(expand = c(0,0)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1))
 
 ol_dist_range <- ggplot(morph_all, aes(x = logol, fill = range)) + 
     geom_density(show.legend = F, alpha = 0.7) + 
@@ -492,7 +561,10 @@ ol_dist_range <- ggplot(morph_all, aes(x = logol, fill = range)) +
     theme(axis.title.y = element_blank()) + 
     theme(axis.title.x = element_blank()) + 
     theme(axis.text = element_text(size = 20)) + 
-    theme(axis.text = element_text(size = 20))
+    theme(axis.text = element_text(size = 20)) +
+    scale_x_continuous(expand = c(0,0)) +
+    scale_y_continuous(expand = c(0,0)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1))
 
 hl_dist_range <- ggplot(morph_all, aes(x = loghl, fill = range)) + 
     geom_density(show.legend = F, alpha = 0.7) + 
@@ -500,14 +572,20 @@ hl_dist_range <- ggplot(morph_all, aes(x = loghl, fill = range)) +
     scale_fill_manual(values = c("springgreen3", "mediumpurple")) + 
     theme(axis.title.y = element_blank()) + 
     theme(axis.title.x = element_blank()) + 
-    theme(axis.text = element_text(size = 20))
+    theme(axis.text = element_text(size = 20)) +
+    scale_x_continuous(expand = c(0,0)) +
+    scale_y_continuous(expand = c(0,0)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1))
 
 bd_dist_range <- ggplot(morph_all, aes(x = logbd, fill = range)) + 
     geom_density(show.legend = F, alpha = 0.7) + 
     theme_set(theme_cowplot(12)) + 
     scale_fill_manual(values = c("springgreen3", "mediumpurple")) + 
     theme(axis.title.x = element_blank()) + theme(axis.title.y = element_blank()) + 
-    theme(axis.text = element_text(size = 20))
+    theme(axis.text = element_text(size = 20)) +
+    scale_x_continuous(expand = c(0,0)) +
+    scale_y_continuous(expand = c(0,0)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1))
 
 range_dist <- plot_grid(tl_dist_range, sl_dist_range, ol_dist_range, hl_dist_range, bd_dist_range, nrow = 1, labels = c("  a", "b", "c", "d", "e"), label_x = 0.1, label_y = 0.95, label_size = 25)
 
@@ -516,14 +594,17 @@ range_dist <- plot_grid(tl_dist_range, sl_dist_range, ol_dist_range, hl_dist_ran
 levels(morph_90_nor_neo_k3$gid) <- c("Neosho", "Northern")
 
 tl_dist_gen <- ggplot(morph_90_nor_neo_k3, aes(x = logtl, fill = gid)) + 
-    geom_density(show.legend = T, alpha = 0.7) + 
+    geom_density(show.legend = F, alpha = 0.7) + 
     theme_set(theme_cowplot(12)) + 
     scale_fill_manual(values = c("springgreen3", "mediumpurple")) + 
     labs(fill = "Assignment", y = "Probability Density", x = "Total Length (mm)") + 
     theme(legend.position = c(0.6,0.9), legend.background = element_blank()) + 
     theme(legend.text = element_text(size = 15), legend.title = element_text(size = 20, face = "bold")) + 
     theme(axis.title = element_text(size = 20)) + 
-    theme(axis.text = element_text(size = 20))
+    theme(axis.text = element_text(size = 20)) +
+    scale_x_continuous(expand = c(0,0)) +
+    scale_y_continuous(expand = c(0,0)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1))
 
 sl_dist_gen <- ggplot(morph_90_nor_neo_k3, aes(x = logsl, fill = gid)) + 
     geom_density(show.legend = F, alpha = 0.7) + 
@@ -532,7 +613,10 @@ sl_dist_gen <- ggplot(morph_90_nor_neo_k3, aes(x = logsl, fill = gid)) +
     labs(x = "Standard Length (mm)") + 
     theme(axis.title.y = element_blank()) + 
     theme(axis.title.x = element_text(size = 20)) + 
-    theme(axis.text = element_text(size = 20))
+    theme(axis.text = element_text(size = 20)) +
+    scale_x_continuous(expand = c(0,0)) +
+    scale_y_continuous(expand = c(0,0)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1))
 
 ol_dist_gen <- ggplot(morph_90_nor_neo_k3, aes(x = logol, fill = gid)) + 
     geom_density(show.legend = F, alpha = 0.7) + 
@@ -541,7 +625,10 @@ ol_dist_gen <- ggplot(morph_90_nor_neo_k3, aes(x = logol, fill = gid)) +
     labs(x = "Orbital Length (mm)") + 
     theme(axis.title.y = element_blank()) + 
     theme(axis.title.x = element_text(size = 20)) + 
-    theme(axis.text = element_text(size = 20))
+    theme(axis.text = element_text(size = 20)) +
+    scale_x_continuous(expand = c(0,0)) +
+    scale_y_continuous(expand = c(0,0)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1))
 
 hl_dist_gen <- ggplot(morph_90_nor_neo_k3, aes(x = loghl, fill = gid)) + 
     geom_density(show.legend = F, alpha = 0.7) + 
@@ -550,7 +637,10 @@ hl_dist_gen <- ggplot(morph_90_nor_neo_k3, aes(x = loghl, fill = gid)) +
     labs(x = "Head Length (mm)") + 
     theme(axis.title.y = element_blank()) + 
     theme(axis.title.x = element_text(size = 20)) + 
-    theme(axis.text = element_text(size = 20))
+    theme(axis.text = element_text(size = 20)) +
+    scale_x_continuous(expand = c(0,0)) +
+    scale_y_continuous(expand = c(0,0)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1))
 
 bd_dist_gen <- ggplot(morph_90_nor_neo_k3, aes(x = logbd, fill = gid)) + 
     geom_density(show.legend = F, alpha = 0.7) + 
@@ -559,7 +649,10 @@ bd_dist_gen <- ggplot(morph_90_nor_neo_k3, aes(x = logbd, fill = gid)) +
     labs(x = "Body Depth (mm)") + 
     theme(axis.title.y = element_blank()) + 
     theme(axis.title.x = element_text(size = 20)) + 
-    theme(axis.text = element_text(size = 20))
+    theme(axis.text = element_text(size = 20)) +
+    scale_x_continuous(expand = c(0,0)) + 
+    scale_y_continuous(expand = c(0,0)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1))
 
 gen_dist <- plot_grid(tl_dist_gen, sl_dist_gen, ol_dist_gen, hl_dist_gen, bd_dist_gen, nrow = 1, labels = c("   f", "g", "h", "i", "j"), label_x = 0.1, label_y = 0.95, label_size = 25)
 
@@ -773,144 +866,173 @@ summary(coefficients_bd_gen)
 #All morphological samples 
 sl_tl_range <- ggplot() + 
     geom_point(data = morph_all_neo, aes(x = total_length, y = standard_length, group = range, fill = range, shape = range), size = 4, pch = 21, color = "black", show.legend = T) +
-    geom_smooth(data = morph_all_neo, aes(x = total_length, y = standard_length, color = range), show.legend = F, method = "lm") +
+    geom_smooth(data = morph_all_neo, aes(x = total_length, y = standard_length, color = range), show.legend = F, method = "lm", fullrange = T) +
     geom_point(data = morph_all_nor, aes(x = total_length, y = standard_length, fill = range, shape = range), size = 4, pch = 22, color = "black", show.legend = F) +
-    geom_smooth(data = morph_all_nor, aes(x = total_length, y = standard_length, color = range), show.legend = F, method = "lm") +
+    geom_smooth(data = morph_all_nor, aes(x = total_length, y = standard_length, color = range), show.legend = F, method = "lm", fullrange = T) +
     theme_set(theme_cowplot(12)) + 
     scale_fill_manual(values = c("springgreen3", "mediumpurple")) +
     scale_color_manual(values = c("springgreen3", "mediumpurple")) +
     scale_shape_manual(values = c("circle","square")) +
-    labs(y = "Standard Length (mm)", fill = "Subspecies", color = "Subspecies", shape = "Subspecies", title = "Taxonomic Range") +
+    labs(y = "Standard length (mm)", fill = "Subspecies", color = "Subspecies", shape = "Subspecies", title = "Taxonomic Range") +
     theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 25)) +
     theme(axis.title.x = element_blank()) + 
     theme(axis.text.x = element_blank()) + 
     theme(axis.text = element_text(size = 20)) + 
-    theme(axis.title.y = element_text(size = 20)) +
+    theme(axis.title = element_text(size = 20)) +
     theme(legend.position = c(0.6,0.2)) +
     theme(legend.title = element_text(size = 20, face = "bold")) +
     theme(legend.background = element_blank()) + 
-    theme(legend.text = element_text(size = 20))
+    theme(legend.text = element_text(size = 20)) +
+    scale_x_continuous(expand = c(0,0)) + 
+    scale_y_continuous(expand = c(0,0)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1))
 
 ol_tl_range <- ggplot() + 
     geom_point(data = morph_all_neo, aes(x = total_length, y = orbital_length, group = range, fill = range, shape = range), size = 4, pch = 21, color = "black", show.legend = F) +
-    geom_smooth(data = morph_all_neo, aes(x = total_length, y = orbital_length, color = range), show.legend = F, method = "lm") +
+    geom_smooth(data = morph_all_neo, aes(x = total_length, y = orbital_length, color = range), show.legend = F, method = "lm", fullrange = T) +
     geom_point(data = morph_all_nor, aes(x = total_length, y = orbital_length, fill = range, shape = range), size = 4, pch = 22, color = "black", show.legend = F) +
-    geom_smooth(data = morph_all_nor, aes(x = total_length, y = orbital_length, color = range), show.legend = F, method = "lm") +
+    geom_smooth(data = morph_all_nor, aes(x = total_length, y = orbital_length, color = range), show.legend = F, method = "lm", fullrange = T) +
     theme_set(theme_cowplot(12)) + 
     scale_fill_manual(values = c("springgreen3", "mediumpurple")) +
     scale_color_manual(values = c("springgreen3", "mediumpurple")) +
     scale_shape_manual(values = c("circle","square")) +
     scale_y_continuous(breaks = c(7.5,10.0,12.5,15.0,17.5,20.0)) +
-    labs(y = "Orbital Length (mm)", fill = "Range", color = "Range", shape = "Range") + 
+    labs(y = "Orbital length (mm)", fill = "Range", color = "Range", shape = "Range") + 
     theme(axis.title.x = element_blank()) + 
     theme(axis.text = element_text(size = 20)) + 
     theme(axis.text.x = element_blank()) + 
-    theme(axis.title.y = element_text(size = 20))
+    theme(axis.title = element_text(size = 20)) +
+    scale_x_continuous(expand = c(0,0)) + 
+    scale_y_continuous(expand = c(0,0)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) + 
+    scale_y_continuous(
+    labels = scales::number_format(accuracy = 0.1,
+                                 decimal.mark = '.'))
 
 hl_tl_range <- ggplot() + 
     geom_point(data = morph_all_neo, aes(x = total_length, y = head_length, group = range, fill = range, shape = range), size = 4, pch = 21, color = "black", show.legend = F) +
-    geom_smooth(data = morph_all_neo, aes(x = total_length, y = head_length, color = range), show.legend = F, method = "lm") +
+    geom_smooth(data = morph_all_neo, aes(x = total_length, y = head_length, color = range), show.legend = F, method = "lm", fullrange = T) +
     geom_point(data = morph_all_nor, aes(x = total_length, y = head_length, fill = range, shape = range), size = 4, pch = 22, color = "black", show.legend = F) +
-    geom_smooth(data = morph_all_nor, aes(x = total_length, y = head_length, color = range), show.legend = F, method = "lm") +
+    geom_smooth(data = morph_all_nor, aes(x = total_length, y = head_length, color = range), show.legend = F, method = "lm", fullrange = T) +
     theme_set(theme_cowplot(12)) + 
     scale_fill_manual(values = c("springgreen3", "mediumpurple")) +
     scale_color_manual(values = c("springgreen3", "mediumpurple")) +
     scale_shape_manual(values = c("circle","square")) +
-    labs(y = "Head Length (mm)", fill = "Range", color = "Range", shape = "Range") +
+    labs(y = "Head length (mm)", fill = "Range", color = "Range", shape = "Range") +
     theme(axis.title.x = element_blank()) + 
     theme(axis.text = element_text(size = 20)) + 
     theme(axis.text.x = element_blank()) + 
-    theme(axis.title.y = element_text(size = 20))
+    theme(axis.title = element_text(size = 20)) +
+    scale_x_continuous(expand = c(0,0)) + 
+    scale_y_continuous(expand = c(0,0)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1))
 
 bd_tl_range <- ggplot() + 
     geom_point(data = morph_all_neo, aes(x = total_length, y = body_depth, group = range, fill = range, shape = range), size = 4, pch = 21, color = "black", show.legend = F) +
-    geom_smooth(data = morph_all_neo, aes(x = total_length, y = body_depth, color = range), show.legend = F, method = "lm") +
+    geom_smooth(data = morph_all_neo, aes(x = total_length, y = body_depth, color = range), show.legend = F, method = "lm", fullrange = T) +
     geom_point(data = morph_all_nor, aes(x = total_length, y = body_depth, fill = range, shape = range), size = 4, pch = 22, color = "black", show.legend = F) +
-    geom_smooth(data = morph_all_nor, aes(x = total_length, y = body_depth, color = range), show.legend = F, method = "lm") +
+    geom_smooth(data = morph_all_nor, aes(x = total_length, y = body_depth, color = range), show.legend = F, method = "lm", fullrange = T) +
     theme_set(theme_cowplot(12)) + 
     scale_fill_manual(values = c("springgreen3", "mediumpurple")) +
     scale_color_manual(values = c("springgreen3", "mediumpurple")) +
     scale_shape_manual(values = c("circle","square")) +
-    labs(y = "Body Depth (mm)", x = "Total Length (mm)", fill = "Range", color = "Range", shape = "Range") +
+    labs(y = "Body depth (mm)", x = "Total length (mm)", fill = "Range", color = "Range", shape = "Range") +
     theme(axis.text = element_text(size = 20)) + 
-    theme(axis.title = element_text(size = 20))
+    theme(axis.title = element_text(size = 20)) +
+    scale_x_continuous(expand = c(0,0)) + 
+    scale_y_continuous(expand = c(0,0)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1))
 
-range_grid <- plot_grid(sl_tl_range, ol_tl_range, hl_tl_range, bd_tl_range, nrow = 4, labels = c("a","c","e","g"), label_x = 0.15, label_y = 0.98, label_size = 30)
+range_grid <- plot_grid(sl_tl_range, ol_tl_range, hl_tl_range, bd_tl_range, nrow = 4, labels = c("a","c","e","g"), label_x = 0.001, label_y = 1.02, label_size = 30)
 
 
 #Only Pure Samples
 sl_tl_gen <- ggplot() + 
     geom_point(data = morph_neo_90_k3, aes(x = tl, y = sl, group = gid, fill = gid, shape = gid), size = 4, pch = 21, color = "black", show.legend = F) +
-    geom_smooth(data = morph_neo_90_k3, aes(x = tl, y = sl, color = gid), show.legend = F, method = "lm") +
+    geom_smooth(data = morph_neo_90_k3, aes(x = tl, y = sl, color = gid), show.legend = F, method = "lm", fullrange = T) +
     geom_point(data = morph_nor_90_k3, aes(x = tl, y = sl, fill = gid, shape = gid), size = 4, pch = 22, color = "black", show.legend = F) +
-    geom_smooth(data = morph_nor_90_k3, aes(x = tl, y = sl, color = gid), show.legend = F, method = "lm") +
+    geom_smooth(data = morph_nor_90_k3, aes(x = tl, y = sl, color = gid), show.legend = F, method = "lm", fullrange = T) +
     theme_set(theme_cowplot(12)) + 
     scale_fill_manual(values = c("springgreen3", "mediumpurple")) +
     scale_color_manual(values = c("springgreen3", "mediumpurple")) +
     scale_shape_manual(values = c("circle","square")) +
-    labs(y = "Standard Length (mm)", fill = "Assignment", color = "Assignment", shape = "Assignment", title = "Genetic Assignment") +
+    labs(y = "Standard length (mm)", fill = "Assignment", color = "Assignment", shape = "Assignment", title = "Genetic Assignment") +
     theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 25)) +
     theme(axis.title.x = element_blank()) + 
     theme(axis.text = element_text(size = 20)) + 
     theme(axis.text.x = element_blank()) + 
-    theme(axis.title.y = element_blank()) +
     theme(legend.position = c(0.7,0.2)) +
     theme(legend.title = element_text(size = 20, face = "bold")) +
-    theme(legend.background = element_blank()) + 
-    theme(legend.text = element_blank())
+    theme(legend.background = element_blank())+ 
+    theme(legend.text = element_blank()) +
+    scale_x_continuous(expand = c(0,0)) + 
+    scale_y_continuous(expand = c(0,0)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) + 
+    theme(axis.title = element_text(size = 20))
 
 ol_tl_gen <- ggplot() + 
     geom_point(data = morph_neo_90_k3, aes(x = tl, y = ol, group = gid, fill = gid, shape = gid), size = 4, pch = 21, color = "black", show.legend = F) +
-    geom_smooth(data = morph_neo_90_k3, aes(x = tl, y = ol, color = gid), show.legend = F, method = "lm") +
+    geom_smooth(data = morph_neo_90_k3, aes(x = tl, y = ol, color = gid), show.legend = F, method = "lm", fullrange = T) +
     geom_point(data = morph_nor_90_k3, aes(x = tl, y = ol, fill = gid, shape = gid), size = 4, pch = 22, color = "black", show.legend = F) +
-    geom_smooth(data = morph_nor_90_k3, aes(x = tl, y = ol, color = gid), show.legend = F, method = "lm") +
+    geom_smooth(data = morph_nor_90_k3, aes(x = tl, y = ol, color = gid), show.legend = F, method = "lm", fullrange = T) +
     theme_set(theme_cowplot(12)) + 
     scale_fill_manual(values = c("springgreen3", "mediumpurple")) +
     scale_color_manual(values = c("springgreen3", "mediumpurple")) +
     scale_shape_manual(values = c("circle","square")) +
-    scale_y_continuous(breaks = c(10.0,12.5,15.0,17.5,20.0)) +
-    labs(y = "Orbital Length (mm)", fill = "gid", color = "gid", shape = "gid") + 
+    labs(y = "Orbital length (mm)", fill = "gid", color = "gid", shape = "gid") + 
     theme(axis.title.x = element_blank()) + 
     theme(axis.text = element_text(size = 20)) +
     theme(axis.text.x = element_blank()) + 
-    theme(axis.title.y = element_blank())
+    scale_x_continuous(expand = c(0,0)) + 
+    scale_y_continuous(expand = c(0,0)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) + 
+    scale_y_continuous(
+    labels = scales::number_format(accuracy = 0.1,
+                                 decimal.mark = '.')) + 
+    theme(axis.title = element_text(size = 20))
 
 hl_tl_gen <- ggplot() + 
     geom_point(data = morph_neo_90_k3, aes(x = tl, y = hl, group = gid, fill = gid, shape = gid), size = 4, pch = 21, color = "black", show.legend = F) +
-    geom_smooth(data = morph_neo_90_k3, aes(x = tl, y = hl, color = gid), show.legend = F, method = "lm") +
+    geom_smooth(data = morph_neo_90_k3, aes(x = tl, y = hl, color = gid), show.legend = F, method = "lm", fullrange = T) +
     geom_point(data = morph_nor_90_k3, aes(x = tl, y = hl, fill = gid, shape = gid), size = 4, pch = 22, color = "black", show.legend = F) +
-    geom_smooth(data = morph_nor_90_k3, aes(x = tl, y = hl, color = gid), show.legend = F, method = "lm") +
+    geom_smooth(data = morph_nor_90_k3, aes(x = tl, y = hl, color = gid), show.legend = F, method = "lm", fullrange = T) +
     theme_set(theme_cowplot(12)) + 
     scale_fill_manual(values = c("springgreen3", "mediumpurple")) +
     scale_color_manual(values = c("springgreen3", "mediumpurple")) +
     scale_shape_manual(values = c("circle","square")) +
-    labs(y = "Head Length (mm)", fill = "gid", color = "gid", shape = "gid") +
+    labs(y = "Head length (mm)", fill = "gid", color = "gid", shape = "gid") +
     theme(axis.title.x = element_blank()) + 
     theme(axis.text = element_text(size = 20)) + 
     theme(axis.text.x = element_blank()) + 
-    theme(axis.title.y = element_blank())
+    scale_x_continuous(expand = c(0,0)) + 
+    scale_y_continuous(expand = c(0,0)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) + 
+    theme(axis.title = element_text(size = 20))
 
 bd_tl_gen <- ggplot() + 
     geom_point(data = morph_neo_90_k3, aes(x = tl, y = bd, group = gid, fill = gid, shape = gid), size = 4, pch = 21, color = "black", show.legend = F) +
-    geom_smooth(data = morph_neo_90_k3, aes(x = tl, y = bd, color = gid), show.legend = F, method = "lm") +
+    geom_smooth(data = morph_neo_90_k3, aes(x = tl, y = bd, color = gid), show.legend = F, method = "lm", fullrange = T) +
     geom_point(data = morph_nor_90_k3, aes(x = tl, y = bd, fill = gid, shape = gid), size = 4, pch = 22, color = "black", show.legend = F) +
-    geom_smooth(data = morph_nor_90_k3, aes(x = tl, y = bd, color = gid), show.legend = F, method = "lm") +
+    geom_smooth(data = morph_nor_90_k3, aes(x = tl, y = bd, color = gid), show.legend = F, method = "lm", fullrange = T) +
     theme_set(theme_cowplot(12)) + 
     scale_fill_manual(values = c("springgreen3", "mediumpurple")) +
     scale_color_manual(values = c("springgreen3", "mediumpurple")) +
     scale_shape_manual(values = c("circle","square")) +
-    labs(y = "Body Depth (mm)", x = "Total Length (mm)", fill = "gid", color = "gid", shape = "gid") +
+    labs(y = "Body depth (mm)", x = "Total length (mm)", fill = "gid", color = "gid", shape = "gid") +
     theme(axis.text = element_text(size = 20)) + 
     theme(axis.title.x = element_text(size = 20)) + 
-    theme(axis.title.y = element_blank())
+    scale_x_continuous(expand = c(0,0)) + 
+    scale_y_continuous(expand = c(0,0)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) + 
+    theme(axis.title = element_text(size = 20))
 
-gen_grid <- plot_grid(sl_tl_gen, ol_tl_gen, hl_tl_gen, bd_tl_gen, nrow = 4, labels = c("b","d","f","h"), label_x = 0.12, label_y = 0.98, label_size = 30)
+gen_grid <- plot_grid(sl_tl_gen, ol_tl_gen, hl_tl_gen, bd_tl_gen, nrow = 4, labels = c("b","d","f","h"), label_x = 0.001, label_y = 1.02, label_size = 30)
 
 
 ###Plot everything together
 pdf("/Users/joegunn/Desktop/Grad_School_Stuff/Research/Projects/Smallmouth_Bass_Microsatellites/visualization/morphology_figures/morph_size_corrections_mm.pdf", width = 14, height = 20)
 
-plot_grid(range_grid, gen_grid, align = "hv", axis = "l", ncol = 2)
+plot_grid(range_grid, gen_grid, align = "v", axis = "l", ncol = 2)
 
 dev.off()
 
@@ -923,7 +1045,7 @@ ggplot(morph_all, aes(x = logtl, y = loghl, color = range)) +
     geom_point(show.legend = F, size = 2) + 
     geom_smooth(show.legend = F, method = "lm") + 
     scale_color_manual(values = c("springgreen3", "mediumpurple")) + 
-    labs(y = "Head Length (mm)", x = "Total Length (mm)") + 
+    labs(y = "Head length (mm)", x = "Total length (mm)") + 
     theme(axis.text = element_text(size = 20)) + 
     theme(axis.title = element_text(size = 20)) + 
     theme(plot.background = element_rect(fill = "black")) +
@@ -996,14 +1118,17 @@ PseudoR2(logistic_rays)
 
 #plot logistic regression
 
-pdf("/Users/joegunn/Desktop/Grad_School_Stuff/Research/Projects/Smallmouth_Bass_Microsatellites/visualization/morphology_figures/fin_logistic_regression.pdf", width=12, height=8)
+pdf("/Users/joegunn/Desktop/Grad_School_Stuff/Research/Projects/Smallmouth_Bass_Microsatellites/visualization/morphology_figures/fin_logistic_regression.pdf", width=8, height=6)
 
 ggplot(morph_gen_logit, aes(x = neosho_prop, y = rays)) + 
-    geom_point(show.legend = F, size = 4) + 
-    geom_smooth(method="glm", method.args = list(family = "binomial"), show.legend = TRUE, color = "red") + 
-    labs(x = "Genotypic Proportion Assigned to the Neosho Cluster", y = "Probability of Fin Ray Count") + 
+    geom_point(aes(fill = range), position = position_jitter(height = 0.05), show.legend = F, size = 4, color = "black", pch=21) + 
+    geom_smooth(method="glm", method.args = list(family = "binomial"), show.legend = F, color = "black", fullrange = T) + 
+    labs(x = "Genotypic proportion assigned to the Neosho cluster", y = "Probability of fin ray count") + 
     theme(axis.text = element_text(size = 20)) +
-    theme(axis.title = element_text(size = 20))
+    theme(axis.title = element_text(size = 20)) + 
+    scale_fill_manual(values = c("grey","grey")) +
+    scale_x_continuous(expand = c(0,0)) + 
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) 
 
 dev.off()
 ```
