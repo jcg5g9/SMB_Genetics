@@ -96,7 +96,8 @@ species <- ggplot(pca_df_all, aes(x = PC1, y = PC2, fill = Taxon)) +
   theme(legend.text = element_text(size = 20)) + 
   theme(legend.title = element_text(size = 20, face = "bold")) + 
   theme(legend.background = element_rect(linetype = "solid", size = 0.5, color = "black")) + 
-  theme(legend.margin = margin(5, 5, 5, 5))
+  theme(legend.margin = margin(5, 5, 5, 5)) +
+  theme(panel.border = element_rect(colour = "black", fill=NA, size=1))
 
 #Subspecies Level (Northern Smallmouth Bass and Neosho Smallmouth Bass)
 sub <- ggplot(pca_df_nospb, aes(x = PC1, y = PC2, fill = Taxon)) + 
@@ -110,7 +111,8 @@ sub <- ggplot(pca_df_nospb, aes(x = PC1, y = PC2, fill = Taxon)) +
   theme(legend.text = element_text(size = 20)) + 
   theme(legend.title = element_text(size = 20, face = "bold")) + 
   theme(legend.background = element_rect(linetype = "solid", size = 0.5, color = "black")) + 
-  theme(legend.margin = margin(5, 5, 5, 5))
+  theme(legend.margin = margin(5, 5, 5, 5)) +
+  theme(panel.border = element_rect(colour = "black", fill=NA, size=1))
 
 #Drainage Level (Arkansas River Basin, Missouri River Tributaries, and White River Tributaries)
 drain <- ggplot(pca_df_nospb, aes(x = PC1, y = PC2, fill = Wang_Structure_Parameters)) + 
@@ -124,7 +126,8 @@ drain <- ggplot(pca_df_nospb, aes(x = PC1, y = PC2, fill = Wang_Structure_Parame
   theme(legend.text = element_text(size = 20)) + 
   theme(legend.title = element_text(size = 20, face = "bold")) + 
   theme(legend.background = element_rect(linetype = "solid", size = 0.5, color = "black")) + 
-  theme(legend.margin = margin(5, 5, 5, 5))
+  theme(legend.margin = margin(5, 5, 5, 5)) +
+  theme(panel.border = element_rect(colour = "black", fill=NA, size=1))
 
 #Population Level (Smallmouth Bass populations)
 pop <- ggplot(pca_df_nospb, aes(x = PC1, y = PC2, fill = Pop)) + 
@@ -133,7 +136,8 @@ pop <- ggplot(pca_df_nospb, aes(x = PC1, y = PC2, fill = Pop)) +
   labs(x = "PC1 (3.5 %)", y = "PC2 (1.8 %)") + 
   theme_set(theme_cowplot(12)) + 
   theme(axis.text = element_text(size = 20)) + 
-  theme(axis.title = element_text(size = 20))
+  theme(axis.title = element_text(size = 20)) +
+  theme(panel.border = element_rect(colour = "black", fill=NA, size=1))
 
 
 #Combine all PCA plots
