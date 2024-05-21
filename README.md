@@ -1,85 +1,111 @@
-# Smallmouth_Bass_Genetics_R_Scripts
+# Reproduce analyses for Gunn et al. 2020
+<font size="+1">Follow the steps listed below in the <b><i>Analyses</i></b> section to reproduce analyses for Gunn et al. (2020). Each step below gives a summary of the analysis and directs you to a general code file which then works through the analysis step-by-step. This general file will usually point you to other Rmd code, bash shell scripts, or python scripts. Each analysis is contained within sub-directories of the same name in the main R project directory.</font>
 
-# Aim 1 - Population Structure Analysis
-### File: NSMB_Microsats_STRUCTURE.Rmd
+<b>Find the article here</b>: <a href="url">https://link.springer.com/article/10.1007/s10592-020-01295-1</a> 
 
-Purpose: I am assessing population structure of Smallmouth Bass and Spotted Bass in the Central Interior Highlands where the native ranges of the Northern and Neosho Smallmouth Bass meet. I am analyzing STRUCTURE at the population level (28 putative populations consisting of 43 collection sites). I am assessing population structure with three different sets of parameters within the external software program STRUCTURE: 1) "Default Parameters": parameters set to default in the program STRUCTURE and using delta K to infer best K, 2) "Wang Parameters": parameters recommended by Wang (2017) and using delta K to infer best K, and 3) "Puechmaille Inference": parameters set to default but using Puechmaille metrics to infer best K.
+<b>Citation here</b>: Gunn, J. C., Berkman, L. K.,Koppelman, J., Taylor, A. T., Brewer, S. K., Long, J. M., & Eggert, L. S. (2020). Complex patterns of genetic and morphological differentiation in the Smallmouth Bass subspecies (<i>Micropterus dolomieu dolomieu</i> and <i>M. d. velox</i>) of the Central Interior Highlands. <i>Conservation Genetics</i>, 21, 891-904.
 
-### Bayesian Parameters Used for all analyses:
+# Project: Population genetic structure and morphological differentiation between Northern Smallmouth Bass (<i>Micropterus dolomieu dolomieu</i>) and Neosho Smallmouth Bass (<i>M. d. velox</i>)
+We investigated patterns of genetic (via microsatellites) and morphological diversity, differentiation, and structure across Smallmouth Bass populations (<i>Micropterus dolomieu</i>) in the Central Interior Highlands (CIH) of North America, including the two recognized subspecies: Northern Smallmouth Bass (<i>M. d. dolomieu</i>), which is native to the lower Ozark Highlands, and Neosho Smallmouth Bass (<i>M. d. velox</i>), which is endemic to tributaries of the Arkansas River Basin. We compared three independent combinations of starting parameters in the Bayesian clustering software program STRUCTURE to ascertain a robust picture of hierarchical genetic structure in the CIH. We paired these data with genetic diversity metrics (e.g., observed and expected heterozygosity and allelic richness) to determine relative amounts of variation across geographically separated populations. We then assessed differentiation in five morphometric and meristic traits. We ultimately aimed to validate or amend the taxonomic status of the Smallmouth Bass subspecies by revealing potential ecological and evolutionary divergence between them, with the hope that increased taxonomic resolution would provide insight into the presence and distribution of evolutionary significant and management units for a popular sportfish.
 
-#### Burn-in: 500,000
-#### MCMC: 1,000,000
-#### Reps: 10
-#### All Samples: K = 1-15
-#### Northern and Spotted Samples: K = 1-5
-#### Neosho Samples: K = 1-10
+## General information on repository structure
+This is a publicly visible GitHub repository storing code (and a small amount of data, although we have done our best to avoid uploading large amounts of data due to the limited storage in GitHub) for Gunn et al. (2020). In the home directory of the repository (SMB_Genetics), you will find a README.md file (the source script for this information), the R Project file (SMB_Genomics.Rproj), a .gitignore file, and [NUMBER] different "analysis" directories, each of which corresponds with a specific analysis conducted in our study:
 
-### Data Used:
+1) 01_map_analysis
+2) 02_
+3) 03_
+4) 04_
+5) 05_
 
-#### All microsatellite data: 766 Samples, 14 microsatellite loci
 
-# Aim 2 - Genetic PCA (Multivariate PCA) Analysis
-### File: NSMB_Microsats_GENETIC_PCA.Rmd
+Within each analysis directory, you will find an R markdown script (.Rmd) with the name of the analysis, which contains all of the code needed to run the full analysis. Additionally, you will find:
 
-Purpose: I am assessing genetic differentiation between Spotted Bass and Smallmouth Bass, between Northern Smallmouth Bass and Neosho Smallmouth Bass, and also population structure among all Smallmouth Bass populations using Principal Components Analysis of my microsatellite data.
+1) code
 
-### Data Used:
+The code directory will store all source code, shell scripts, lists of bash commands, and software packages needed for analysis. 
 
-#### All microsatellite data: 766 Samples, 14 microsatellite loci
+Once you have downloaded the repository and located the code directory, you should create two additional sub-directories within each analysis (on the same level as the code directory):
 
-# Aim 3 - Genetic Diversity Analysis
-### File: NSMB_Microsats_GENETIC_DIVERSITY.Rmd
+2) data
+3) figures
 
-Purpose: I am assessing differences in genetic diversity between Northern Smallmouth Bass and Neosho Smallmouth Bass. I am specifically calculating five genetic diversity metrics (rarefied allelic richness, observed heterozygosity, expected heterozygosity, private allele frequency, and common allele frequency) at the level of collection site (43 total collection sites) across my Smallmouth Bass samples (N = 766 total samples). Allelic richness (AR) and private allele frequency (AP) were both calculated using the software program HP-RARE, which is not built into R. Values across sampling sites were manually imported into Excel, along with the calculations conducted for allelic richness, heterozygosity, and common allele frequency, which were then all separately imported into R for downstream analysis. I am then testing for differences in these metrics using linear mixed ANOVA models at the subspecies level. 
+The data directory will store all raw data, processed data, and metadata needed for analysis. The figures folder will contain any raw figures generated in ggplot for each analysis. Ideally, the Rmd script should have paths set up so that the code reads all data and scripts and generates figures seamlessly.
 
-### Data Used:
+```mermaid
+flowchart LR
+  A{SMB_Genetics} --> B(README.md)
+  A{SMB_Genetics} --> C(SMB_Genetics.Rproj)
+  A{SMB_Genetics} --> D(.gitignore)
+  A{SMB_Genetics} --> E[analysis_directories]
+  E[analysis_directories] ---> F(smb_genetics_analysis.Rmd)
+  E[analysis_directories] ---> G[code]
+  E[analysis_directories] ---> H[data]
+  E[analysis_directories] ---> I[figures]
+```
+<center>Figure 1. Graphical map of project directory structure</center>
 
-#### All microsatellite data: 766 Samples, 14 microsatellite loci
+## Using the code
+To reproduce all analyses in Gunn et al. (2020), download this repository and place in a desired home directory. This may be done on your local machine, but we recommend downloading to a high-performance computing cluster so that all code will run seamlessly in one environment, as long as Rstudio is installed and the GUI can be called on the cluster.
 
-# Aim 4 - Morphological Analysis
-### File: NSMB_Microsats_MORPHOLOGY.Rmd
+Once all directories are downloaded, create a new sub-directory within the home directory (same level as the seven analysis directories, .Rproj, README.md, etc.) called "raw_data". This is where you will store the raw genomic data and associated sample metadata (see <i><b>Data</i></b> section below).
 
-Purpose: I am assessing morphological differentiation between the Neosho Smallmouth Bass and Northern Smallmouth Bass where their ranges meet in the Central Interior Highlands. I am to assess overall divergence using multivariate methods (Discriminant Function Analysis) and differences in 6 individual morphological traits using linear mixed models (ANCOVA). Additionally, divergence will be assessed according to the range from which individuals were collected (their putative native range) and according to their genetic composition (which subspecies they assigned 90% or more genetically in previous STRUCTURE analysis).
+```mermaid
+flowchart LR
+  A{SMB_Genetics} --> B(README.md)
+  A{SMB_Genetics} --> C(SMB_Genetics.Rproj)
+  A{SMB_Genetics} --> D(.gitignore)
+  A{SMB_Genetics} --> E[analysis_directories]
+  E[analysis_directories] ---> F(smb_genomics_analysis.Rmd)
+  E[analysis_directories] ---> G[code]
+  E[analysis_directories] ---> H[data]
+  E[analysis_directories] ---> I[figures]
+  A{SMB_Genetics} --> J[raw_data]
+  
+  %% Link colors %%
+  linkStyle 8 stroke:red
+```
+<center>Figure 2. Include a `raw_data` directory in the project home directory</center>
 
-I am analyzing five morpohometric traits: total length, standard length, orbital length, head length, and body depth; and one meristic trait: the number of soft dorsal fin rays. 
+## Data
+Raw microsatellite genotype calls (.xlsx), morphological data (.xlsx), and accompanying metadata are available at Zenodo.org: <a href="url">https://doi.org/10.5281/zenodo.3937432.</a>
 
-To assess overall differentiation, I will use Discriminant Function Analysis on the five morphometric traits to determine the accuracy with which individual samples can be identified to their range or genetic identity. To assess individual differences, I will use linear mixed ANCOVA models that determine differences of each morphometric trait relative to total length. To assess the number of soft dorsal fin rays, I will use logistic regression on 13 or 14 fin rays to the proportion of the genetic composition assigned to a given subspecies.
+Download these data to your working directory and place in the /raw_data directory. You are good to start analyzing.
 
-### Data Info:
+If you have any questions or issues with data and/or code, please don't hesitate to contact me: jcgunn@uvm.edu
 
-Here I provide summary information for my morphological analysis for easy access in the manuscript writing process. I give the number of samples with morphological data, and within those, the number of Northern SMB and Neosho SMB samples. I also give the number of individual samples that assigned 90 % or more to any one cluster and also had morphological data.
+## Analyses
 
-OMITTED AR24 BECAUSE IT ASSIGNS ALMOST 98 PERCENT TO SPOTTED BASS
+### Analysis 1: Generating species native range maps
+In this analysis, we generated easily readable maps displaying the native distributions of the two subspecies of interest, Northern Smallmouth Bass and Neosho Smallmouth Bass. We generated two types of maps: 1) a full range map, in which the full native range of each species is displayed, and 2) a close-up map of the Central Interior Highlands (CIH), where the paraptry of the species' ranges is shown in detail. In R, we generated only geo-referenced outlines of these maps. Shapes representing stream sites and/or populations were superimposed <i>a posteriori</i> on the maps in PowerPoint.
 
-### SAMPLE SIZES
+#### Run the code: `01_map_analysis/smb_genetics_map_analysis.Rmd`
 
-#### Total samples with morphological data = 249
-#### Total Northern Range = 65
-#### Total Neosho Range = 184
+### Analysis 2: SNP Filtering, Data Processing, and Preliminary Calculations
+In this analysis, 
 
-#### Total samples with both morphological data and genetic data = 185
-#### Total samples assigning 90 % or more to neosho or northern = 88
-#### Total Pure Neosho = 17
-#### Total Pure Northern = 71
-#### Total Admixed = 97
+#### Run the code: `02_filtering_processing_analysis/smb_genomics_filtering_processing_analysis.Rmd`
 
-### Total Length Data
+### Analysis 3: Admixture and phylogenomics
+In this analysis, 
 
-#### Samples with Total Length data = 385
-#### Neosho samples with Total Length data = 320
-#### Northern samples with Total Length data = 65
-#### Pure neosho Total Length samples = 55
-#### Pure northern Total Length samples = 82
+#### Run the code: `03_filtering_processing_analysis/smb_genomics_admixture_phylogenomics_analysis.Rmd`
 
-# Aim 5 - Map Building
-### NSMB_Microsats_MAPS.Rmd
+### Analysis 4: Population Inference
+In this analysis, 
 
-Purpose: I am building multiple-scale maps to show my sample distribution.
+#### Run the code: `04_population_analysis/smb_genomics_population_analysis.Rmd`
 
-### Data Used:
+### Analysis 5: Admixture mapping analysis
+In this analysis, 
 
-#### Shape file data from the internet
+#### Run the code: `05_admixture_mapping_analysis/smb_genomics_admixture_mapping_analysis.Rmd`
 
-# Unused Code
+### Analysis 6: Directional selection analysis
+In this analysis, we 
 
-All code in this file is miscellaneous, unused code from the SMB Genetics and Morphology R Project
+#### Run the code: `06_outlier_fst_analysis/smb_genomics_outlier_fst_analysis.Rmd`
+
+### Analysis 7: Demographic analysis
+In this analysis, we 
+
+#### Run the code: `07_demographic_analysis/smb_genomics_demographic_analysis.Rmd`
