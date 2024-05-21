@@ -147,9 +147,7 @@ Note: we did not include a scalebar in the United States map as we were only int
 
 This figure was used as the basis for Figure 1a in the manuscript. We overlayed artistic renderings of our study organism as well as other map features for easy interpretation.
 
-#### 2b: Generate a close-up map of the CIH, including states of the United States, rivers in the CIH, the Smallmouth Bass native range, and the Neosho Bass native range. 
-
-### IMPORTANT NOTE: Order of plotting data layers matters for our analysis.
+#### 2b: Generate a close-up map of the CIH, including states of the United States, rivers in the CIH, the Northern Smallmouth Bass native range, and the Neosho Smallmouth Bass native range. 
 
 ##### 2b.1. Run the Rmd chunk below to generate a CIH range map:
 
@@ -224,5 +222,5 @@ After generating these outline maps, colored-in shapes and other map details wer
 
 ## ------------------------ END OF PHASE 1: GENERATE MAPS ----------------------- ##
 
-## ------------------------ END OF MAP ANALYSIS  ----------------------- ##
+## ------------------------ END OF ANALYSIS 1: GENERATING SPECIES' NATIVE RANGE MAPS  ----------------------- ##
 
