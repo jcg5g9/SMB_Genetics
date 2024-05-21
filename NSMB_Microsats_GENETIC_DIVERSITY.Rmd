@@ -1,0 +1,290 @@
+---
+title: "NSMB_Microsats_GENETIC_DIVERSITY"
+author: "Joe Gunn"
+date: "7/25/2019"
+output: html_document
+---
+
+# Libraries Needed For Analysis
+```{r Libraries, echo = FALSE, include = FALSE}
+
+library(riverdist)
+library(sp)
+library(readxl)
+library(popgraph)
+library(tidyverse)
+library(gstudio)
+library(ade4)
+library(adegenet)
+library(cowplot)
+library(nlme)
+library(poppr)
+library(PopGenReport)
+library(maps)
+library(mapdata)
+library(stringr)
+library(rgdal)
+library(sf)
+library(ggsn)
+library(raster)
+library(lme4)
+library(factoextra)
+library(MASS)
+library(logihist)
+library(pophelper)
+library(ggpubr)
+library(DescTools)
+library(vegan)
+library(ggstatsplot)
+```
+
+## Metadata
+```{r}
+smb_metadata_geo <- read_excel("../../data/metadata/smb_metadata_geo.xlsx")
+smb_metadata_geo_nor <- smb_metadata_geo[c(617:766),]
+smb_metadata_neo <- read_excel("../../data/metadata/smb_metadata_nonGEO.xlsx")
+```
+
+## Read in genetic data and clean data.
+```{r}
+gen_data <- read_population("../../data/microsatellite_data//micros_blank_river.csv", type = "column", locus.columns = 6:33)
+
+#Data Cleaning:
+#Change categorical variables to factors
+gen_data$Population_Name <- as.factor(gen_data$Population_Name)
+gen_data$Sample_ID <- as.factor(gen_data$Sample_ID)
+```
+
+#Calculate Genetic Diversity Metrics
+```{r}
+#Common Allele Frequency
+A_95 <- genetic_diversity(gen_data, mode = "A95") # frequency of non-rare alleles by locus
+
+A_95_bypop <- genetic_diversity(gen_data, mode = "A95", stratum = "Population_Name") # non-rare allele frequency by individual
+A_95_bypop <- A_95_bypop %>% 
+  group_by(Stratum) %>% 
+  summarize (mean_A95 = mean(A95)) # average non-rare allele frequency by population
+
+#Heterozygosity
+Ho_pop <- genetic_diversity(gen_data, stratum = "Population_Name", mode = c("Ho")) # calculate observed heterozygosity across populations 
+He_pop <- genetic_diversity(gen_data, stratum = "Population_Name", mode = c("He")) # calculate expected heterozygosity across populations
+
+Ho_pop_ave <- Ho_pop %>% 
+  group_by(Stratum) %>% 
+  summarize(mean_Ho = mean(Ho)) # calculate average observed heterozygosity for populations
+
+He_pop_ave <- He_pop %>% 
+  group_by(Stratum) %>% 
+  summarize(mean_He = mean(He)) # calculate average expected heterozygosity for populations
+```
+
+# Read-in new data file compiled in Excel and clean dataframe to compute averages of each metric by collection site. All of the information in the dataframe imported below were calculated in the above section (Calculate Genetic Diversity Metrics) or in outside software programs not built into R.
+```{r}
+#read-in new data file compiled in Excel from data frames above
+options(scipen = 999)
+div <- read_excel("../../data/excel_data/div_CERC.xls")
+
+#Clean and organize data files by subspecies range
+div_ave <- div %>% 
+  group_by(Range) %>% 
+  summarize(meanAR = mean(AR), meanAE = mean(AE), mean95 = mean(A95), meanAP = mean(AP), meanHO = mean(HO), meanHE = mean(HE)) # calculate mean of diversity metrics at subsepecies level
+
+div_sd <- div %>% 
+  group_by(Range) %>% 
+  summarize(sdAR = sd(AR), sdAE = sd(AE), sd95 = sd(A95), sdAP = sd(AP), sdHO = sd(HO), sdHE = sd(HE)) # calculate standard deviation of diversity metrics at subspecies level
+div_nospb <- div[-c(41:43),]
+
+div_neo <- div %>% 
+  filter(Range == "Neosho") #create data file for Neosho samples only
+
+div_nor <- div %>% 
+  filter(Range == "Northern") #create data file for Northern only
+
+div_spb <- div %>% 
+  filter(Range == "Spotted") #create data file for Spotted only
+
+div_neo_ave <- div_neo %>% 
+  group_by(Range) %>% 
+  summarize(AR = mean(AR), A95 = mean(A95), AP = mean(AP), HO = mean(HO), HE = mean(HE))
+
+div_nor_ave <- div_nor %>% 
+  group_by(Range) %>% 
+  summarize(AR = mean(AR), A95 = mean(A95), AP = mean(AP), HO = mean(HO), HE = mean(HE))
+
+div_neo_sd <- div_neo %>% 
+  summarize(AR = sd(AR), A95 = sd(A95), AP = sd(AP), HO = sd(HO), HE = sd(HE))
+
+div_nor_sd <- div_nor %>% 
+  summarize(AR = sd(AR), A95 = sd(A95), AP = sd(AP), HO = sd(HO), HE = sd(HE))
+
+div_neo_sd <- t(div_neo_sd)
+div_neo_sd <- as.data.frame(div_neo_sd)
+div_neo_sd <- div_neo_sd %>% 
+  rownames_to_column("metric")
+colnames(div_neo_sd) <- c("metric", "sd")
+
+div_neo_ave <- t(div_neo_ave)
+div_neo_ave <- as.data.frame(div_neo_ave)
+div_neo_ave <- div_neo_ave %>% 
+  rownames_to_column("metric")
+colnames(div_neo_ave) <- c("metric", "mean")
+div_neo_ave <- div_neo_ave[-1,]
+
+div_nor_sd <- t(div_nor_sd)
+div_nor_sd <- as.data.frame(div_nor_sd)
+div_nor_sd <- div_nor_sd %>% 
+  rownames_to_column("metric")
+colnames(div_nor_sd) <- c("metric", "sd")
+
+div_nor_ave <- t(div_nor_ave)
+div_nor_ave <- as.data.frame(div_nor_ave)
+div_nor_ave <- div_nor_ave %>% 
+  rownames_to_column("metric")
+colnames(div_nor_ave) <- c("metric", "mean")
+div_nor_ave <- div_nor_ave[-1,]
+
+neo_metrics <- merge(div_neo_ave, div_neo_sd, by = "metric")
+nor_metrics <- merge(div_nor_ave, div_nor_sd, by = "metric")
+nor_labels <- c(rep("Northern", 5))
+nor_labels <- as.data.frame(nor_labels)
+colnames(nor_labels) <- c("range")
+
+neo_labels <- c(rep("Neosho", 5))
+neo_labels <- as.data.frame(neo_labels)
+colnames(neo_labels) <- c("range")
+
+neo_metrics <- cbind(neo_labels, neo_metrics)
+nor_metrics <- cbind(nor_labels, nor_metrics)
+genetic_metrics <- rbind(neo_metrics, nor_metrics)
+```
+
+## Run linear models to test for significant differences in genetic diversity at the subspecies level
+```{r}
+lm1 <- aov(HO ~ Range, data = div_nospb) # observed heterozygosity
+summary(lm1)
+
+lm2 <- lm(HE ~ Range, data = div_nospb) # expected heterozygosity
+summary(lm2)
+
+lm3 <- lm(AR ~ Range, data = div_nospb) # rarefied allelic richness (taken from rarefied allelic richness run in HP-Rare)
+summary(lm3)
+
+lm5 <- lm(A95 ~ Range, data = div_nospb) # non-rare allele frequency
+summary(lm5)
+
+lm6 <- lm(AP ~ Range, data = div_nospb) # private (rare) allele frequency (taken from private allele frequency run in HP-Rare)
+summary(lm6)
+```
+
+## Calculate 95 % confidence intervals for each metric
+```{r}
+e95neo <- qt(0.975,df=30)*0.82168581/sqrt(30)
+eAPneo <- qt(0.975,df=30)*0.03961101/sqrt(30)
+eARneo <- qt(0.975,df=30)*0.57309329/sqrt(30)
+eHEneo <- qt(0.975,df=30)*0.09935171/sqrt(30)
+eHOneo <- qt(0.975,df=30)*0.09809077/sqrt(30)
+e95nor <- qt(0.975,df=8)*0.91145228/sqrt(8)
+eAPnor <- qt(0.975,df=8)*0.05897269/sqrt(8)
+eARnor <- qt(0.975,df=8)*0.48365794/sqrt(8)
+eHEnor <- qt(0.975,df=8)*0.06055186/sqrt(8)
+eHOnor <- qt(0.975,df=8)*0.05367262/sqrt(8)
+
+error <- c(e95neo, eAPneo, eARneo, eHEneo, eHOneo, e95nor, eAPnor, eARnor, eHEnor, eHOnor)
+error <- as.data.frame(error)
+genetic_metrics <- cbind(genetic_metrics, error)
+
+A95_data <- genetic_metrics %>% 
+  filter(metric == "A95")
+
+A95_data <- A95_data %>% 
+  mutate(mean = as.character(mean)) %>% 
+  mutate(mean = as.numeric(mean))
+
+AP_data <- genetic_metrics %>% 
+  filter(metric == "AP")
+
+AP_data <- AP_data %>% 
+  mutate(mean = as.character(mean)) %>% 
+  mutate(mean = as.numeric(mean))
+
+AR_data <- genetic_metrics %>% 
+  filter(metric == "AR")
+
+AR_data <- AR_data %>% 
+  mutate(mean = as.character(mean)) %>% 
+  mutate(mean = as.numeric(mean))
+
+HO_data <- genetic_metrics %>% 
+  filter(metric == "HO")
+
+HO_data <- HO_data %>% 
+  mutate(mean = as.character(mean)) %>% 
+  mutate(mean = as.numeric(mean))
+
+HE_data <- genetic_metrics %>% 
+  filter(metric == "HE")
+
+HE_data <- HE_data %>% 
+  mutate(mean = as.character(mean)) %>% 
+  mutate(mean = as.numeric(mean))
+```
+
+## Plot 95% confidence intervals by Range for each genetic metric
+```{r}
+#Allelic Richness Plot
+AR_plot <- ggplot(AR_data, aes(x = range, y = mean)) + 
+  geom_point(size = 3, show.legend = F) + 
+  geom_errorbar(aes(ymin = mean - error, ymax = mean + error, width = 0.3), show.legend = F) + 
+  theme_set(theme_cowplot(12)) +
+  labs(x = "Range", y = "Mean AR") + 
+  theme(axis.text.x = element_text(angle = 30, hjust = 1)) + 
+  theme(axis.text = element_text(size = 20), axis.title = element_text(size = 20)) + 
+  theme(axis.title.x = element_blank())
+
+#Private Allele Frequency Plot
+AP_plot <- ggplot(AP_data, aes(x = range, y = mean)) + 
+  geom_point(size = 3, show.legend = F) + 
+  geom_errorbar(aes(ymin = mean - error, ymax = mean + error, width = 0.3), show.legend = F) +
+  theme_set(theme_cowplot(12)) +
+  labs(x = "Range", y = "Mean AP") + 
+  theme(axis.text.x = element_text(angle = 30, hjust = 1)) + 
+  theme(axis.text = element_text(size = 20), axis.title = element_text(size = 20)) + 
+  theme(axis.title.x = element_blank())
+
+#Common Allele Frequency Plot
+A95_plot <- ggplot(A95_data, aes(x = range, y = mean)) + 
+  geom_point(size = 3, show.legend = F) + 
+  geom_errorbar(aes(ymin = mean - error, ymax = mean + error, width = 0.3), show.legend = F) + 
+  theme_set(theme_cowplot(12)) +
+  labs(x = "Range", y = "Mean A95") + 
+  theme(axis.text.x = element_text(angle = 30, hjust = 1)) +
+  theme(axis.text = element_text(size = 20), axis.title = element_text(size = 20)) + 
+  theme(axis.title.x = element_blank())
+
+#Observed Heterozygosity Plot
+HO_plot <- ggplot(HO_data, aes(x = range, y = mean)) + 
+  geom_point(size = 3, show.legend = F) + 
+  geom_errorbar(aes(ymin = mean - error, ymax = mean + error, width = 0.3), show.legend = F) + 
+  theme_set(theme_cowplot(12)) +
+  labs(x = "Range", y = "Mean HO") + 
+  theme(axis.text.x = element_text(angle = 30, hjust = 1)) + 
+  theme(axis.text = element_text(size = 20), axis.title = element_text(size = 20)) + 
+  theme(axis.title.x = element_blank())
+
+#Expected Heterozygosity Plot
+HE_plot <- ggplot(HE_data, aes(x = range, y = mean)) + 
+  geom_point(size = 3, show.legend = F) + 
+  geom_errorbar(aes(ymin = mean - error, ymax = mean + error, width = 0.3), show.legend = F) + 
+  theme_set(theme_cowplot(12)) +
+  labs(x = "Range", y = "Mean HE") + 
+  theme(axis.text.x = element_text(angle = 30, hjust = 1)) + 
+  theme(axis.text = element_text(size = 20), axis.title = element_text(size = 20)) + 
+  theme(axis.title.x = element_blank())
+
+#Combine all 95% confidence interval plots 
+pdf("/Users/joegunn/Desktop/Grad_School_Stuff/Research/Projects/Smallmouth_Bass_Microsatellites/visualization/genetic_diversity_figures/95_confidence_intervals.pdf", width=12, height=8) 
+
+plot_grid(HO_plot, HE_plot, AR_plot, A95_plot, AP_plot, nrow = 2, ncol = 3, labels = c("A", "B", "C", "D", "E"), label_size = 25)
+
+dev.off()
+```
