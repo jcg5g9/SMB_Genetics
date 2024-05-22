@@ -1,0 +1,124 @@
+---
+title: "Analysis 2: Data enumeration, filtering and metadata summary analysis"
+author: "Joe Gunn"
+date: "2024-02-06"
+output: html_document
+---
+
+# Project: Population genetic structure and morphological differentiation between Northern Smallmouth Bass (<i>Micropterus dolomieu dolomieu</i>) and Neosho Smallmouth Bass (<i>M. d. velox</i>)
+We investigated patterns of genetic (via microsatellites) and morphological diversity, differentiation, and structure across Smallmouth Bass populations (<i>Micropterus dolomieu</i>) in the Central Interior Highlands (CIH) of North America, including the two recognized subspecies: Northern Smallmouth Bass (<i>M. d. dolomieu</i>), which is native to the lower Ozark Highlands, and Neosho Smallmouth Bass (<i>M. d. velox</i>), which is endemic to tributaries of the Arkansas River Basin. We compared three independent combinations of starting parameters in the Bayesian clustering software program STRUCTURE to ascertain a robust picture of hierarchical genetic structure in the CIH. We paired these data with genetic diversity metrics (e.g., observed and expected heterozygosity and allelic richness) to determine relative amounts of variation across geographically separated populations. We then assessed differentiation in five morphometric and meristic traits. We ultimately aimed to validate or amend the taxonomic status of the Smallmouth Bass subspecies by revealing potential ecological and evolutionary divergence between them, with the hope that increased taxonomic resolution would provide insight into the presence and distribution of evolutionary significant and management units for a popular sportfish.
+
+## Specific Aim: Data enumeration, filtering, and summarization
+In this analysis, we read in, clean, and enumerate the raw microsatellite genotype data, morphological trait data, and associated sample metadata (i.e., information about subspecies, collection location, and geographic region) for our Northern and Neosho Smallmouth Bass samples. After we prepare data, we summarize sample sizes within and across important groups.
+
+## Phases of analysis:
+### Phase 1: Data read-in and preparation
+### Phase 2: Data summarization
+
+## Libraries needed for analysis
+```{r}
+library(readxl)
+library(cowplot)
+library(tidyverse)
+```
+
+## PHASE 1: DATA READ-IN AND PREPARATION
+In this phase of the analysis, we read in and prepare the
+
+### STEP 1: Read in and clean metadata for elephant samples and taxonomic classification data for microbial OTUs.
+In this step, we read in previously curated metadata for African savana elephants (<i>Loxidonta africana</i>) and African forest elephants (<i>L. cyclotis</i>) collected from across the species' native ranges (`../raw_data/metadata.xlsx`).
+
+#### 1a. Read in and clean sample metadata.
+In this step, we read in the full metadata for all elephants included in the study. Data include: 
+
+   1. "ind_id": a unique, alphanumeric ID for each elephant sample
+   2. "barcode": the sequence of nucleotides ligated to elephant metagenomic samples for downstream matching of OTUs to individual
+   3. "linker": primer linker sequence
+   4. "phylogeny": species of African elephant (L. africana or L. cyclotis)
+   5. "diet": diet of African elephant, either a crop raider (Raider) or not a known crop raider (Nonraider)
+   6. "habitat": habitat type of the individual (forest or savanna)
+   7. "age": general description of the age cohort of the individual (adult, subadult, juvenile)
+   8. "sex": sex of the individual (male or female)
+   9. "group": a combined identifier including species, diet, and habitat
+   10. "description": a combined identifier including species, diet, habitat, age, and sex
+
+##### 1a.1. Read in full metadata and convert characters to factors; run the Rmd chunk below.
+
+##### Read in and clean full metadata:
+```{r}
+# Read in raw metadata file
+metadata <- read_tsv("../raw_data/metadata.tsv")
+
+# Convert characters to factors
+metadata <- metadata %>%
+  mutate(ind_id = factor(ind_id),
+         barcode = factor(barcode), 
+         linker = factor(linker), 
+         phylogeny = factor(phylogeny), 
+         diet = factor(diet), 
+         habitat = factor(habitat), 
+         age = factor(age), 
+         sex = factor(sex), 
+         group = factor(group), 
+         description = factor(description))
+
+# Save metadata for downstream analyses
+save(metadata, file = "data/metadata.Rda")
+```
+
+#### 1b. Read in and clean taxonomic classifcation data for metagenomic sequences of microbial OTUs.
+In this step, we read in the full taxonomic classification data (`../raw_data/taxa.qza`) for metagenomic sequences of microbial OTUs, which is generated in QIIME (see QIIME pipeline code in Analysis 1). Initial sequence read counts varied among African elephant samples (mean = 141,563, min = 271, max = 3,586,017). These reads were identified as 9,066 distinct OTUs from unique sequence reads at 99% similarity. Data include: 
+
+   1. "Feature.ID": a unique, alphanumeric ID for each OTU detected across the full dataset
+   2. "Taxon": the taxonomic classificaiton for each OTU detected across the full dataset
+   3. "Confidence": the probability (confidence) with which an OTU was accurately identified to the taxonomic classification indicated in the "Taxon" column
+   
+We also generate a "phyloseq" object, a formatted data object compatible with the phyloseq software library, which contains the taxonomic classificaiton, otu abundance, and phylogenetic tree relationship data, along with associated metadata. We use the phyloseq object for downstream analyses. We merge these two datasets to get a clean version of the taxonomic classification and confidence data in this analysis.
+
+##### 1a.1. Read in full dataset, convert to datatable, restructure, and convert characters to facotrs; run the Rmd chunk below.
+
+##### Read in and clean full taxonomy data:
+```{r}
+# Read in taxonomic classificaiton data alone to get confidence data
+taxa <- read_qza("../raw_data/taxa.qza")
+
+# Read in, combine, and convert QIIME output and metadata to phyloseq format
+phyloseq <- qza_to_phyloseq(features = "../raw_data/otus.qza", 
+                            taxonomy = "../raw_data/taxa.qza",  
+                            tree = "../raw_data/tree.qza", 
+                            metadata = "../raw_data/metadata.tsv")
+
+# Convert the "data" module of the taxonomic classification dataset into a dataframe
+otu_ids <- taxa$data %>% 
+  as.data.frame() %>%
+  mutate(otu_id = factor(`Feature.ID`),
+         confidence = as.numeric(Confidence)) %>%
+  dplyr::select(otu_id, confidence)
+
+# Extract taxonomic classifcaitons from the phyloseq object
+taxa <- tax_table(phyloseq) %>%
+  as.data.frame() %>%
+  rownames_to_column("otu_id") %>%
+  mutate(otu_id = factor(otu_id), 
+         kingdom = factor(Kingdom), 
+         phylum = factor(Phylum), 
+         class = factor(Class), 
+         order = factor(Order), 
+         family = factor(Family), 
+         genus = factor(Genus), 
+         species = factor(Species)) %>%
+  select(otu_id, kingdom, phylum, class, order, family, genus, species)
+
+# Merge taxonomic classifications with confidence data
+taxa <- merge(otu_ids, 
+              taxa, 
+              by = "otu_id")
+
+# Save taxonomic data for downstream analyses
+save(taxa, file = "data/taxa.Rda")
+
+# Save raw phyloseq object for downstream analyses
+save(phyloseq, file = "data/phyloseq.Rda")
+```
+
+### ----------------------- END OF PHASE 1: DATA READ-IN AND PREPARATION ----------------------- ###
