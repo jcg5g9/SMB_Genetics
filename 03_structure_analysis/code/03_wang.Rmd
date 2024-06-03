@@ -20,6 +20,9 @@ library(writexl)
 library(pophelper)
 ```
 
+## PHASE 3: STRUCTURE ANALYSIS WITH WANG (2017) RECOMMENDED STRUCTURE PARAMETERS
+In this phase of analysis, we are assessing hierarchical population genetic structure among Spotted Bass, Northern Smallmouth Bass, and Neosho Smallmouth Bass populations in the CIH using parameter settings recommended by Wang (2017) in the software program STRUCTURE.
+
 ### STEP 1: Data preparation
 
 #### 1a: Load the fully filtered dataset ('full_data'); run the Rmd chunk below.

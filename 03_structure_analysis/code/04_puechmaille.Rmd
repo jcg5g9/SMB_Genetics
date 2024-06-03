@@ -20,6 +20,9 @@ library(writexl)
 library(pophelper)
 ```
 
+## PHASE 4: STRUCTURE ANALYSIS WITH PUECHMAILLE INFERENCE METRICS
+In this phase of analysis, we are assessing hierarchical population genetic structure among Spotted Bass, Northern Smallmouth Bass, and Neosho Smallmouth Bass populations in the CIH using default STRUCTURE parameter settings, but inferring optimal number of genetic clusters using inference metrics developed by Puechmaille (2017).
+
 ### STEP 1: Data preparation
 
 #### 1a: Load in fully filtered dataset ('full_data') and list of hybrids detected between Spotted Bass and all other Central Interior Highlands fish ('spb_other_hybrids'); run the Rmd chunk below to load in all data.
