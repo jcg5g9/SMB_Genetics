@@ -41,6 +41,10 @@ library(cowplot)
 library(readxl)
 library(writexl)
 library(genepopedit)
+<<<<<<< HEAD
+=======
+library(graph4lg)
+>>>>>>> 821a6d0226fa418c2c3a582ae1f2eba73e538796
 ```
 
 ## PHASE 1: GENOTYPE DATA PREPARATION
@@ -60,7 +64,11 @@ In this step, we opted to reformat the raw Excel microsatellite genotype data by
 ##### 1e. Save the Excel sheet as a .xlsx and a .txt file, with a specification that it is a "genepop" file.
 
 ### STEP 2: Generate STRUCTURE formatted files from genepop format.
+<<<<<<< HEAD
 In this step, we are reading in, checking, and converting the genepop file manually generated in STEP 1 above into a STRUCTURE formatted file. There are quite a few tricky and very specific formatting needs for the genepop text file before genepopedit will convert successfully. Follow Step 2a-2f closely to create a proper genepop format. Click on the text file manually here, in R Studio, and use Ctrl + F in R Studio to find and replace the necessary things.
+=======
+In this step, we are reading in, checking, and converting the genepop file manually generated in STEP 1 above into a STRUCTURE formatted file. There are quite a few tricky and very specific formatting needs for the genepop text file before genepopedit will convert successfully. Follow Step 2a-... closely to create a proper genepop format. Click on the text file manually here, in R Studio, and use Ctrl + F in R Studio to find and replace the necessary things.
+>>>>>>> 821a6d0226fa418c2c3a582ae1f2eba73e538796
 
 ### IMPORTANT NOTE ON DATA: genepopedit requires that sample names be in the format 'popname_01', 'popname_02', etc. where the 'popname' is a signifier for the population of origin for the sample, and the '01', etc. are numerical designations for the samples. 'popname' and the numeric must be separated by a "_", and there can only be a single "_". Otherwise, genepopedit will not read the sample's population of origin correctly. In the case of this project, we are clumping samples together by stream for STRUCTURE analysis to see if there is substructure mapped by stream. Many sample IDs in our dataset were not in the required format, so we added an additional column to the metadata set and associated processed data sets called "structure_ID", which gives a unique sample name in the proper structure format. This column can then be linked back to any other column in downstream analyses if we need to know which specific samples the results came from. 
 
@@ -92,16 +100,28 @@ N<sub>pops</sub> = 43
 
 ## PHASE 2: STRUCTURE ANALYSIS WITH DEFAULT STRUCTURE PARAMETERS
 
+<<<<<<< HEAD
 #### Run the code: `code/02_default.Rmd`
 
 ## ------------------------ END OF PHASE 2: STRUCTURE ANALYSIS WITH DEFAULT STRUCTURE PARAMETERS -------------------------- ##
 
 ## PHASE 3: STRUCTURE ANALYSIS WITH WANG (2017) RECOMMENDED STRUCTURE PARAMETERS: `code/03_wang.Rmd`
+=======
+#### Run the code: `code/01_default.Rmd`
+
+## ------------------------ END OF PHASE 2: STRUCTURE ANALYSIS WITH DEFAULT STRUCTURE PARAMETERS -------------------------- ##
+
+## PHASE 3: STRUCTURE ANALYSIS WITH WANG (2017) RECOMMENDED STRUCTURE PARAMETERS: `code/02_wang.Rmd`
+>>>>>>> 821a6d0226fa418c2c3a582ae1f2eba73e538796
 In this phase of analysis, we are assessing population structure 
 
 ## ------------------------ END OF PHASE 3: STRUCTURE ANALYSIS WITH WANG (2017) RECOMMENDED STRUCTURE PARAMETERS ---------- ##
 
+<<<<<<< HEAD
 ## PHASE 4: STRUCTURE ANALYSIS WITH PUECHMAILLE METRICS: `code/04_puechmaille.Rmd`
+=======
+## PHASE 4: STRUCTURE ANALYSIS WITH PUECHMAILLE METRICS: `code/03_puechmaille.Rmd`
+>>>>>>> 821a6d0226fa418c2c3a582ae1f2eba73e538796
 In this phase of analysis, we are assessing population structure 
 
 ## ------------------------ END OF PHASE 4: STRUCTURE AND HYBRID ASSIGNMENT ANALYSIS OF SMB AND CIH ----------- ##
