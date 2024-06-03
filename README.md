@@ -12,8 +12,8 @@ We investigated patterns of genetic (via microsatellites) and morphological dive
 This is a publicly visible GitHub repository storing code (and a small amount of data, although we have done our best to avoid uploading large amounts of data due to the limited storage in GitHub) for Gunn et al. (2020). In the home directory of the repository (SMB_Genetics), you will find a README.md file (the source script for this information), the R Project file (SMB_Genomics.Rproj), a .gitignore file, and [NUMBER] different "analysis" directories, each of which corresponds with a specific analysis conducted in our study:
 
 1) 01_map_analysis
-2) 02_
-3) 03_
+2) 02_data_summary_analysis
+3) 03_structure_analysis
 4) 04_
 5) 05_
 
@@ -67,7 +67,7 @@ flowchart LR
 <center>Figure 2. Include a `raw_data` directory in the project home directory</center>
 
 ## Data
-Raw microsatellite genotype calls (.xlsx), morphological data (.xlsx), and accompanying metadata are available at Zenodo.org: <a href="url">https://doi.org/10.5281/zenodo.3937432.</a>
+Raw microsatellite genotype calls (.xlsx), morphological data (.xlsx), and accompanying metadata (.xlsx) are available at Zenodo.org: <a href="url">https://doi.org/10.5281/zenodo.3937432.</a>
 
 Download these data to your working directory and place in the /raw_data directory. You are good to start analyzing.
 
@@ -80,32 +80,23 @@ In this analysis, we generated easily readable maps displaying the native distri
 
 #### Run the code: `01_map_analysis/smb_genetics_map_analysis.Rmd`
 
-### Analysis 2: SNP Filtering, Data Processing, and Preliminary Calculations
+### Analysis 2: Data enumeration, filtering and metadata summary analysis
+In this analysis, we read in, clean, and enumerate the raw microsatellite genotype data, morphological trait data, and associated sample metadata (i.e., information about subspecies, collection location, and geographic region) for our Northern and Neosho Smallmouth Bass samples. After we prepare data, we summarize sample sizes within and across important groups.
+
+#### Run the code: `02_data_summary_analysis/smb_genetics_data_summary_analysis.Rmd`
+
+### Analysis 3: Hierarchical population structure analysis
+In this analysis, we use Bayesian clustering analysis and genotypes from 14 microsatellite loci with STRUCTURE to assess patterns hierarchical genetic structure among and within black bass species (i.e., Spotted Bass and Smallmouth Bass) and subspecies (i.e., Northern Smallmouth Bass and Neosho Smallmouth Bass) in the CIH. To maximize our ability to ascertain potentially complex or cryptic levels of genetic diversity, we employ and integrate three independent "methods" within STRUCTURE, which each use either different starting parameters for identifying genetic clusters or different inference techniques for determining the optimal number of clusters: 1) <i>default parameters</i> (default parameters in STRUCUTRE); 2) <i>Wang parameters</i> (parameters recommended by Wang (2017); and 3) <i>Puechmaille metrics</i> (optimal cluster inference method recommended by Puechmaille 2016).
+
+#### Run the code: `03_structure_analysis/smb_genetics_structure_analysis.Rmd`
+
+### Analysis 4: Genetic diversity and differentiation analysis
 In this analysis, 
 
-#### Run the code: `02_filtering_processing_analysis/smb_genomics_filtering_processing_analysis.Rmd`
+#### Run the code: `04_diversity_analysis/smb_genetics_diversity_analysis.Rmd`
 
-### Analysis 3: Admixture and phylogenomics
+### Analysis 5: Morphological differentiation analysis
 In this analysis, 
 
-#### Run the code: `03_filtering_processing_analysis/smb_genomics_admixture_phylogenomics_analysis.Rmd`
+#### Run the code: `05_morphology_analysis/smb_genetics_morphology_analysis.Rmd`
 
-### Analysis 4: Population Inference
-In this analysis, 
-
-#### Run the code: `04_population_analysis/smb_genomics_population_analysis.Rmd`
-
-### Analysis 5: Admixture mapping analysis
-In this analysis, 
-
-#### Run the code: `05_admixture_mapping_analysis/smb_genomics_admixture_mapping_analysis.Rmd`
-
-### Analysis 6: Directional selection analysis
-In this analysis, we 
-
-#### Run the code: `06_outlier_fst_analysis/smb_genomics_outlier_fst_analysis.Rmd`
-
-### Analysis 7: Demographic analysis
-In this analysis, we 
-
-#### Run the code: `07_demographic_analysis/smb_genomics_demographic_analysis.Rmd`
