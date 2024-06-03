@@ -1,0 +1,149 @@
+---
+title: "NSMB_Microsats_GENETIC_PCA"
+author: "Joe Gunn"
+date: "7/25/2019"
+output: html_document
+---
+
+## Libraries Needed For Analysis
+```{r Libraries, echo = FALSE, include = FALSE}
+
+library(riverdist)
+library(sp)
+library(readxl)
+library(popgraph)
+library(tidyverse)
+library(gstudio)
+library(ade4)
+library(adegenet)
+library(cowplot)
+library(nlme)
+library(poppr)
+library(PopGenReport)
+library(maps)
+library(mapdata)
+library(stringr)
+library(rgdal)
+library(sf)
+library(ggsn)
+library(raster)
+library(lme4)
+library(factoextra)
+library(MASS)
+library(logihist)
+library(pophelper)
+library(ggpubr)
+library(DescTools)
+library(vegan)
+library(R.utils)
+
+```
+
+## Metadata
+```{r}
+smb_metadata_geo <- read_excel("../../data/metadata/smb_metadata_geo.xlsx")
+smb_metadata_geo_nor <- smb_metadata_geo[c(617:766),]
+smb_metadata_neo <- read_excel("../../data/metadata/smb_metadata_nonGEO.xlsx")
+```
+
+
+###  GENETIC ANALYSIS  #################################################################################################################
+
+###Principal Component Analysis of Genetic Data
+```{r}
+
+gen_data_all <- read_population("../../data/microsatellite_data//micros_blank.csv", type = "column", locus.columns = 6:33) # read-in microsatellite genotypes formatted for gstudio. This data set contains all Black Bass samples, including Smallmouth and Spotted Bass
+
+gen_data_nospb <- read_population("../../data/microsatellite_data//micros_blank_nospb.csv", type = "column", locus.columns = 8:35) #this data set is identical to the data above, but it excludes Spotted Bass in order to test for clustering at the subspecies level
+
+##Data Cleaning
+#Change categorical variables to factors
+#With Spotted Bass (All samples)
+gen_data_all$Population_Name <- as.factor(gen_data_all$Population_Name)
+gen_data_all$Sample_ID <- as.factor(gen_data_all$Sample_ID)
+
+#Without Spotted Bass
+gen_data_nospb$Population_Name <- as.factor(gen_data_nospb$Population_Name)
+gen_data_nospb$Sample_ID <- as.factor(gen_data_nospb$Sample_ID)
+```
+
+## Run PCA
+```{r}
+#Run PCA with Spotted Bass
+gen_data_mv_all <- to_mv(gen_data_all, drop.allele = T)
+fit_pca_all <- princomp(gen_data_mv_all, cor = T)
+pred_all <- predict(fit_pca_all)
+pca_df_all <- data.frame(PC1 = pred_all[,1], PC2 = pred_all[,2], Taxon = gen_data_all$Range, Pop = gen_data_all$Population_Name) 
+
+#Run PCA without Spotted Bass
+gen_data_mv_nospb <- to_mv(gen_data_nospb, drop.allele = T)
+fit_pca_nospb <- princomp(gen_data_mv_nospb, cor = T)
+pred_nospb <- predict(fit_pca_nospb)
+pca_df_nospb <- data.frame(PC1 = pred_nospb[,1], PC2 = pred_nospb[,2], Taxon = gen_data_nospb$Range, Wang_Structure_Parameters = gen_data_nospb$Wang, Pop = gen_data_nospb$Population_Name, Drainage = gen_data_nospb$Drainage) 
+```
+
+## Plot PCA
+```{r}
+#Taxon Level (Spotted Bass and Smallmouth Bass)
+species <- ggplot(pca_df_all, aes(x = PC1, y = PC2, fill = Taxon)) + 
+  geom_point(aes(fill = Taxon), color = "black", pch = 21, size = 3, show.legend = T, alpha = 0.9) + 
+  scale_fill_manual(values = c("springgreen3", "mediumpurple", "firebrick3")) + 
+  labs(fill = "Species", color = "Species", x = "PC1 (3.3 %)", y = "PC2 (2.8 %)") + 
+  theme_set(theme_cowplot(12)) + 
+  theme(legend.position = c(0.01,0.15)) + 
+  theme(axis.text = element_text(size = 20)) + 
+  theme(axis.title = element_text(size = 20)) + 
+  theme(legend.text = element_text(size = 20)) + 
+  theme(legend.title = element_text(size = 20, face = "bold")) + 
+  theme(legend.background = element_rect(linetype = "solid", size = 0.5, color = "black")) + 
+  theme(legend.margin = margin(5, 5, 5, 5)) +
+  theme(panel.border = element_rect(colour = "black", fill=NA, size=1))
+
+#Subspecies Level (Northern Smallmouth Bass and Neosho Smallmouth Bass)
+sub <- ggplot(pca_df_nospb, aes(x = PC1, y = PC2, fill = Taxon)) + 
+  geom_point(aes(fill = Taxon), color = "black", pch = 21, size = 3, show.legend = T, alpha = 0.9) + 
+  scale_fill_manual(values = c("springgreen3", "mediumpurple")) + 
+  labs(fill = "Subspecies", color = "Subspecies", x = "PC1 (3.5 %)", y = "PC2 (1.8 %)") + 
+  theme_set(theme_cowplot(12)) + 
+  theme(legend.position = c(0.01,0.12)) + 
+  theme(axis.text = element_text(size = 20)) + 
+  theme(axis.title = element_text(size = 20)) + 
+  theme(legend.text = element_text(size = 20)) + 
+  theme(legend.title = element_text(size = 20, face = "bold")) + 
+  theme(legend.background = element_rect(linetype = "solid", size = 0.5, color = "black")) + 
+  theme(legend.margin = margin(5, 5, 5, 5)) +
+  theme(panel.border = element_rect(colour = "black", fill=NA, size=1))
+
+#Drainage Level (Arkansas River Basin, Missouri River Tributaries, and White River Tributaries)
+drain <- ggplot(pca_df_nospb, aes(x = PC1, y = PC2, fill = Wang_Structure_Parameters)) + 
+  geom_point(aes(fill = Wang_Structure_Parameters), color = "black", pch = 21, size = 3, show.legend = T, alpha = 0.9) + 
+  scale_fill_manual(values = c("springgreen3", "forestgreen", "chocolate1","mediumblue")) + 
+  labs(fill = "River System", color = "River System", x = "PC1 (3.5 %)", y = "PC2 (1.8 %)") + 
+  theme_set(theme_cowplot(12)) + 
+  theme(legend.position = c(0.01,0.17)) + 
+  theme(axis.text = element_text(size = 20)) + 
+  theme(axis.title = element_text(size = 20)) + 
+  theme(legend.text = element_text(size = 20)) + 
+  theme(legend.title = element_text(size = 20, face = "bold")) + 
+  theme(legend.background = element_rect(linetype = "solid", size = 0.5, color = "black")) + 
+  theme(legend.margin = margin(5, 5, 5, 5)) +
+  theme(panel.border = element_rect(colour = "black", fill=NA, size=1))
+
+#Population Level (Smallmouth Bass populations)
+pop <- ggplot(pca_df_nospb, aes(x = PC1, y = PC2, fill = Pop)) + 
+  geom_point(aes(fill = Pop), color = "black", pch = 21, size = 3, show.legend = F, alpha = 0.9) + 
+  scale_fill_manual(values = c("forestgreen", "lightskyblue", "darkorchid1", "blue", "chocolate1", "gold1", "maroon1", "lightpink1")) +
+  labs(x = "PC1 (3.5 %)", y = "PC2 (1.8 %)") + 
+  theme_set(theme_cowplot(12)) + 
+  theme(axis.text = element_text(size = 20)) + 
+  theme(axis.title = element_text(size = 20)) +
+  theme(panel.border = element_rect(colour = "black", fill=NA, size=1))
+
+
+#Combine all PCA plots
+pdf("/Users/joegunn/Desktop/Grad_School_Stuff/Research/Projects/Smallmouth_Bass_Microsatellites/visualization/genetics_pca_figures/genpcas_manuscript.pdf", width=15, height=12)
+
+plot_grid(species, sub, drain, pop, nrow = 2, ncol = 2, labels = c("a", "b", "c", "d"), label_size = 35)
+
+dev.off()
+```

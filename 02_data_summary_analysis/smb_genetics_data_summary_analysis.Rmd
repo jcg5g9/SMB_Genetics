@@ -1,0 +1,241 @@
+---
+title: "Analysis 2: Data enumeration, filtering and metadata summary analysis"
+author: "Joe Gunn"
+date: "2024-02-06"
+output: html_document
+---
+
+# Project: Population genetic structure and morphological differentiation between Northern Smallmouth Bass (<i>Micropterus dolomieu dolomieu</i>) and Neosho Smallmouth Bass (<i>M. d. velox</i>)
+We investigated patterns of genetic (via microsatellites) and morphological diversity, differentiation, and structure across Smallmouth Bass populations (<i>Micropterus dolomieu</i>) in the Central Interior Highlands (CIH) of North America, including the two recognized subspecies: Northern Smallmouth Bass (<i>M. d. dolomieu</i>), which is native to the lower Ozark Highlands, and Neosho Smallmouth Bass (<i>M. d. velox</i>), which is endemic to tributaries of the Arkansas River Basin. We compared three independent combinations of starting parameters in the Bayesian clustering software program STRUCTURE to ascertain a robust picture of hierarchical genetic structure in the CIH. We paired these data with genetic diversity metrics (e.g., observed and expected heterozygosity and allelic richness) to determine relative amounts of variation across geographically separated populations. We then assessed differentiation in five morphometric and meristic traits. We ultimately aimed to validate or amend the taxonomic status of the Smallmouth Bass subspecies by revealing potential ecological and evolutionary divergence between them, with the hope that increased taxonomic resolution would provide insight into the presence and distribution of evolutionary significant and management units for a popular sportfish.
+
+## Specific Aim: Data enumeration, filtering, and summarization
+In this analysis, we read in, clean, and enumerate the raw microsatellite genotype data, morphological trait data, and associated sample metadata (i.e., information about subspecies, collection location, and geographic region) for our Northern and Neosho Smallmouth Bass samples. After we prepare data, we summarize sample sizes within and across important groups.
+
+## Phases of analysis:
+### Phase 1: Data read-in and preparation
+### Phase 2: Data summary and enumeration
+
+## Libraries needed for analysis
+```{r}
+library(readxl)
+library(cowplot)
+library(tidyverse)
+```
+
+## PHASE 1: DATA READ-IN AND PREPARATION
+In this phase of the analysis, we read in metadata, genotype data, and phenotype data for Smallmouth Bass samples collected across the native ranges of both subspecies, Northern Smallmouth Bass (<i>Micropterus dolomieu dolomieu</i>) and Neosho Smallmouth Bass (<i>M. d. velox</i>) in the Central Interior Highlands (including some samples of Spotted Bass, <i>M. punctulatus</i>, as an outgroup), and we prepare the data for enumeration and summarization. Data summaries are presented in the Results section of the final ms.
+
+### STEP 1: Read in and clean metadata, genotype data, and phenotype data for Smallmouth Bass samples and taxonomic classification data for microbial OTUs.
+In this step, we read in previously curated metadata for Northern Smallmouth Bass and Neosho Smallmouth Bass (and Spotted Bass as an outgroup, collected from across the subspecies' native ranges in the Central Interior Highlands (`../raw_data/metadata.xlsx`).
+
+#### 1a. Read in and clean sample metadata.
+In this step, we read in the full metadata for all fish included in the study. Data include: 
+
+   1. "sample_id": a unique, alphanumeric ID for each fish sample
+   2. "easting": UTM easting GPS coordinates for each fish
+   3. "northing": UTM northing GPS coordinates for each fish
+   4. "population": name of the stream, river, lake, or hatchery from which fish were collected
+   5. "site": a numerical identifier representing the general location within a population from which fish were collected
+   6. "source": indication of whether a fish was collected from a wild population (stream or river) or hatchery
+   7. "subspecies": subspecies designation of the fish, based on the population from which it was collected (Neosho Smallmouth Bass or Northern Smallmouth Bass); this column also includes Spotted Bass (species) as an outgroup
+   8. "state": United States state from which a fish was collected
+   9. "phenotype": a yes/no indicator of whether a fish has (yes) or does not have (no) associated phenotype data 
+   10. "genotype": a yes/no indicator of whether a fish has (yes) or does not have (no) associated genotype data 
+
+##### 1a.1. Read in full metadata and convert characters to factors; run the Rmd chunk below.
+
+##### Read in and clean full metadata:
+```{r}
+# Read in raw metadata file
+metadata <- read_excel("../raw_data/metadata.xlsx")
+
+# Convert characters to factors
+metadata <- metadata %>%
+  mutate(sample_id = factor(sample_id),
+         population = factor(population), 
+         site = factor(site), 
+         source = factor(source), 
+         subspecies = factor(subspecies), 
+         state = factor(state), 
+         phenotype = factor(phenotype), 
+         genotype = factor(genotype))
+
+# Save metadata for downstream analyses
+save(metadata, file = "data/metadata.Rda")
+```
+
+#### 1b. Read in and clean genotype data for the Smallmouth Bass subspecies.
+In this step, we read in the full genotype dataset (`../raw_data/genotype_data.xlsx`), comprising allelic state data for 14 microsatellite loci Data include: 
+
+   1. "sample_id": a unique, alphanumeric ID for each fish sample
+   2. 28 columns which represent pairs of three-digit numerical alleles (2 alleles, i.e., 2 columns, per locus), with the first column in each pair labeled with the locus name (e.g., mdo9), and the second column left empty "NA".
+   
+##### 1b.1. Read in full genotype dataset; run the Rmd chunk below.
+
+##### Read in and clean genotype data:
+```{r}
+# Read in genotype data 
+genotype_data <- read_excel("../raw_data/genotype_data.xlsx")
+
+# Convert characters to factors
+genotype_data <- genotype_data %>%
+  mutate(sample_id = factor(sample_id))
+
+# Save raw genotype data for downstream analyses
+save(genotype_data, file = "data/genotype_data.Rda")
+```
+
+#### 1c. Read in and clean phenotype data for the Smallmouth Bass subspecies.
+In this step, we read in the full phenotype dataset (`../raw_data/phenotype_data.xlsx`), comprising data for five morphometric traits and one meristic trait. Data include: 
+
+   1. "sample_id": a unique, alphanumeric ID for each fish sample
+   2. "tl": individual total length (tip of mandible to tip of caudal fin, mm)
+   3. "sl": individual standard length (tip of mandible to hyperal plate, mm)
+   4. "ol": individual orbital length (eyeball diameter, mm)
+   5. "hl": individual head length (tip of mandible to anterior end of gill plate, mm)
+   6. "bd": individual body depth (width of fish at widest midpoint, mm)
+   7. "rays": integer representing the count of soft dorsal fin rays (13 or 14)
+   
+##### 1b.1. Read in full phenotype dataset; run the Rmd chunk below.
+
+##### Read in and clean phenotype data:
+```{r}
+# Read in phenotype data 
+phenotype_data <- read_excel("../raw_data/phenotype_data.xlsx")
+
+# Convert characters to factors for the full dataset
+phenotype_data <- phenotype_data %>%
+  mutate(sample_id = factor(sample_id)) 
+
+# Create a second dataset with only number of soft dorsal rays (for downstream analysis), and convert meristic to binary variables (i.e., 13 = 0, 14 = 1)
+ray_data <- phenotype_data %>%
+  drop_na() %>%
+  mutate(rays = as.numeric(if_else(rays=="13","0","1"))) %>%
+  select(sample_id, rays)
+  
+# Save raw phenotype data for downstream analyses
+save(phenotype_data, file = "data/phenotype_data.Rda")
+
+# Save ray data for downstream analyses
+save(ray_data, file = "data/ray_data.Rda")
+```
+
+### ----------------------- END OF PHASE 1: DATA READ-IN AND PREPARATION ----------------------- ###
+
+## PHASE 2: DATA SUMMARY AND ENUMERATION
+In this phase of analysis, we summarize the full metadata, genotype data, and phenotype data, giving numbers of samples per group of interest in downstream analyses.
+
+### STEP 1: Summarize the full metadata.
+In this step, we are summarizing the full metadata set, including counts of samples with genotype and phenotype data and within groups of interest for the full dataset.
+
+#### 1a. Read in and summarize metadata data; run the Rmd chunk below:
+
+##### Summarize full metadata:
+```{r}
+# Load taxanomic data
+load("data/metadata.Rda")
+
+# Get full sample count
+metadata %>% 
+  count()
+
+# Calculate number of fish per subspecies
+metadata %>% 
+  group_by(subspecies) %>%
+  count()
+
+# Calculate number of genotype samples
+metadata %>% 
+  group_by(genotype) %>%
+  count()
+
+# Calculate number of phenotype samples
+metadata %>% 
+  group_by(phenotype) %>%
+  count()
+
+# Calculate number of samples per site (within populations)
+metadata %>% 
+  group_by(subspecies,population, site) %>%
+  count()
+
+# Calculate number of samples with genotype data per site (within populations)
+metadata %>% 
+  group_by(genotype, subspecies, population, site) %>%
+  count()
+
+# Calculate number of samples with phenotype data per site (within populations)
+metadata %>% 
+  group_by(phenotype, subspecies, population, site) %>%
+  count()
+```
+
+### Data summary:
+
+## Total
+<b><i>N</i><sub>total</sub></b> = 838 <br>
+
+## By subspecies/species (native range)
+<b><i>N</i><sub>Neosho Smallmouth Bass </sub></b> = 675 <br>
+<b><i>N</i><sub>Northern Smallmouth Bass</sub></b> = 130 <br>
+<b><i>N</i><sub>Spotted Bass</sub></b> = 130 <br>
+
+## Samples with genotype or phenotype data
+<b><i>N</i><sub>genotype</sub></b> = 776 <br>
+<b><i>N</i><sub>phenotype</sub></b> = 249 <br>
+
+## Number of fish per site within populations (number with genotype, number with phenotype)
+<b>Neosho Smallmouth Bass</b>
+<b><i>N</i><sub>Baron Fork 1</sub></b> = 18 (18, 0) <br>
+<b><i>N</i><sub>Baron Fork 2</sub></b> = 29 (29, 0) <br>
+<b><i>N</i><sub>Big Piney AR</sub></b> = 17 (17, 7) <br>
+<b><i>N</i><sub>Big Sugar 1</sub></b> = 21 (12, 21) <br>
+<b><i>N</i><sub>Big Sugar 2</sub></b> = 10 (8, 9) <br>
+<b><i>N</i><sub>Big Sugar 3</sub></b> = 16 (11, 0) <br>
+<b><i>N</i><sub>Buffalo</sub></b> = 51 (51, 0) <br>
+<b><i>N</i><sub>Caney 1</sub></b> = 22 (22, 0) <br>
+<b><i>N</i><sub>Caney 2</sub></b> = 23 (23, 0) <br>
+<b><i>N</i><sub>Caney 3</sub></b> = 33 (33, 0) <br>
+<b><i>N</i><sub>Center Creek</sub></b> = 6 (5, 6) <br>
+<b><i>N</i><sub>Elk 1</sub></b> = 24 (24, 23) <br>
+<b><i>N</i><sub>Elk 2</sub></b> = 23 (9, 17) <br>
+<b><i>N</i><sub>Elk 3</sub></b> = 49 (49, 0) <br>
+<b><i>N</i><sub>Honey Creek</sub></b> = 44 (44, 0) <br>
+<b><i>N</i><sub>Illinois Bayou 1</sub></b> = 30 (30, 0) <br>
+<b><i>N</i><sub>Illinois Bayou 2</sub></b> = 5 (5, 2) <br>
+<b><i>N</i><sub>Illinois 1</sub></b> = 9 (7, 1) <br>
+<b><i>N</i><sub>Illinois 2</sub></b> = 20 (20, 0) <br>
+<b><i>N</i><sub>Illinois 3</sub></b> = 6 (6, 0) <br>
+<b><i>N</i><sub>Illinois 4</sub></b> = 34 (34, 0) <br>
+<b><i>N</i><sub>Indian Creek 1</sub></b> = 26 (21, 26) <br>
+<b><i>N</i><sub>Indian Creek 2</sub></b> = 9 (9, 8) <br>
+<b><i>N</i><sub>Lee</sub></b> = 20 (20, ) <br>
+<b><i>N</i><sub>Little Sugar</sub></b> = 26 (14, 26) <br>
+<b><i>N</i><sub>Mulberry</sub></b> = 8 (8, 8) <br>
+<b><i>N</i><sub>Shoal 1</sub></b> = 7 (3, 6) <br>
+<b><i>N</i><sub>Shoal 2</sub></b> = 9 (8, 9) <br>
+<b><i>N</i><sub>Shoal 3</sub></b> = 24 (20, 15) <br>
+<b><i>N</i><sub>Spavinaw</sub></b> = 19 (19, 0) <br>
+<b><i>N</i><sub>Sycamore</sub></b> = 37 (37, 0) <br>
+
+<b>Northern Smallmouth Bass</b>
+<b><i>N</i><sub>Big Pine MO 1</sub></b> = 5 (4, 5) <br>
+<b><i>N</i><sub>Big Pine MO 2</sub></b> = 21 (20, 16) <br>
+<b><i>N</i><sub>Crook Creek</sub></b> = 13 (13, 0) <br>
+<b><i>N</i><sub>Genoa Hatchery</sub></b> = 20 (20, 0) <br>
+<b><i>N</i><sub>Meramec</sub></b> = 13 (8, 13) <br>
+<b><i>N</i><sub>Skiatook</sub></b> = 20 (20, 0) <br>
+<b><i>N</i><sub>Stockton</sub></b> = 10 (10, 10) <br>
+<b><i>N</i><sub>Tablerock</sub></b> = 20 (19, 16) <br>
+<b><i>N</i><sub>Tavern</sub></b> = 5 (0, 5) <br>
+<b><i>N</i><sub>White</sub></b> = 3 (3, 0) <br>
+
+<b>Spotted Bass (no phenotype data)</b>
+<b><i>N</i><sub>Illinois, Elk, and Honey</sub></b> = 4 (4, 0) <br>
+<b><i>N</i><sub>Illinois</sub></b> = 17 (17, 0) <br>
+<b><i>N</i><sub>Spring River</sub></b> = 12 (12, 0) <br>
+
+
+This information is the basis for Table 1 in the Results section of the final ms.
+
+### ----------------------- ## PHASE 2: DATA SUMMARY AND ENUMERATION ----------------------- ###

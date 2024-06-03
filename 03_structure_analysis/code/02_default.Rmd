@@ -1,0 +1,392 @@
+---
+title: "Analysis 2 - Phase 2: Structure analysis with default STRUCTURE parameters"
+author: "Joe Gunn"
+date: "2022-08-13"
+output: html_document
+---
+
+# Project: Population genetic structure and morphological differentiation between Northern Smallmouth Bass (<i>Micropterus dolomieu dolomieu</i>) and Neosho Smallmouth Bass (<i>M. d. velox</i>)
+We investigated patterns of genetic (via microsatellites) and morphological diversity, differentiation, and structure across Smallmouth Bass populations (<i>Micropterus dolomieu</i>) in the Central Interior Highlands (CIH) of North America, including the two recognized subspecies: Northern Smallmouth Bass (<i>M. d. dolomieu</i>), which is native to the lower Ozark Highlands, and Neosho Smallmouth Bass (<i>M. d. velox</i>), which is endemic to tributaries of the Arkansas River Basin. We compared three independent combinations of starting parameters in the Bayesian clustering software program STRUCTURE to ascertain a robust picture of hierarchical genetic structure in the CIH. We paired these data with genetic diversity metrics (e.g., observed and expected heterozygosity and allelic richness) to determine relative amounts of variation across geographically separated populations. We then assessed differentiation in five morphometric and meristic traits. We ultimately aimed to validate or amend the taxonomic status of the Smallmouth Bass subspecies by revealing potential ecological and evolutionary divergence between them, with the hope that increased taxonomic resolution would provide insight into the presence and distribution of evolutionary significant and management units for a popular sportfish.
+
+## Specific Aim: Hierarchical structure analysis with three independent methods
+For this aim, we use Bayesian clustering analysis and genotypes from 14 microsatellite loci with STRUCTURE (see citation below in under "Programs Needed") to assess patterns hierarchical genetic structure among and within black bass species (i.e., Spotted Bass and Smallmouth Bass) and subspecies (i.e., Northern Smallmouth Bass and Neosho Smallmouth Bass) in the CIH. To maximize our ability to ascertain potentially complex or cryptic levels of genetic diversity, we employ and integrate three independent "methods" within STRUCTURE, which each use either different starting parameters for identifying genetic clusters or different inference techniques for determining the optimal number of clusters: 1) <i>default parameters</i> (default parameters in STRUCUTRE); 2) <i>Wang parameters</i> (parameters recommended by Wang (2017); and 3) <i>Puechmaille metrics</i> (optimal cluster inference method recommended by Puechmaille 2016).
+
+### Libraries needed for analysis
+```{r}
+library(tidyverse)
+library(cowplot)
+library(readxl)
+library(writexl)
+library(pophelper)
+```
+
+## PHASE 2: STRUCTURE ANALYSIS WITH DEFAULT STRUCTURE PARAMETERS
+In this phase of analysis, we are assessing hierarchical population genetic structure among Spotted Bass, Northern Smallmouth Bass, and Neosho Smallmouth Bass populations in the CIH using default parameter settings in the software program STRUCTURE.
+
+### STEP 1. Generate STRUCTURE files from genepop files
+Here it is important to not include the 'popgroup = ' unless it is explicitly necessary. Assigning popgroup to a dataframe with population names will cause the STRUCTURE input file to have word strings in the popdata column. Our experience is that STRUCTURE expects an integer here rather than a string, so best not to use popgroup.
+
+##### Convert genepop to STRUCTURE format: files are stored in the directory `../data/structure_data/`
+```{r}
+# Generate structure file for all samples with all SNPs
+genepop_structure("../data/genepop_data/all_samples_all_snps_genepop.txt", 
+                  locusnames = TRUE, 
+                  #popgroup = "data/genepop_data/all_samples_all_snps.csv",
+                  path = "../data/structure_data/input_data/all_samples_all_snps_structure.txt")
+```
+
+<b>Details on SMB and Interior Highlands populations:</b> <br>
+N<sub>pops</sub> = 25
+
+#### 1e: Generate batch list files and shell scripts for running STRUCTURE in parallel
+In this step, we are creating batch lists of command line code to run STRUCTURE analyses in parallel. We are making a single batch list for each of our data combinations (generated above; 'spb_other', 'smb_ih', 'ih', 'ouachita_little', 'ouachita', 'little'). Each batch list will contain a separate line of code to run a single replicate at an a priori determined number of populations (<i>K</i>, listed in the chunk above for each dataset). We will run each analysis in 10 replicates at each <i>K</i>, e.g.:
+
+structure -K 1 -m mainparams -e extraparams -i structure_input.txt -o structure_output_1_1
+structure -K 1 -m mainparams -e extraparams -i structure_input.txt -o structure_output_1_2
+structure -K 1 -m mainparams -e extraparams -i structure_input.txt -o structure_output_1_3
+structure -K 1 -m mainparams -e extraparams -i structure_input.txt -o structure_output_1_4
+structure -K 1 -m mainparams -e extraparams -i structure_input.txt -o structure_output_1_5
+.
+.
+.
+structure -K 1 -m mainparams -e extraparams -i structure_input.txt -o structure_output_1_10
+structure -K 2 -m mainparams -e extraparams -i structure_input.txt -o structure_output_2_1
+structure -K 2 -m mainparams -e extraparams -i structure_input.txt -o structure_output_2_2
+.
+.
+.
+where, in the output name, the first number represents the <i>K</i> value for the run, and the last number represents the replicate.
+
+##### 1e.1. Generate batch list file; run the Rmd chunk below:
+The Rmd chunk below generates a list of commands that contains the full cluster paths (/home/data/...) for necessary files.
+
+##### Generate batch commands: `batch_cmd_lists/all_samples_all_snps_structure_batch_cmd_list.txt`
+```{r}
+nk <- data.frame(c(1:25))
+nreps <- data.frame(c(1:10))
+
+cat("", file="batch_cmd_lists/all_samples_all_snps_structure_batch_cmd_list.txt")
+
+# Run loop to create file for storing commands
+for(ii in 1:nrow(nk)) {
+
+  for(aa in 1:nrow(nreps)) {
+    
+    structure_call <- paste("structure ")
+
+    param_files <- paste(" -m /home/jcg5g9/data/SNOLH_Genomics/structure_analysis/data/structure_data/param_files/mainparams_all_samples_all_snps -e /home/jcg5g9/data/SNOLH_Genomics/structure_analysis/data/structure_data/param_files/extraparams")
+
+    input <- paste(" -i /home/jcg5g9/data/SNOLH_Genomics/structure_analysis/data/structure_data/input_data/all_samples_all_snps_structure.txt")
+  
+    output <- paste(" -o /home/jcg5g9/data/SNOLH_Genomics/structure_analysis/data/structure_data/output_data/all_samples_all_snps_structure_output/")
+  
+    cat(paste(structure_call, "-K ", nk[ii,], param_files, input, output,
+            strsplit("all_samples_all_snps_structure.txt", "_structure.txt", fixed = TRUE)[[1]][1], "_", nk[ii,], "_", nreps[aa,], sep=""),
+      "\n", 
+      file = paste("batch_cmd_lists/all_samples_all_snps_structure_batch_cmd_list.txt"),
+      append = TRUE)
+  }
+}
+```
+
+##### 1e.2. Generate shell script; run the Rmd chunk below
+
+##### IMPORTANT NOTE: This shell script was generated on the server directly, and thus the Rmd chunk below does not need to be run to generate the file. This is purely to keep a record of each script file. 
+
+##### Generate batch commands: `shell_scripts/spb_other_structure.sh`
+```{r}
+#!/bin/bash
+#-------------------------------------------------------------------------------
+#  SBATCH CONFIG
+#-------------------------------------------------------------------------------
+## resources
+#SBATCH --partition Lewis
+#SBATCH --nodes=1
+#SBATCH --ntasks=1  # used for MP#SBATCH -e error_%A_%a.err # Standard errorI codes, otherwise leav$
+##SBATCH --cpus-per-task=12  # cores per task
+#SBATCH --mem-per-cpu=16G  # memory per core (default is 1GB/core)
+#SBATCH --time 2-00:00  # days-hours:minutes
+#SBATCH --qos=normal
+#SBATCH --array=23-220
+
+## labels and outputs
+#SBATCH --job-name=snolh_structure_jgunn
+#
+#SBATCH -o test_%A_%a.out # Standard output
+#SBATCH -e error_%A_%a.err # Standard error
+
+## notifications
+#SBATCH --mail-user=jcg5g9@mail.missouri.edu  # email address for notifications
+#SBATCH --mail-type=END,FAIL  # which type of notifications to send
+#-------------------------------------------------------------------------------
+
+#echo "### Starting at: $(date) ###"
+
+
+# load packages
+#module load rss/rss-2020
+#module load structure/structure-2.3.4
+
+#COMMANDA=`head -n ${SLURM_ARRAY_TASK_ID} ../batch_cmd_lists/all_samples_all_snps_structure_batch_cmd_list.txt | tail -n 1`
+#eval $COMMANDA
+
+
+#echo "### Ending at: $(date) ###"
+```
+
+#### 1f: Prepare mainparam and extraparam files for STRUCTURE.
+In this step, we are preparing the mainparam and extraparam input files for STRUCTURE so that they are unique to each analysis we are running.
+
+##### 1f.1. Edit base mainparam STRUCTURE file (downloaded with STRUCTURE program) and generate a separate, unique mainparam file.
+
+<b>mainparam file:</b> <br>
+`../data/structure_data/param_files/mainparams_all_samples_all_snps` <br> 
+
+###### 1f.1.1. Edit "maxpops" value to reflect the number of populations designated in Step 3b above. These values should be the following:
+
+<b>Populations:</b> 25 <br>
+
+###### 1f.1.2. Set the number of burn-in and MCMC iterations to run; these are the same for each analysis:
+
+<b>Burn-in runs:</b> 500,000 <br>
+<b>MCMC runs:</b> 1,000,000 <br>
+
+###### 1f.1.3. Set the number of individuals. These values should be the following:
+
+<b>Individuals:</b> 472 <br>
+
+###### 1f.1.4 Set the number of loci. These values should be the following:
+
+<b>Loci:</b> 186 <br>
+
+###### 1f.1.5. Set 'ONEROWPERIND' to '0'
+
+###### 1f.1.6. Set 'LABEL' to '1'
+
+###### 1f.1.7. Set 'POPDATA' to '1'
+
+###### 1f.1.8. Set 'POPFLAG' to '0'
+
+##### 1f.2. Edit base extraparam STRUCTURE file (downloaded with STRUCTURE program).
+We did not change any of the default settings in the extraparams file (most importantly, we used the default admixture model), so we only used a single extraparams file.
+
+<b>extraparam file:</b> <br>
+`../data/structure_data/param_files/extraparams` <br> 
+
+### STEP 2: Population Structure Analysis with STRUCTURE
+
+See `snolh_structure_analysis.Rmd` (Line 166) for programs needed for analysis.
+
+#### 2a: Run STRUCTURE analysis using the input data generated in STEP 1. Navigate to `shell_scripts/` Be sure that all relative and full paths to all input files and output destination directories are set up properly (ideally, this is already done within this GitHub repo). This command line code assumes capability to run the code using SLURM or a SLURM-like cluster scheduling software.
+
+Run `sbatch all_samples_all_snps_structure.sh`
+
+#### 2b: Structure output files are generated and stored here: `../data/structure_data/output_data/all_samples_all_snps_structure_output/`.
+
+#### 2c: Compress output directory into a zip file compatible with Structure Selector (Li and Liu 2017) or Structure Harvester (Earl and vonHoldt 2011) online
+
+#### 2d: Submit zip directory to Structure Selector or Structure Harvester to extract summary results
+
+#### 2e: Visualize STRUCTURE runs for all data combinations
+
+##### 2e.1. Convert STRUCTURE files into aligned Q files compatible with analysis in the program CLUMPP (Jakobbson and Rosenberg 2007); run the rmd chunk below.
+
+##### Convert STRUCTURE files to aligned Q files for CLUMPP: 
+```{r}
+# Get a list of structure files for each data combination
+all_sfiles <- list.files("../data/structure_data/output_data/all_samples_all_snps_structure_output/", 
+                               full.names = T)
+
+# Extract q value information (ancestry proportions) from each run for each K value for each individual from the STRUCTURE output files in the directories listed above
+all_Q <- readQ(all_sfiles)
+
+# Tabulate information from the q lists
+all_tab <- tabulateQ(all_Q)
+
+# Summarize information from tabultions above
+all_summary <- summariseQ(all_tab)
+
+# Extract deltaK and associated summary information using Evanno method
+all_evanno <- evannoMethodStructure(all_summary, returnplot = F)
+
+# Set infinity and NA to zero arbitrarily
+all_evanno$deltaK[all_evanno$deltaK == "Inf"] <- 0
+all_evanno$deltaK[is.na(all_evanno$deltaK)] <- 0
+
+# Write Evanno table to Excel table for manuscript preparation.
+
+## Convert to data frame
+all_evanno <- as.data.frame(all_evanno)
+
+## Write Excel file
+write_xlsx(all_evanno, "../data/structure_data/deltak_data/all_deltak.xlsx")
+
+# Align replicate runs for each K to correct label switching
+all_align <- alignK(all_Q)
+```
+
+##### 2e.2. Export CLUMPP compatible files for CLUMPP analysis; run the rmd chunk below to export CLUMPP associated files for each K.
+
+<b>We used the following parameters: </b> <br>
+
+Large-K-Greedy algorithm (paramrep = 3) <br>
+10,000 replicates <br>
+
+### IMPORTANT NOTE: This step only needs to be run ONCE to generate files for CLUMPP. Once you have run this chunk, move on to Step 2e.3. Uncomment each line to run this code.
+
+##### Export CLUMPP files:
+```{r}
+clumppExport(all_align, 
+            parammode = 3, 
+            paramrep = 10000,
+            exportpath = "../data/structure_data/clumpp_data/all_samples_all_snps_clumpp")
+```
+
+The code above generates a .txt file (pop_K#-combined.txt) with combined cluster ancestry proportions for each individual at each K and stores it in a separate directory labeled "pop_K#", where '#' is the corresponding K value. Additionally, the code generates an accompanying "paramfile" that is input for CLUMPP, which contains information on parameters to generate merged datasets across our 10 replicates at each K.
+
+##### 2e.3. Generate merged Q files using CLUMPP.
+In this step, we used the software program CLUMPP (Jakobbson and Rosenberg 2007) to merge cluster ancestry proportion inferences for all replicate runs of each K across individuals. We downloaded the Linux 64-bit build of CLUMPP v.1.1.2 and installed it on our computing cluster. We then executed the program for each analysis by sequentially copying the associated paramfiles generated in the clumppExport function (see section above) to the CLUMPP home directory. All output files were then moved to the corresponding structure directory.
+
+###### 2e.3.1. Downolad CLUMPP and install on cluster; navigate to the desired directory: `code`. Run the command: `wget https://rosenberglab.stanford.edu/software/CLUMPP_Linux64.1.1.2.tar.gz`
+
+###### 2e.3.2. Run the command: `gunzip CLUMPP_Linux64.1.1.2.tar.gz`
+
+###### 2e.3.3. Run the command: `tar -xvf CLUMPP_Linux64.1.1.2.tar`
+
+###### 2e.3.4. For each analysis separately, copy the 'pop_K#-combined.txt' file and 'paramfile' over to the CLUMPP directory (`CLUMPP_Linux64.1.1.2`)
+
+###### 2e.3.5. For each analysis separately, execute CLUMPP on the paramfile; run the code `./CLUMPP paramfile`
+We are running this code with GREEDY OPTION 2, which uses random sampling of replicate runs. 
+
+This code generates three additional files, which we moved back to the corresponding pop_K folder in the clumpp_data directory:
+
+<b>Files generated: </b> <br>
+
+pop_K#-combined-miscfile.txt <br>
+pop_K#-combined-merged.txt <br>
+pop_K#-combined-aligned.txt <br>
+
+##### 2e.4. Plot deltaK results and STRUCTURE runs at best K value (according to deltak statistic) for each analysis; run the rmd chunk below.
+The Evanno (deltaK) method conferred the highest relative support to <i>K</i>=3 clusters (6.507094e+04
+), but also gave support for <i>K</i>=5 clusters (1.570570e+03). The Puechmaille method of inference gave full support for <i>K</i>=10. Thus we generate plots for each of these <i>K</i> values
+
+##### STRUCTURE results for all samples and all snps: 1) `01_all_deltaK.pdf`; 2) `01_all_k3.pdf`; 3) `01_all_k5.pdf`
+```{r}
+# DeltaK results
+pdf("../figures/structure_figures/deltak_plots/01_all_samples_all_snps_deltaK.pdf", width = 8, height = 5)
+
+ggplot(all_evanno, aes(x = k, y = deltaK)) +
+  geom_point() + 
+  geom_line() +
+  theme_cowplot(theme_set(12)) +
+  geom_vline(xintercept = 3, color = "blue", size = 1) +
+  geom_vline(xintercept = 5, color = "red", size = 1, linetype = "longdash") +
+  theme(axis.text = element_text(size = 15)) +
+  theme(axis.title = element_text(size = 15)) +
+  theme(axis.title.x = element_text(face = "italic")) +
+  labs(x = "K", y = "deltaK") + 
+  scale_x_continuous("K", labels = as.character(all_evanno$k), breaks = all_evanno$k)
+
+dev.off()
+
+# Read in combined-merged Q table from CLUMPP
+all_samples_all_snps_k3 <- readQ("../data/structure_data/clumpp_data/all_samples_all_snps_clumpp/pop_K3/pop_K3-combined-merged.txt")
+
+# Visualize Structure
+plotQ(all_samples_all_snps_k3,
+      grplab = all_samples_all_snps[,c(13,7)],
+      ordergrp = F,
+      selgrp = "river",
+      showgrplab = T,
+      showlegend = F, 
+      showsp = F, 
+      showdiv = T, 
+      divsize = 2, 
+      divtype = 1,
+      divcol = "black",  
+      grplabsize = 4, 
+      grplabangle = 45,
+      grplabjust = 0.5,
+      legendkeysize = 15, 
+      linealpha = 0,
+      legendtextsize = 10, 
+      linesize = 0.05, 
+      pointsize = 4, 
+      barbordercolour = "black",
+      barbordersize = 0.1, 
+      clustercol = c("firebrick1", "goldenrod1","forestgreen"),
+      exportplot = T,
+      imgtype = "pdf",
+      height = 10, 
+      width = 100,
+      outputfilename = "01_all_samples_all_snps_k3",
+      exportpath = "../figures/structure_figures/q_plots")
+
+# Read in merged Q value table for K=5
+all_samples_all_snps_k5 <- readQ("../data/structure_data/clumpp_data/all_samples_all_snps_clumpp/pop_K5/pop_K5-combined-merged.txt")
+
+# Visualize Structure
+plotQ(all_samples_all_snps_k5,
+      grplab = all_samples_all_snps[,c(13,7)],
+      ordergrp = F,
+      selgrp = "river",
+      showgrplab = T,
+      showlegend = F, 
+      showsp = F, 
+      showdiv = T, 
+      divsize = 2, 
+      divtype = 1,
+      divcol = "black",  
+      grplabsize = 4, 
+      grplabangle = 45,
+      grplabjust = 0.5,
+      legendkeysize = 15, 
+      linealpha = 0,
+      legendtextsize = 10, 
+      linesize = 0.05, 
+      pointsize = 4, 
+      barbordercolour = "black",
+      barbordersize = 0.1, 
+      clustercol = c("firebrick1", "goldenrod1","deepskyblue1", "darkorchid1", "forestgreen"),
+      exportplot = T,
+      imgtype = "pdf",
+      height = 10, 
+      width = 100,
+      outputfilename = "01_all_samples_all_snps_k5",
+      exportpath = "../figures/structure_figures/q_plots")
+
+# Read in merged Q value table for K=10
+all_samples_all_snps_k10 <- readQ("../data/structure_data/clumpp_data/all_samples_all_snps_clumpp/pop_K10/pop_K10-combined-merged.txt")
+
+# Visualize Structure
+plotQ(all_samples_all_snps_k10,
+      grplab = all_samples_all_snps[,c(13,7)],
+      ordergrp = F,
+      selgrp = "river",
+      showgrplab = T,
+      showlegend = F, 
+      showsp = F, 
+      showdiv = T, 
+      divsize = 2, 
+      divtype = 1,
+      divcol = "black",  
+      grplabsize = 4, 
+      grplabangle = 45,
+      grplabjust = 0.5,
+      legendkeysize = 15, 
+      linealpha = 0,
+      legendtextsize = 10, 
+      linesize = 0.05, 
+      pointsize = 4, 
+      barbordercolour = "black",
+      barbordersize = 0.1, 
+      clustercol = c("lightyellow", "darkorchid1", "goldenrod1", "forestgreen", "deeppink2", "lightgreen", "chocolate1", "deepskyblue1", "sienna4", "firebrick1"),
+      exportplot = T,
+      imgtype = "pdf",
+      height = 10, 
+      width = 100,
+      outputfilename = "01_all_samples_all_snps_k10",
+      exportpath = "../figures/structure_figures/q_plots")
+```
+
+## ------------------------ END OF PHASE 1 OF STRUCTURE AND HYBRID ASSIGNMENT ANALYSIS ----------------------- ##
