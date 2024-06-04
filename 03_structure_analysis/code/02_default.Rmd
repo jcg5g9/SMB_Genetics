@@ -21,25 +21,10 @@ library(pophelper)
 ```
 
 ## PHASE 2: STRUCTURE ANALYSIS WITH DEFAULT STRUCTURE PARAMETERS
-In this phase of analysis, we are assessing hierarchical population genetic structure among Spotted Bass, Northern Smallmouth Bass, and Neosho Smallmouth Bass populations in the CIH using default parameter settings in the software program STRUCTURE.
+In this phase of analysis, we are assessing hierarchical population genetic structure among Spotted Bass, Northern Smallmouth Bass, and Neosho Smallmouth Bass populations in the CIH using default parameter settings in the software program STRUCTURE. 
 
-### STEP 1. Generate STRUCTURE files from genepop files
-Here it is important to not include the 'popgroup = ' unless it is explicitly necessary. Assigning popgroup to a dataframe with population names will cause the STRUCTURE input file to have word strings in the popdata column. Our experience is that STRUCTURE expects an integer here rather than a string, so best not to use popgroup.
-
-##### Convert genepop to STRUCTURE format: files are stored in the directory `../data/structure_data/`
-```{r}
-# Generate structure file for all samples with all SNPs
-genepop_structure("../data/genepop_data/all_samples_all_snps_genepop.txt", 
-                  locusnames = TRUE, 
-                  #popgroup = "data/genepop_data/all_samples_all_snps.csv",
-                  path = "../data/structure_data/input_data/all_samples_all_snps_structure.txt")
-```
-
-<b>Details on SMB and Interior Highlands populations:</b> <br>
-N<sub>pops</sub> = 25
-
-#### 1e: Generate batch list files and shell scripts for running STRUCTURE in parallel
-In this step, we are creating batch lists of command line code to run STRUCTURE analyses in parallel. We are making a single batch list for each of our data combinations (generated above; 'spb_other', 'smb_ih', 'ih', 'ouachita_little', 'ouachita', 'little'). Each batch list will contain a separate line of code to run a single replicate at an a priori determined number of populations (<i>K</i>, listed in the chunk above for each dataset). We will run each analysis in 10 replicates at each <i>K</i>, e.g.:
+### STEP 1: Generate batch list files and shell scripts for running STRUCTURE in parallel
+In this step, we are creating batch lists of command line code to run STRUCTURE analyses in parallel. Each batch list contains a separate line of code to run a single replicate at an a priori determined number of populations (<i>K</i>, listed in the chunk above for each dataset). We run the analysis for 10 replicates at each <i>K</i>, e.g.:
 
 structure -K 1 -m mainparams -e extraparams -i structure_input.txt -o structure_output_1_1
 structure -K 1 -m mainparams -e extraparams -i structure_input.txt -o structure_output_1_2
@@ -60,12 +45,12 @@ where, in the output name, the first number represents the <i>K</i> value for th
 ##### 1e.1. Generate batch list file; run the Rmd chunk below:
 The Rmd chunk below generates a list of commands that contains the full cluster paths (/home/data/...) for necessary files.
 
-##### Generate batch commands: `batch_cmd_lists/all_samples_all_snps_structure_batch_cmd_list.txt`
+##### Generate batch commands: `batch_cmd_lists/default_batch_cmd_list.txt`
 ```{r}
-nk <- data.frame(c(1:25))
+nk <- data.frame(c(1:28))
 nreps <- data.frame(c(1:10))
 
-cat("", file="batch_cmd_lists/all_samples_all_snps_structure_batch_cmd_list.txt")
+cat("", file="batch_cmd_lists/default_batch_cmd_list.txt")
 
 # Run loop to create file for storing commands
 for(ii in 1:nrow(nk)) {
@@ -74,16 +59,16 @@ for(ii in 1:nrow(nk)) {
     
     structure_call <- paste("structure ")
 
-    param_files <- paste(" -m /home/jcg5g9/data/SNOLH_Genomics/structure_analysis/data/structure_data/param_files/mainparams_all_samples_all_snps -e /home/jcg5g9/data/SNOLH_Genomics/structure_analysis/data/structure_data/param_files/extraparams")
+    param_files <- paste(" -m /home/jcg5g9/data/SMB_Genetics/03_structure_analysis/data/structure_data/param_files/mainparams_default -e /home/jcg5g9/data/SMB_Genetics/03_structure_analysis/data/structure_data/param_files/extraparams_default")
 
-    input <- paste(" -i /home/jcg5g9/data/SNOLH_Genomics/structure_analysis/data/structure_data/input_data/all_samples_all_snps_structure.txt")
+    input <- paste(" -i /home/jcg5g9/data/SMB_Genetics/03_structure_analysis/data/structure_data/input_data/structure.txt")
   
-    output <- paste(" -o /home/jcg5g9/data/SNOLH_Genomics/structure_analysis/data/structure_data/output_data/all_samples_all_snps_structure_output/")
+    output <- paste(" -o /home/jcg5g9/data/SMB_Genetics/03_structure_analysis/data/structure_data/output_data/structure_output_default/")
   
     cat(paste(structure_call, "-K ", nk[ii,], param_files, input, output,
-            strsplit("all_samples_all_snps_structure.txt", "_structure.txt", fixed = TRUE)[[1]][1], "_", nk[ii,], "_", nreps[aa,], sep=""),
+            strsplit("default_structure.txt", "_structure.txt", fixed = TRUE)[[1]][1], "_", nk[ii,], "_", nreps[aa,], sep=""),
       "\n", 
-      file = paste("batch_cmd_lists/all_samples_all_snps_structure_batch_cmd_list.txt"),
+      file = paste("batch_cmd_lists/default_structure_batch_cmd_list.txt"),
       append = TRUE)
   }
 }
@@ -102,7 +87,7 @@ for(ii in 1:nrow(nk)) {
 ## resources
 #SBATCH --partition Lewis
 #SBATCH --nodes=1
-#SBATCH --ntasks=1  # used for MP#SBATCH -e error_%A_%a.err # Standard errorI codes, otherwise leav$
+#SBATCH --ntasks=1  # used for MP#SBATCH -e error_%A_%a.err # Standard error codes, otherwise leav$
 ##SBATCH --cpus-per-task=12  # cores per task
 #SBATCH --mem-per-cpu=16G  # memory per core (default is 1GB/core)
 #SBATCH --time 2-00:00  # days-hours:minutes
@@ -127,7 +112,7 @@ for(ii in 1:nrow(nk)) {
 #module load rss/rss-2020
 #module load structure/structure-2.3.4
 
-#COMMANDA=`head -n ${SLURM_ARRAY_TASK_ID} ../batch_cmd_lists/all_samples_all_snps_structure_batch_cmd_list.txt | tail -n 1`
+#COMMANDA=`head -n ${SLURM_ARRAY_TASK_ID} ../batch_cmd_lists/default_structure_batch_cmd_list.txt | tail -n 1`
 #eval $COMMANDA
 
 

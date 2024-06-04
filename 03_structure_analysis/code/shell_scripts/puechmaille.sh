@@ -10,7 +10,7 @@
 #SBATCH --mem-per-cpu=16G  # memory per core (default is 1GB/core)
 #SBATCH --time 2-00:00  # days-hours:minutes
 #SBATCH --qos=normal
-#SBATCH --array=1-180
+#SBATCH --array=1-260
 
 ## labels and outputs
 #SBATCH --job-name=snolh_structure_jgunn
@@ -30,7 +30,7 @@ echo "### Starting at: $(date) ###"
 module load rss/rss-2020
 module load structure/structure-2.3.4
 
-COMMANDA=`head -n ${SLURM_ARRAY_TASK_ID} ../batch_cmd_lists/ih_structure_batch_cmd_list.txt | tail -n 1`
+COMMANDA=`head -n ${SLURM_ARRAY_TASK_ID} ../batch_cmd_lists/spb_other_structure_batch_cmd_list.txt | tail -n 1`
 eval $COMMANDA
 
 
