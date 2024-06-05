@@ -53,7 +53,7 @@ The Rmd chunk below generates a list of commands that contains the full cluster 
 nk <- data.frame(c(1:28))
 nreps <- data.frame(c(1:10))
 
-cat("", file="code/batch_cmd_lists/prelim_batch_cmd_list.txt")
+cat("", file="batch_cmd_lists/prelim_batch_cmd_list.txt")
 
 # Run loop to create file for storing commands
 for(ii in 1:nrow(nk)) {
@@ -66,12 +66,12 @@ for(ii in 1:nrow(nk)) {
 
     input <- paste(" -i /home/jcg5g9/data/SMB_Genetics/03_structure_analysis/data/structure_data/input_data/structure.txt")
   
-    output <- paste(" -o /home/jcg5g9/data/SMB_Genetics/03_structure_analysis/data/structure_data/output_data/output_prelim/")
+    output <- paste(" -o /home/jcg5g9/data/SMB_Genetics/03_structure_analysis/data/structure_data/output_data/prelim/")
   
     cat(paste(structure_call, "-K ", nk[ii,], param_files, input, output,
             strsplit("prelim_structure.txt", "_structure.txt", fixed = TRUE)[[1]][1], "_", nk[ii,], "_", nreps[aa,], sep=""),
       "\n", 
-      file = paste("code/batch_cmd_lists/prelim_batch_cmd_list.txt"),
+      file = paste("batch_cmd_lists/prelim_batch_cmd_list.txt"),
       append = TRUE)
   }
 }

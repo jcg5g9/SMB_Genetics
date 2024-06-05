@@ -50,7 +50,7 @@ The Rmd chunk below generates a list of commands that contains the full cluster 
 
 ##### Generate batch commands: `batch_cmd_lists/default_batch_cmd_list.txt`
 ```{r}
-nk <- data.frame(c(1:28))
+nk <- data.frame(c(1:15))
 nreps <- data.frame(c(1:10))
 
 cat("", file="batch_cmd_lists/default_batch_cmd_list.txt")
@@ -66,12 +66,12 @@ for(ii in 1:nrow(nk)) {
 
     input <- paste(" -i /home/jcg5g9/data/SMB_Genetics/03_structure_analysis/data/structure_data/input_data/structure.txt")
   
-    output <- paste(" -o /home/jcg5g9/data/SMB_Genetics/03_structure_analysis/data/structure_data/output_data/structure_output_default/")
+    output <- paste(" -o /home/jcg5g9/data/SMB_Genetics/03_structure_analysis/data/structure_data/output_data/default/")
   
     cat(paste(structure_call, "-K ", nk[ii,], param_files, input, output,
             strsplit("default_structure.txt", "_structure.txt", fixed = TRUE)[[1]][1], "_", nk[ii,], "_", nreps[aa,], sep=""),
       "\n", 
-      file = paste("batch_cmd_lists/default_structure_batch_cmd_list.txt"),
+      file = paste("batch_cmd_lists/default_batch_cmd_list.txt"),
       append = TRUE)
   }
 }
