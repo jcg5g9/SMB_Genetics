@@ -1,5 +1,5 @@
 ---
-title: "Analysis 2 - Phase 4: Structure analysis using Puechmaille inference metrics"
+title: "Analysis 2: Phase 2: Model 4 - Structure analysis using Puechmaille inference metrics"
 author: "Joe Gunn"
 date: "2022-08-13"
 output: html_document
@@ -19,6 +19,14 @@ library(readxl)
 library(writexl)
 library(pophelper)
 ```
+
+## PHASE 2: STRUCTURE ANALYSIS 
+In this phase of analysis, we are assessing hierarchical population genetic structure among Spotted Bass, Northern Smallmouth Bass, and Neosho Smallmouth Bass populations in the CIH using three independent "models" in the software program STRUCTURE following a preliminary screening (Model 1) of genetic structure: Model 2) <i>Default parameters</i>, in which we use default parameter settings in STRUCTURE; Model 3) <i>Wang parameters</i>, in which we use parameter settings in STRUCTURE recommended by Wang (2017); and Model 4) <i>Puechmaille metrics</i>, in which we use default parameter settings but infer population structure using metrics recommended by Puechmaille et al. (2016).
+
+### STEP 4: Run Model 4 - Puechmaille metrics
+In this step, we conduct a full analysis in STRUCTURE using default parameter settings for <i>K</i> = 1-15 possible clusters (based no Model 1; see Step 1 in `01_prelim.Rmd`) but inferring population structure using metrics recommended by Puechmaille et al. (2016).
+
+
 
 ## PHASE 4: STRUCTURE ANALYSIS WITH PUECHMAILLE INFERENCE METRICS
 In this phase of analysis, we are assessing hierarchical population genetic structure among Spotted Bass, Northern Smallmouth Bass, and Neosho Smallmouth Bass populations in the CIH using default STRUCTURE parameter settings, but inferring optimal number of genetic clusters using inference metrics developed by Puechmaille (2017).
