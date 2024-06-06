@@ -45,7 +45,7 @@ structure -K 2 -m mainparams -e extraparams -i structure_input.txt -o structure_
 .
 where, in the output name, the first number represents the <i>K</i> value for the run, and the last number represents the replicate.
 
-#### 3b. Generate batch list file; run the Rmd chunk below:
+##### 1a.1 Generate batch list file; run the Rmd chunk below:
 The Rmd chunk below generates a list of commands that contains the full cluster paths (/home/data/...) for necessary files.
 
 ##### Generate batch commands: `batch_cmd_lists/prelim_batch_cmd_list.txt`
@@ -77,7 +77,7 @@ for(ii in 1:nrow(nk)) {
 }
 ```
 
-#### 3c. Generate shell script; run the Rmd chunk below:
+##### 1a.2. Generate shell script; run the Rmd chunk below:
 
 ##### IMPORTANT NOTE: This shell script was generated on the server directly, and thus the Rmd chunk below does not need to be run to generate the file. This is purely to keep a record of each script file. 
 
@@ -121,98 +121,102 @@ for(ii in 1:nrow(nk)) {
 #echo "### Ending at: $(date) ###"
 ```
 
-#### 3d: Prepare mainparam and extraparam files for STRUCTURE.
+#### 1b. Prepare mainparam and extraparam files for STRUCTURE.
 In this step, we are preparing the mainparam and extraparam input files for STRUCTURE so that they are unique to each analysis we are running.
 
-##### 3d.1. Edit base mainparam STRUCTURE file (downloaded with STRUCTURE program) and generate a separate, unique mainparam file.
+##### 1b.1. Edit base mainparam STRUCTURE file (downloaded with STRUCTURE program) and generate a separate, unique mainparam file.
 
 <b>mainparam file:</b> <br>
 `../data/structure_data/param_files/mainparams_prelim` <br> 
 
-###### 3d.1.1. Edit "maxpops" value to reflect the number of populations designated in Step 3b above. These values should be the following:
+###### 1b.1.1. Edit "maxpops" value to reflect the number of populations designated in Step 3b above. These values should be the following:
 
 <b>Populations:</b> 28 <br>
 
-###### 3d.1.2. Set the number of burn-in and MCMC iterations to run; these are the same for each analysis:
+###### 1b.1.2. Set the number of burn-in and MCMC iterations to run; these are the same for each analysis:
 
 <b>Burn-in runs:</b> 500,000 <br>
 <b>MCMC runs:</b> 1,000,000 <br>
 
-###### 3d.1.3. Set the number of individuals.
+###### 1b.1.3. Set the number of individuals.
 
 <b>Individuals:</b> 766 <br>
 
-###### 3d.1.4 Set the number of loci.
+###### 1b.1.4 Set the number of loci.
 
 <b>Loci:</b> 14 <br>
 
-###### 3d.1.5. Set 'ONEROWPERIND' to '0'
+###### 1b.1.5. Set 'ONEROWPERIND' to '0'
 
-###### 3d.1.6. Set 'LABEL' to '1'
+###### 1b.1.6. Set 'LABEL' to '1'
 
-###### 3d.1.7. Set 'POPDATA' to '1'
+###### 1b.1.7. Set 'POPDATA' to '1'
 
-###### 3d.1.8. Set 'POPFLAG' to '0'
+###### 1b.1.8. Set 'POPFLAG' to '0'
 
-##### 3d.2. Edit base extraparam STRUCTURE file (downloaded with STRUCTURE program).
+##### 1b.2. Edit base extraparam STRUCTURE file (downloaded with STRUCTURE program).
 We did not change any of the default settings in the extraparams file (most importantly, we used the default admixture model), so we only used a single extraparams file.
 
 <b>extraparam file:</b> <br>
-`../data/structure_data/param_files/extraparams` <br> 
+`../data/structure_data/param_files/extraparams_prelim` <br> 
 
-### STEP 4: Population Structure Analysis with STRUCTURE
+#### 1c. Population Structure Analysis with STRUCTURE
 
-See `snolh_structure_analysis.Rmd` (Line 166) for programs needed for analysis.
+See `smb_genetics_structure_analysis.Rmd` (Line 19) for programs needed for analysis.
 
-#### 2a: Run STRUCTURE analysis using the input data generated in STEP 1. Navigate to `shell_scripts/` Be sure that all relative and full paths to all input files and output destination directories are set up properly (ideally, this is already done within this GitHub repo). This command line code assumes capability to run the code using SLURM or a SLURM-like cluster scheduling software.
+##### 1c.1. Run STRUCTURE analysis using the input data generated in PHASE 1 (`smb_genetics_structure_analysis.Rmd`). Navigate to `shell_scripts/` Be sure that all relative and full paths to all input files and output destination directories are set up properly (ideally, this is already done within this GitHub repo). This command line code assumes capability to run the code using SLURM or a SLURM-like cluster scheduling software.
 
-Run `sbatch all_samples_all_snps_structure.sh`
+Run `sbatch prelim_structure.sh`
 
-#### 2b: Structure output files are generated and stored here: `../data/structure_data/output_data/all_samples_all_snps_structure_output/`.
+##### 1c.2. Structure output files are generated and stored here: `../data/structure_data/output_data/prelim/`.
 
-#### 2c: Compress output directory into a zip file compatible with Structure Selector (Li and Liu 2017) or Structure Harvester (Earl and vonHoldt 2011) online
+##### 1c.3. Compress output directory into a zip file compatible with Structure Selector (Li and Liu 2017) or Structure Harvester (Earl and vonHoldt 2011) online
 
-#### 2d: Submit zip directory to Structure Selector or Structure Harvester to extract summary results
+##### 1c.4. Submit zip directory to Structure Selector or Structure Harvester to extract summary results
 
-#### 2e: Visualize STRUCTURE runs for all data combinations
+##### 1c.5. Visualize STRUCTURE runs for all data combinations
 
-##### 2e.1. Convert STRUCTURE files into aligned Q files compatible with analysis in the program CLUMPP (Jakobbson and Rosenberg 2007); run the rmd chunk below.
+##### 1c.5. Convert STRUCTURE files into aligned Q files compatible with analysis in the program CLUMPP (Jakobbson and Rosenberg 2007); run the rmd chunk below.
 
 ##### Convert STRUCTURE files to aligned Q files for CLUMPP: 
 ```{r}
 # Get a list of structure files for each data combination
-all_sfiles <- list.files("../data/structure_data/output_data/all_samples_all_snps_structure_output/", 
-                               full.names = T)
+sfiles <- list.files("../data/structure_data/output_data/prelim/",
+                     full.names = T)
 
 # Extract q value information (ancestry proportions) from each run for each K value for each individual from the STRUCTURE output files in the directories listed above
-all_Q <- readQ(all_sfiles)
+Q <- readQ(sfiles)
 
 # Tabulate information from the q lists
-all_tab <- tabulateQ(all_Q)
+tab <- tabulateQ(Q)
 
 # Summarize information from tabultions above
-all_summary <- summariseQ(all_tab)
+summary <- summariseQ(tab)
 
 # Extract deltaK and associated summary information using Evanno method
-all_evanno <- evannoMethodStructure(all_summary, returnplot = F)
+evanno <- evannoMethodStructure(summary, 
+                                returnplot = F)
 
 # Set infinity and NA to zero arbitrarily
-all_evanno$deltaK[all_evanno$deltaK == "Inf"] <- 0
-all_evanno$deltaK[is.na(all_evanno$deltaK)] <- 0
+evanno$deltaK[evanno$deltaK == "Inf"] <- 0
+evanno$deltaK[is.na(evanno$deltaK)] <- 0
 
 # Write Evanno table to Excel table for manuscript preparation.
 
 ## Convert to data frame
-all_evanno <- as.data.frame(all_evanno)
+evanno <- as.data.frame(evanno)
 
 ## Write Excel file
-write_xlsx(all_evanno, "../data/structure_data/deltak_data/all_deltak.xlsx")
+write_xlsx(evanno, "../data/structure_data/deltak_data/prelim_deltak.xlsx")
 
 # Align replicate runs for each K to correct label switching
-all_align <- alignK(all_Q)
+align <- alignK(Q)
+
+# Save aligned replicates file for downstream analyses
+save(align, file = "../data/structure_data/aligned_data/default_align.Rda")
 ```
 
-##### 2e.2. Export CLUMPP compatible files for CLUMPP analysis; run the rmd chunk below to export CLUMPP associated files for each K.
+##### 1c.6. Export CLUMPP compatible files for CLUMPP analysis; run the rmd chunk below to export CLUMPP associated files for each K.
 
 <b>We used the following parameters: </b> <br>
 
@@ -222,11 +226,15 @@ Large-K-Greedy algorithm (paramrep = 3) <br>
 ### IMPORTANT NOTE: This step only needs to be run ONCE to generate files for CLUMPP. Once you have run this chunk, move on to Step 2e.3. Uncomment each line to run this code.
 
 ##### Export CLUMPP files:
-```{r}
-clumppExport(all_align, 
+```{r, echo = FALSE}
+# Load aligned structure replicate data
+load("../data/structure_data/aligned_data/default_align.Rda")
+
+# Generate clumpp formatted file
+clumppExport(align, 
             parammode = 3, 
             paramrep = 10000,
-            exportpath = "../data/structure_data/clumpp_data/all_samples_all_snps_clumpp")
+            exportpath = "../data/structure_data/clumpp_data/prelim_clumpp")
 ```
 
 The code above generates a .txt file (pop_K#-combined.txt) with combined cluster ancestry proportions for each individual at each K and stores it in a separate directory labeled "pop_K#", where '#' is the corresponding K value. Additionally, the code generates an accompanying "paramfile" that is input for CLUMPP, which contains information on parameters to generate merged datasets across our 10 replicates at each K.
