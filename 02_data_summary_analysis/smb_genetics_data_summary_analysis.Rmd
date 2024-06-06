@@ -178,10 +178,10 @@ metadata %>%
 ## By subspecies/species (native range)
 <b><i>N</i><sub>Neosho Smallmouth Bass </sub></b> = 675 <br>
 <b><i>N</i><sub>Northern Smallmouth Bass</sub></b> = 130 <br>
-<b><i>N</i><sub>Spotted Bass</sub></b> = 130 <br>
+<b><i>N</i><sub>Spotted Bass</sub></b> = 33 <br>
 
 ## Samples with genotype or phenotype data
-<b><i>N</i><sub>genotype</sub></b> = 776 <br>
+<b><i>N</i><sub>genotype</sub></b> = 766 <br>
 <b><i>N</i><sub>phenotype</sub></b> = 249 <br>
 
 ## Number of fish per site within populations (number with genotype, number with phenotype)

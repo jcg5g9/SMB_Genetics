@@ -105,9 +105,8 @@ In this step, we conduct a full analysis in STRUCTURE using default parameter se
 ### STEP 3: Run Model 3 - Wang parameters; Run the code: `code/03_wang.Rmd`
 In this step, we conduct a full analysis in STRUCTURE using parameter settings recommended by Wang (2017) for <i>K</i> = 1-15 possible clusters (based no Model 1; see Step 1 in `01_prelim.Rmd`). We assess hierarchical structure within major genetic cluster divisions (subspecies) using <i>K</i> = 1-10 (Neosho Smallmouth Bass) and <i>K</i> = 1-5 (Northern Smallmouth Bass). 
 
-### STEP 3: Run Model 4 - Puechmaille metrics; Run the code: `code/04_puechmaille.Rmd`
+### STEP 4: Run Model 4 - Puechmaille metrics; Run the code: `code/04_puechmaille.Rmd`
 In this step, we conduct a full analysis in STRUCTURE using default parameter settings for <i>K</i> = 1-15 possible clusters (based no Model 1; see Step 1 in `01_prelim.Rmd`) but inferring population structure using metrics recommended by Puechmaille et al. (2016).
-
 
 ## ------------------------ END OF PHASE 2: STRUCTURE ANALYSIS -------------------------- ##
 
