@@ -64,8 +64,6 @@ Follow Step 2a-2f closely to create a proper genepop format. Click on the text f
 
 In this step, we are reading in, checking, and converting the genepop file manually generated in STEP 1 above into a STRUCTURE formatted file. There are quite a few tricky and very specific formatting needs for the genepop text file before genepopedit will convert successfully. Follow Step 2a-2f closely to create a proper genepop format. Click on the text file manually here, in R Studio, and use Ctrl + F in R Studio to find and replace the necessary things.
 
-### IMPORTANT NOTE ON DATA: genepopedit requires that sample names be in the format 'popname_01', 'popname_02', etc. where the 'popname' is a signifier for the population of origin for the sample, and the '01', etc. are numerical designations for the samples. 'popname' and the numeric must be separated by a "_", and there can only be a single "_". Otherwise, genepopedit will not read the sample's population of origin correctly. In the case of this project, we are clumping samples together by stream for STRUCTURE analysis to see if there is substructure mapped by stream. Many sample IDs in our dataset were not in the required format, so we added an additional column to the metadata set and associated processed data sets called "structure_ID", which gives a unique sample name in the proper structure format. This column can then be linked back to any other column in downstream analyses if we need to know which specific samples the results came from. 
-
 #### 2a. All quotation marks were removed from the text file
 
 #### 2b. All "," in the genepop text files were manually replaced with " ,  "
@@ -88,7 +86,7 @@ genepop_structure("data/genepop_data/genepop.txt",
 ```
 
 <b>Details on structure file for all black bass samples:</b> <br>
-N<sub>pops</sub> = 43
+N<sub>pops</sub> = 43 <br>
 N<sub>streams/lakes</sub> = 28
 
 ## ------------------------ END OF PHASE 1: GENOTYPE DATA PREPARATION -------------------------- ##
@@ -108,12 +106,14 @@ In this step, we conduct a full analysis in STRUCTURE using parameter settings r
 ### STEP 4: Run Model 4 - Puechmaille metrics; Run the code: `code/04_puechmaille.Rmd`
 In this step, we conduct a full analysis in STRUCTURE using default parameter settings for <i>K</i> = 1-15 possible clusters (based no Model 1; see Step 1 in `01_prelim.Rmd`) but inferring population structure using metrics recommended by Puechmaille et al. (2016).
 
-## ------------------------ END OF PHASE 2: STRUCTURE ANALYSIS -------------------------- ##
+## -------------- END OF PHASE 2: STRUCTURE ANALYSIS ---------------- ##
+
+
 
 ## PHASE 3: PRINCIPAL COMPONENTS ANALYSIS
 In this phase of analysis, we visualize and infer population hierarchical structure at the species, subspecies, and population level using an alternative, model-free principal components analysis (PCA)
 
-## ------------------------ END OF PHASE 3: PRINCIPAL COMPONENTS ANALYSIS ----------- ##
+## --------------  END OF PHASE 3: PRINCIPAL COMPONENTS ANALYSIS -------------- ## 
 
-## ------------------------ END OF ANALYSIS 2: HIERARCHICAL POPULATION STRUCTURE ANALYSIS ----------------------- ##
+## --------------  END OF ANALYSIS 2: HIERARCHICAL POPULATION STRUCTURE ANALYSIS --------------  ##
 
