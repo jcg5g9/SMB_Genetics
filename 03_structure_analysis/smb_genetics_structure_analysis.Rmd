@@ -44,8 +44,10 @@ library(genepopedit)
 ## PHASE 1: GENOTYPE DATA PREPARATION
 In this phase of the analysis, we convert the raw microsatellite genotype data (`../raw_data/genotype_data.xlsx`) into Genepop-compatible format, which is read by the software program STRUCTURE in all downstream analyses. We use the same exact genepop data for each independent analysis in STRUCTURE; thus, we generate a single genepop and subsequent structure file, which includes all samples representing all collection sites.
 
+We also generate two additional genepop files to be used for substructure analysis using default STRUCTURE parameters. We generate one file with only Neosho Smallmouth Bass, and one file with only Northern Smallmouth Bass. This step follows from STRUCTURE results of Phase 2, Step 2 (default parameter model).
+
 ### STEP 1: Manually reformat Excel genotype data into genepop-compatible format.
-In this step, we opted to reformat the raw Excel microsatellite genotype data by hand in Excel, given that we could not find a working R library and/or function that converts raw genotype tables into genepop format (i.e., we attempted to use the <i>genind_to_genepop()</i> function from the package <i>graph4lg</i>, but we could not get our genind to convert properly). We follwed the steps below exactly in Excel to convert our genotype data into Genepop format, and we saved the corresponding data as a text file in the working `data` directory.
+In this step, we opted to reformat the raw Excel microsatellite genotype data by hand in Excel, given that we could not find a working R library and/or function that converts raw genotype tables into genepop format (i.e., we attempted to use the <i>genind_to_genepop()</i> function from the package <i>graph4lg</i>, but we could not get our genind to convert properly). We followed the steps below exactly in Excel to convert our genotype data into Genepop format, and we saved the corresponding data as a text file in the working `data` directory.
 
 #### 1a. Add a "," after each sample_id in the first column.
 
@@ -57,7 +59,7 @@ In this step, we opted to reformat the raw Excel microsatellite genotype data by
 
 ##### 1e. Save the Excel sheet as a .xlsx and a .txt file, with a specification that it is a "genepop" file.
 
-### STEP 2: Generate STRUCTURE formatted files from genepop format.
+### STEP 2: Generate STRUCTURE formatted file from genepop format.
 In this step, we read in, check, and convert the genepop file manually generated in STEP 1 above into a STRUCTURE formatted file. There are quite a few tricky and very specific formatting needs for the genepop text file before genepopedit will convert successfully. 
 
 Follow Step 2a-2f closely to create a proper genepop format. Click on the text file manually here, in R Studio, and use Ctrl + F in R Studio to find and replace the necessary things.

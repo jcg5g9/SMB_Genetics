@@ -25,6 +25,9 @@ library(tidyverse)
 ## PHASE 1: DATA READ-IN AND PREPARATION
 In this phase of the analysis, we read in metadata, genotype data, and phenotype data for Smallmouth Bass samples collected across the native ranges of both subspecies, Northern Smallmouth Bass (<i>Micropterus dolomieu dolomieu</i>) and Neosho Smallmouth Bass (<i>M. d. velox</i>) in the Central Interior Highlands (including some samples of Spotted Bass, <i>M. punctulatus</i>, as an outgroup), and we prepare the data for enumeration and summarization. Data summaries are presented in the Results section of the final ms.
 
+    Important note: Here, we provide (and begin with) our fully filtered metadata, phenotype data, and genotype panel. The metadata file includes all samples collected for genetic and phenotypic analysis (ranging from 66-466mm total length), with indication of whether each individual was used for either or both types of analyses. The phenotype data file includes only samples that were used for morphological analyses. The genotype data file includes 14 diploid microsatellite loci (see supplementary publication material for full table of microsatellites and accompanying metadata) for samples that passed quality filters. Locus alleles were scored semi-automatically (i.e., alleles were automatically scored if possible, but manually scored if not) in the software program GeneMarker. Genotypes were filtered by individual fish, such that DNA samples that failed to amplify at >60% of loci (9 loci) were omitted from the dataset. The dataset was checked for null and false alleles and allelic dropout in the software program Gimlet.
+
+
 ### STEP 1: Read in and clean metadata, genotype data, and phenotype data for Smallmouth Bass samples and taxonomic classification data for microbial OTUs.
 In this step, we read in previously curated metadata for Northern Smallmouth Bass and Neosho Smallmouth Bass (and Spotted Bass as an outgroup, collected from across the subspecies' native ranges in the Central Interior Highlands (`../raw_data/metadata.xlsx`).
 
@@ -65,10 +68,11 @@ save(metadata, file = "data/metadata.Rda")
 ```
 
 #### 1b. Read in and clean genotype data for the Smallmouth Bass subspecies.
-In this step, we read in the full genotype dataset (`../raw_data/genotype_data.xlsx`), comprising allelic state data for 14 microsatellite loci Data include: 
+In this step, we read in the full, filtered genotype dataset (`../raw_data/genotype_data.xlsx`), comprising allelic state data for 14 microsatellite loci. Data include: 
 
    1. "sample_id": a unique, alphanumeric ID for each fish sample
    2. 28 columns which represent pairs of three-digit numerical alleles (2 alleles, i.e., 2 columns, per locus), with the first column in each pair labeled with the locus name (e.g., mdo9), and the second column left empty "NA".
+   
    
 ##### 1b.1. Read in full genotype dataset; run the Rmd chunk below.
 
@@ -181,8 +185,8 @@ metadata %>%
 <b><i>N</i><sub>Spotted Bass</sub></b> = 33 <br>
 
 ## Samples with genotype or phenotype data
-<b><i>N</i><sub>genotype</sub></b> = 766 <br>
-<b><i>N</i><sub>phenotype</sub></b> = 249 <br>
+<b><i>N</i><sub>genotype</sub></b> = 766 (616 Neosho, 117 Northern, 33 Spotted) <br>
+<b><i>N</i><sub>phenotype</sub></b> = 249 (184 Neosho, 65 Northern, 0 Spotted) <br>
 
 ## Number of fish per site within populations (number with genotype, number with phenotype)
 <b>Neosho Smallmouth Bass</b>
