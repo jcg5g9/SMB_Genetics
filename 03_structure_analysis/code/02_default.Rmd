@@ -186,7 +186,7 @@ Run `sbatch default_structure.sh`
 ##### Convert STRUCTURE files to aligned Q files for CLUMPP: 
 ```{r}
 # Get a list of structure files for each data combination
-sfiles <- list.files("../data/structure_data/output_data/default/",
+sfiles <- list.files("../data/structure_data/output_data/default/full_data/",
                      full.names = T)
 
 # Extract q value information (ancestry proportions) from each run for each K value for each individual from the STRUCTURE output files in the directories listed above
@@ -195,7 +195,7 @@ Q <- readQ(sfiles)
 # Tabulate information from the q lists
 tab <- tabulateQ(Q)
 
-# Summarize information from tabultions above
+# Summarize information from tabulations above
 summary <- summariseQ(tab)
 
 # Extract deltaK and associated summary information using Evanno method
@@ -457,7 +457,7 @@ for(ii in 1:nrow(nk)) {
 
 ###### 2a.2.1. Generate shell script for Neosho Smallmouth Bass only; run the Rmd chunk below.
 
-##### IMPORTANT NOTE: This shell script was generated on the server directly, and thus the Rmd chunk below does not need to be run to generate the file. This is purely to keep a record of each script file. 
+##### IMPORTANT NOTE: This shell script was generated on the server directly, and thus the Rmd chunk below does not need to be run to generate the file. This is purely to keep a record of each script file.
 
 ##### Generate batch commands: `shell_scripts/default_neosho_structure.sh`
 ```{r}
@@ -617,12 +617,14 @@ Run `sbatch default_structure.sh`
 
 ##### 2c.5. Visualize STRUCTURE runs for all data combinations
 
-##### 2c.5. Convert STRUCTURE files into aligned Q files compatible with analysis in the program CLUMPP (Jakobbson and Rosenberg 2007); run the rmd chunk below
+##### 2c.5. Convert STRUCTURE files into aligned Q files compatible with analysis in the program CLUMPP (Jakobbson and Rosenberg 2007)
 
-##### Convert STRUCTURE files to aligned Q files for CLUMPP: 
+###### 2c.5.1. Convert STRUCTURE files for Neosho Smallmouth Bass samples only; run the Rmd chunk below.
+
+##### Convert STRUCTURE files for Neosho Smallmouth Bass to aligned Q files for CLUMPP: 
 ```{r}
 # Get a list of structure files for each data combination
-sfiles <- list.files("../data/structure_data/output_data/default/",
+sfiles <- list.files("../data/structure_data/output_data/default/neosho_data/",
                      full.names = T)
 
 # Extract q value information (ancestry proportions) from each run for each K value for each individual from the STRUCTURE output files in the directories listed above
@@ -631,7 +633,7 @@ Q <- readQ(sfiles)
 # Tabulate information from the q lists
 tab <- tabulateQ(Q)
 
-# Summarize information from tabultions above
+# Summarize information from tabulations above
 summary <- summariseQ(tab)
 
 # Extract deltaK and associated summary information using Evanno method
@@ -648,17 +650,57 @@ evanno$deltaK[is.na(evanno$deltaK)] <- 0
 evanno <- as.data.frame(evanno)
 
 ## save evanno file for downstream analyses
-save(evanno, file = "../data/structure_data/deltak_data/default_deltak.Rda")
+save(evanno, file = "../data/structure_data/deltak_data/default_neosho_deltak.Rda")
 
 # Align replicate runs for each K to correct label switching
 align <- alignK(Q)
 
 # Save aligned replicates file for downstream analyses
-save(align, file = "../data/structure_data/aligned_data/default_align.Rda")
+save(align, file = "../data/structure_data/aligned_data/default_neosho_align.Rda")
 ```
 
 <b>Model results</b>:
 We found strongest evidence for K=2 major clusters.
+
+###### 2c.5.2. Convert STRUCTURE files for Northern Smallmouth Bass samples only; run the Rmd chunk below.
+
+##### Convert STRUCTURE files for Northern Smallmouth Bass to aligned Q files for CLUMPP: 
+```{r}
+# Get a list of structure files for each data combination
+sfiles <- list.files("../data/structure_data/output_data/default/northern_data/",
+                     full.names = T)
+
+# Extract q value information (ancestry proportions) from each run for each K value for each individual from the STRUCTURE output files in the directories listed above
+Q <- readQ(sfiles)
+
+# Tabulate information from the q lists
+tab <- tabulateQ(Q)
+
+# Summarize information from tabulations above
+summary <- summariseQ(tab)
+
+# Extract deltaK and associated summary information using Evanno method
+evanno <- evannoMethodStructure(summary, 
+                                returnplot = F)
+
+# Set infinity and NA to zero arbitrarily
+evanno$deltaK[evanno$deltaK == "Inf"] <- 0
+evanno$deltaK[is.na(evanno$deltaK)] <- 0
+
+# Write Evanno table to Excel table for manuscript preparation.
+
+## Convert to data frame
+evanno <- as.data.frame(evanno)
+
+## save evanno file for downstream analyses
+save(evanno, file = "../data/structure_data/deltak_data/default_northern_deltak.Rda")
+
+# Align replicate runs for each K to correct label switching
+align <- alignK(Q)
+
+# Save aligned replicates file for downstream analyses
+save(align, file = "../data/structure_data/aligned_data/default_northern_align.Rda")
+```
 
 ##### 2c.6. Export CLUMPP compatible files for CLUMPP analysis; run the rmd chunk below to export CLUMPP associated files for each K.
 
