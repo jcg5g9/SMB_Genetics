@@ -1,0 +1,121 @@
+---
+title: "Analysis 2: Hierarchical population structure analysis"
+author: "Joe Gunn"
+date: "2022-07-28"
+output: html_document
+---
+
+# Project: Population genetic structure and morphological differentiation between Northern Smallmouth Bass (<i>Micropterus dolomieu dolomieu</i>) and Neosho Smallmouth Bass (<i>M. d. velox</i>)
+We investigated patterns of genetic (via microsatellites) and morphological diversity, differentiation, and structure across Smallmouth Bass populations (<i>Micropterus dolomieu</i>) in the Central Interior Highlands (CIH) of North America, including the two recognized subspecies: Northern Smallmouth Bass (<i>M. d. dolomieu</i>), which is native to the lower Ozark Highlands, and Neosho Smallmouth Bass (<i>M. d. velox</i>), which is endemic to tributaries of the Arkansas River Basin. We compared three independent combinations of starting parameters in the Bayesian clustering software program STRUCTURE to ascertain a robust picture of hierarchical genetic structure in the CIH. We paired these data with genetic diversity metrics (e.g., observed and expected heterozygosity and allelic richness) to determine relative amounts of variation across geographically separated populations. We then assessed differentiation in five morphometric and meristic traits. We ultimately aimed to validate or amend the taxonomic status of the Smallmouth Bass subspecies by revealing potential ecological and evolutionary divergence between them, with the hope that increased taxonomic resolution would provide insight into the presence and distribution of evolutionary significant and management units for a popular sportfish.
+
+## Specific Aim: Hierarchical structure analysis with three independent methods
+For this aim, we use Bayesian clustering analysis and genotypes from 14 microsatellite loci with STRUCTURE (see citation below in under "Programs Needed") to assess patterns hierarchical genetic structure among and within black bass species (i.e., Spotted Bass and Smallmouth Bass) and subspecies (i.e., Northern Smallmouth Bass and Neosho Smallmouth Bass) in the CIH. To maximize our ability to ascertain potentially complex or cryptic levels of genetic diversity, we employ and integrate three independent "methods" within STRUCTURE, which each use either different starting parameters for identifying genetic clusters or different inference techniques for determining the optimal number of clusters: 1) <i>default parameters</i> (default parameters in STRUCUTRE); 2) <i>Wang parameters</i> (parameters recommended by Wang (2017); and 3) <i>Puechmaille metrics</i> (optimal cluster inference method recommended by Puechmaille 2016).
+
+## Phases of Analysis
+### Phase 1: Genotype data preparation
+### Phase 2: Structure analysis
+### Phase 3: Principal Components Analysis
+
+Programs needed:
+
+STRUCTURE v.2.3.4. (Pritchard et al. 2000)
+
+Citation:
+
+Pritchard JK, Stephens M, Donnelly P. 2000. Inference of population structure using multilocus genotype data. Genetics 155: 945-959.
+
+CLUMPP v.1.1.2 (Jakobsson and Rosenberg 2007)
+
+Citation:
+
+Jakobsson M, Rosenberg NA. 2007. CLUMPP: A cluster matching and permutation program for dealing with label switching and multimodality in analysis of population structure. Bioinformatics 23: 1801-1806.
+
+We ran each hierarchical analysis in separate .Rmd files, which are found in the `code/` directory.
+
+## Libraries needed for analysis
+```{r}
+library(tidyverse)
+library(cowplot)
+library(readxl)
+library(writexl)
+library(genepopedit)
+```
+
+## PHASE 1: GENOTYPE DATA PREPARATION
+In this phase of the analysis, we convert the raw microsatellite genotype data (`../raw_data/genotype_data.xlsx`) into Genepop-compatible format, which is read by the software program STRUCTURE in all downstream analyses. We use the same exact genepop data for each independent analysis in STRUCTURE; thus, we generate a single genepop and subsequent structure file, which includes all samples representing all collection sites.
+
+We also generate two additional genepop files to be used for substructure analysis using default STRUCTURE parameters. We generate one file with only Neosho Smallmouth Bass, and one file with only Northern Smallmouth Bass. This step follows from STRUCTURE results of Phase 2, Step 2 (default parameter model).
+
+### STEP 1: Manually reformat Excel genotype data into genepop-compatible format.
+In this step, we opted to reformat the raw Excel microsatellite genotype data by hand in Excel, given that we could not find a working R library and/or function that converts raw genotype tables into genepop format (i.e., we attempted to use the <i>genind_to_genepop()</i> function from the package <i>graph4lg</i>, but we could not get our genind to convert properly). We followed the steps below exactly in Excel to convert our genotype data into Genepop format, and we saved the corresponding data as a text file in the working `data` directory.
+
+#### 1a. Add a "," after each sample_id in the first column.
+
+#### 1b. Insert a row above each new population in the data, and insert "pop" in the sample_id column in each empty row (the word "pop" should appear for each population)
+
+##### 1c. Copy the header row of microsatellite locus IDs and transpose paste in a new Excel sheet; each locus ID should be listed in its own row (number of rows should be equal to numbrer of locus IDs)
+
+##### 1d. Copy all genotype and label data from the original Excel file and paste in the row immediately below the list of locus IDs
+
+##### 1e. Save the Excel sheet as a .xlsx and a .txt file, with a specification that it is a "genepop" file.
+
+### STEP 2: Generate STRUCTURE formatted file from genepop format.
+In this step, we read in, check, and convert the genepop file manually generated in STEP 1 above into a STRUCTURE formatted file. There are quite a few tricky and very specific formatting needs for the genepop text file before genepopedit will convert successfully. 
+
+Follow Step 2a-2f closely to create a proper genepop format. Click on the text file manually here, in R Studio, and use Ctrl + F in R Studio to find and replace the necessary things.
+
+In this step, we are reading in, checking, and converting the genepop file manually generated in STEP 1 above into a STRUCTURE formatted file. There are quite a few tricky and very specific formatting needs for the genepop text file before genepopedit will convert successfully. Follow Step 2a-2f closely to create a proper genepop format. Click on the text file manually here, in R Studio, and use Ctrl + F in R Studio to find and replace the necessary things.
+
+#### 2a. All quotation marks were removed from the text file
+
+#### 2b. All "," in the genepop text files were manually replaced with " ,  "
+
+#### 2c. All "tabs" between six-digit alleles were were manually replaced with " " (a single space)
+
+#### 2d. The top row designating the dataset combination was manually omitted
+
+#### 2e. Any additional space at the bottom of the text file was removed
+
+#### 2f. Generate STRUCTURE file from genepop file; run the Rmd chunk below.
+Here it is important to not include the 'popgroup = ' unless it is explicitly necessary. Assigning popgroup to a dataframe with population names will cause the STRUCTURE input file to have word strings in the popdata column. Our experience is that STRUCTURE expects an integer here rather than a string, so best not to use popgroup.
+
+##### Convert genepop to STRUCTURE format:`
+```{r}
+# Generate structure .txt file from genepop .txt file
+genepop_structure("data/genepop_data/genepop.txt", 
+                  locusnames = TRUE, 
+                  path = "data/structure_data/input_data/structure.txt")
+```
+
+<b>Details on structure file for all black bass samples:</b> <br>
+N<sub>pops</sub> = 43 <br>
+N<sub>streams/lakes</sub> = 28
+
+## ------------------------ END OF PHASE 1: GENOTYPE DATA PREPARATION -------------------------- ##
+
+## PHASE 2: STRUCTURE ANALYSIS 
+In this phase of analysis, we are assessing hierarchical population genetic structure among Spotted Bass, Northern Smallmouth Bass, and Neosho Smallmouth Bass populations in the CIH using three independent "models" in the software program STRUCTURE following a preliminary screening (Model 1) of genetic structure: Model 2) <i>Default parameters</i>, in which we use default parameter settings in STRUCTURE; Model 3) <i>Wang parameters</i>, in which we use parameter settings in STRUCTURE recommended by Wang et al. (2017); and Model 4) <i>Puechmaille metrics</i>, in which we use default parameter settings but infer population structure using metrics recommended by Puechmaille et al. (2016).
+
+### STEP 1: Run Model 1 - Preliminary analysis; Run the code: `code/01_prelim.Rmd`
+In this step, we conduct a preliminary analysis in STRUCTURE, in which we set the number of possible clusters (<i>K</i> to 28, representing all stream, lake, or hatchery systems, to screen for broad levels of population structure. We use this analysis to assess the maximum number of genetic clusters and therefore inform all downstream independent analyses.
+
+### STEP 2: Run Model 2 - Default parameters; Run the code: `code/02_default.Rmd`
+In this step, we conduct a full analysis in STRUCTURE using default parameter settings for <i>K</i> = 1-15 possible clusters (based no Model 1; see Step 1 in `01_prelim.Rmd`). We assess hierarchical structure within major genetic cluster divisions (subspecies) using <i>K</i> = 1-10 (Neosho Smallmouth Bass) and <i>K</i> = 1-5 (Northern Smallmouth Bass). 
+
+### STEP 3: Run Model 3 - Wang parameters; Run the code: `code/03_wang.Rmd`
+In this step, we conduct a full analysis in STRUCTURE using parameter settings recommended by Wang (2017) for <i>K</i> = 1-15 possible clusters (based no Model 1; see Step 1 in `01_prelim.Rmd`). We assess hierarchical structure within major genetic cluster divisions (subspecies) using <i>K</i> = 1-10 (Neosho Smallmouth Bass) and <i>K</i> = 1-5 (Northern Smallmouth Bass). 
+
+### STEP 4: Run Model 4 - Puechmaille metrics; Run the code: `code/04_puechmaille.Rmd`
+In this step, we conduct a full analysis in STRUCTURE using default parameter settings for <i>K</i> = 1-15 possible clusters (based no Model 1; see Step 1 in `01_prelim.Rmd`) but inferring population structure using metrics recommended by Puechmaille et al. (2016).
+
+## -------------- END OF PHASE 2: STRUCTURE ANALYSIS ---------------- ##
+
+
+
+## PHASE 3: PRINCIPAL COMPONENTS ANALYSIS
+In this phase of analysis, we visualize and infer population hierarchical structure at the species, subspecies, and population level using an alternative, model-free principal components analysis (PCA)
+
+## --------------  END OF PHASE 3: PRINCIPAL COMPONENTS ANALYSIS -------------- ## 
+
+## --------------  END OF ANALYSIS 2: HIERARCHICAL POPULATION STRUCTURE ANALYSIS --------------  ##
+
