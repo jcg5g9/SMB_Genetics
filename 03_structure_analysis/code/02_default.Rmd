@@ -592,7 +592,7 @@ See `smb_genetics_structure_analysis.Rmd` (Line 19) for programs needed for anal
 ##### 2c.1. Filter structure input file for each substructure analysis; run the Rmd chunk below.
 In this step, we generate two separate structure input files based on the original, full data: 1) Neosho Smallmouth Bass only, and 2) Northern Smallmouth Bass only.
 
-##### Convert genepops to STRUCTURE format:`
+##### Convert genepops to STRUCTURE format:
 ```{r}
 # Generate Neosho Smallmouth Bass structure .txt file from genepop .txt file
 genepop_structure("../data/genepop_data/genepop_neosho.txt", 
