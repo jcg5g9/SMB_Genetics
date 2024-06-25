@@ -71,7 +71,7 @@ for(ii in 1:nrow(nk)) {
 
     input <- paste(" -i /home/jcg5g9/data/SMB_Genetics/03_structure_analysis/data/structure_data/input_data/structure.txt")
   
-    output <- paste(" -o /home/jcg5g9/data/SMB_Genetics/03_structure_analysis/data/structure_data/output_data/default/")
+    output <- paste(" -o /home/jcg5g9/data/SMB_Genetics/03_structure_analysis/data/structure_data/output_data/default/full_data/")
   
     cat(paste(structure_call, "-K ", nk[ii,], param_files, input, output,
             strsplit("default_structure.txt", "_structure.txt", fixed = TRUE)[[1]][1], "_", nk[ii,], "_", nreps[aa,], sep=""),
@@ -401,7 +401,7 @@ for(ii in 1:nrow(nk)) {
 
     input <- paste(" -i /home/jcg5g9/data/SMB_Genetics/03_structure_analysis/data/structure_data/input_data/structure_neosho.txt")
   
-    output <- paste(" -o /home/jcg5g9/data/SMB_Genetics/03_structure_analysis/data/structure_data/output_data/default/neosho/")
+    output <- paste(" -o /home/jcg5g9/data/SMB_Genetics/03_structure_analysis/data/structure_data/output_data/default/neosho_data/")
   
     cat(paste(structure_call, "-K ", nk[ii,], param_files, input, output,
             strsplit("default_neosho_structure.txt", "_structure.txt", fixed = TRUE)[[1]][1], "_", nk[ii,], "_", nreps[aa,], sep=""),
@@ -440,7 +440,7 @@ for(ii in 1:nrow(nk)) {
 
     input <- paste(" -i /home/jcg5g9/data/SMB_Genetics/03_structure_analysis/data/structure_data/input_data/structure_northern.txt")
   
-    output <- paste(" -o /home/jcg5g9/data/SMB_Genetics/03_structure_analysis/data/structure_data/output_data/default/northern")
+    output <- paste(" -o /home/jcg5g9/data/SMB_Genetics/03_structure_analysis/data/structure_data/output_data/default/northern_data/")
   
     cat(paste(structure_call, "-K ", nk[ii,], param_files, input, output,
             strsplit("default_northern_structure.txt", "_structure.txt", fixed = TRUE)[[1]][1], "_", nk[ii,], "_", nreps[aa,], sep=""),

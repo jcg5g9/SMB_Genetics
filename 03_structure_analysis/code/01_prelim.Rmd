@@ -192,7 +192,7 @@ Q <- readQ(sfiles)
 # Tabulate information from the q lists
 tab <- tabulateQ(Q)
 
-# Summarize information from tabultions above
+# Summarize information from tabulations above
 summary <- summariseQ(tab)
 
 # Extract deltaK and associated summary information using Evanno method
