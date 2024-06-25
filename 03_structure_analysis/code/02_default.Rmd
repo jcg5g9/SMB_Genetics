@@ -916,3 +916,5 @@ plotQ(default_northern_k2,
       outputfilename = "default_northern_k2",
       exportpath = "../figures")
 ```
+
+## ------------------------ END OF PHASE2: ANALYSIS 2 ----------------------- ##

@@ -221,4 +221,4 @@ save(align, file = "../data/structure_data/aligned_data/default_align.Rda")
 <b>Model results</b>:
 There is no evidence of population structure (deltaK < ~30.00) beyond K=15, so we are using K=15 as the maximum number of possible clusters for all subsequent analyses to reduce computation time and provide more accurate estimates of optimal K.
 
-## ------------------------ END OF PHASE 1 OF STRUCTURE AND HYBRID ASSIGNMENT ANALYSIS ----------------------- ##
+## ------------------------ END OF PHASE 1: ANALYSIS 1 ----------------------- ##
