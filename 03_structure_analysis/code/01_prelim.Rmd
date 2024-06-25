@@ -162,7 +162,7 @@ We did not change any of the default settings in the extraparams file (most impo
 <b>extraparam file:</b> <br>
 `../data/structure_data/param_files/extraparams_prelim` <br> 
 
-#### 1c. Population Structure Analysis with STRUCTURE
+#### 1c. Population structure analysis with STRUCTURE
 
 See `smb_genetics_structure_analysis.Rmd` (Line 19) for programs needed for analysis.
 

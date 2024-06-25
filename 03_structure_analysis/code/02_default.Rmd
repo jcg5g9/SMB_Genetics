@@ -181,7 +181,7 @@ Run `sbatch default_structure.sh`
 
 ##### 2c.5. Visualize STRUCTURE runs for all data combinations
 
-##### 2c.5. Convert STRUCTURE files into aligned Q files compatible with analysis in the program CLUMPP (Jakobbson and Rosenberg 2007); run the rmd chunk below
+##### 2c.6. Convert STRUCTURE files into aligned Q files compatible with analysis in the program CLUMPP (Jakobbson and Rosenberg 2007); run the rmd chunk below
 
 ##### Convert STRUCTURE files to aligned Q files for CLUMPP: 
 ```{r}
@@ -224,7 +224,7 @@ save(align, file = "../data/structure_data/aligned_data/default_align.Rda")
 <b>Model results</b>:
 We found strongest evidence for K=2 major clusters.
 
-##### 2c.6. Export CLUMPP compatible files for CLUMPP analysis; run the rmd chunk below to export CLUMPP associated files for each K.
+##### 2c.7. Export CLUMPP compatible files for CLUMPP analysis; run the rmd chunk below to export CLUMPP associated files for each K.
 
 <b>We used the following parameters: </b> <br>
 
@@ -242,23 +242,23 @@ load("../data/structure_data/aligned_data/default_align.Rda")
 clumppExport(align, 
             parammode = 3, 
             paramrep = 10000,
-            exportpath = "../data/structure_data/clumpp_data/default_clumpp")
+            exportpath = "../data/structure_data/clumpp_data/default_clumpp/full_data/")
 ```
 
 The code above generates a .txt file (pop_K#-combined.txt) with combined cluster ancestry proportions for each individual at each K and stores it in a separate directory labeled "pop_K#", where '#' is the corresponding K value. Additionally, the code generates an accompanying "paramfile" that is input for CLUMPP, which contains information on parameters to generate merged datasets across our 10 replicates at each K.
 
-##### 2c.3. Generate merged Q files using CLUMPP.
+##### 2c.8. Generate merged Q files using CLUMPP.
 In this step, we used the software program CLUMPP (Jakobbson and Rosenberg 2007) to merge cluster ancestry proportion inferences for all replicate runs of each K across individuals. We downloaded the Linux 64-bit build of CLUMPP v.1.1.2 and installed it on our computing cluster. We then executed the program for each analysis by sequentially copying the associated paramfiles generated in the clumppExport function (see section above) to the CLUMPP home directory. All output files were then moved to the corresponding structure directory.
 
-###### 2c.3.1. Downolad CLUMPP and install on cluster; navigate to the desired directory: `code`. Run the command: `wget https://rosenberglab.stanford.edu/software/CLUMPP_Linux64.1.1.2.tar.gz`
+###### 2c.8.1. Downolad CLUMPP and install on cluster; navigate to the desired directory: `code`. Run the command: `wget https://rosenberglab.stanford.edu/software/CLUMPP_Linux64.1.1.2.tar.gz`
 
-###### 2c.3.2. Run the command: `gunzip CLUMPP_Linux64.1.1.2.tar.gz`
+###### 2c.8.2. Run the command: `gunzip CLUMPP_Linux64.1.1.2.tar.gz`
 
-###### 2c.3.3. Run the command: `tar -xvf CLUMPP_Linux64.1.1.2.tar`
+###### 2c.8.3. Run the command: `tar -xvf CLUMPP_Linux64.1.1.2.tar`
 cd 
-###### 2e.3.4. For each analysis separately, copy the 'pop_K#-combined.txt' file and 'paramfile' over to the CLUMPP directory (`CLUMPP_Linux64.1.1.2`)
+###### 2c.8.4. For each analysis separately, copy the 'pop_K#-combined.txt' file and 'paramfile' over to the CLUMPP directory (`CLUMPP_Linux64.1.1.2`)
 
-###### 2c.3.5. For each analysis separately, execute CLUMPP on the paramfile; run the code `./CLUMPP paramfile`
+###### 2c.8.5. For each analysis separately, execute CLUMPP on the paramfile; run the code `./CLUMPP paramfile`
 We are running this code with GREEDY OPTION 2, which uses random sampling of replicate runs. 
 
 This code generates three additional files, which we moved back to the corresponding pop_K folder in the clumpp_data directory:
@@ -272,7 +272,7 @@ pop_K#-combined-aligned.txt <br>
 #### 2d. Plot deltaK results and STRUCTURE runs at best K value (according to deltak statistic) for each analysis
 Here we plot the results of structure analysis using default parameters and the Evanno method of cluster inference. The Evanno (deltaK) method revealed greatest relative support to <i>K</i>=2 clusters.
 
-##### 2d.1. Read in sample metadata file and filter for samples with genotypes;run the rmd chunk below.
+##### 2d.1. Read in sample metadata file and filter for samples with genotypes; run the Rmd chunk below.
 In this step, we read in the full sample metadata and filter for only those samples used in genetic analyses (to be used for plotting)
 
 ##### Read in and filter metadata:
@@ -289,6 +289,8 @@ metadata <- metadata %>%
 # save metadata for plotting
 save(metadata, file = "../data/structure_data/metadata/full_default_metadata.Rda")
 ```
+
+##### 2d.2. Plot STRUCTURE results for default parameters; run the Rmd chunk below.
 
 ##### STRUCTURE results for default parameters: 1) `default_deltak.pdf`; 2) `default_k2.pdf`
 ```{r}
@@ -315,7 +317,7 @@ ggplot(evanno, aes(x = k, y = deltaK)) +
 dev.off()
 
 # Read in combined-merged Q table from CLUMPP
-default_k2 <- readQ("../data/structure_data/clumpp_data/default_clumpp/pop_K2/pop_K2-combined-merged.txt")
+default_k2 <- readQ("../data/structure_data/clumpp_data/default_clumpp/full_data/pop_K2/pop_K2-combined-merged.txt")
 
 # Plot structure results
 plotQ(default_k2,
@@ -349,9 +351,9 @@ plotQ(default_k2,
 ```
 
 ### ANALYSIS 2: Samples within major divisions (subtructure analysis)
-Here, we split the full dataset according to the two major clusters inferred from genetic structure analysis of the full dataset (Analysis 1 above). Analysis 1 split individuals into two major groups, broadly corresponding to subsepecies designation: Neosho Smallmouth Bass, and Northern Smallmouth Bass (plus Spotted Bass). Spotted Bass clustered with Northern Smallmouth Bass in this analysis and so are included within this sample set.
+Here, we split the full dataset according to the two major clusters inferred from genetic structure analysis of the full dataset (Analysis 1 above). Frp, Analysis 1, we inferred two major groups, broadly corresponding to subspecies designation: Neosho Smallmouth Bass, and Northern Smallmouth Bass (plus Spotted Bass). Spotted Bass clustered with Northern Smallmouth Bass in this analysis and so are included within the "Northern" sample set.
 
-For The Neosho Smallmouth Bass subset, we are running structure with a maximum (<i>K</i>=10), and within the Northern Smallmouth Bass subset, we are running structure with a maximum (<i>K</i>=5).
+For the Neosho Smallmouth Bass subset, we are running structure with a maximum (<i>K</i>=10). For the Northern Smallmouth Bass subset, we are running structure with a maximum (<i>K</i>=5).
 
 #### 2a: Generate batch list files and shell scripts for running STRUCTURE in parallel
 In this step, we are creating batch lists of command line code to run STRUCTURE analyses in parallel. Each batch list contains a separate line of code to run a single replicate at an a priori determined number of populations (<i>K</i>). We run the analysis for 10 replicates at each <i>K</i>, e.g.:
@@ -408,9 +410,7 @@ for(ii in 1:nrow(nk)) {
       "\n", 
       file = paste("batch_cmd_lists/default_neosho_batch_cmd_list.txt"),
       append = TRUE)
-    
   }
-  
 }
 ```
 
@@ -447,9 +447,7 @@ for(ii in 1:nrow(nk)) {
       "\n", 
       file = paste("batch_cmd_lists/default_northern_batch_cmd_list.txt"),
       append = TRUE)
-    
   }
-  
 }
 ```
 
@@ -585,7 +583,7 @@ We did not change any of the default settings in the extraparams file (most impo
 <b>extraparam file:</b> <br>
 `../data/structure_data/param_files/extraparams_default` <br> 
 
-#### 2c. Population Structure Analysis with STRUCTURE
+#### 2c. Population structure analysis with STRUCTURE
 
 See `smb_genetics_structure_analysis.Rmd` (Line 19) for programs needed for analysis.
 
@@ -617,9 +615,9 @@ Run `sbatch default_structure.sh`
 
 ##### 2c.5. Visualize STRUCTURE runs for all data combinations
 
-##### 2c.5. Convert STRUCTURE files into aligned Q files compatible with analysis in the program CLUMPP (Jakobbson and Rosenberg 2007)
+##### 2c.6. Convert STRUCTURE files into aligned Q files compatible with analysis in the program CLUMPP (Jakobbson and Rosenberg 2007)
 
-###### 2c.5.1. Convert STRUCTURE files for Neosho Smallmouth Bass samples only; run the Rmd chunk below.
+###### 2c.6.1. Convert STRUCTURE files for Neosho Smallmouth Bass samples only; run the Rmd chunk below.
 
 ##### Convert STRUCTURE files for Neosho Smallmouth Bass to aligned Q files for CLUMPP: 
 ```{r}
@@ -662,7 +660,7 @@ save(align, file = "../data/structure_data/aligned_data/default_neosho_align.Rda
 <b>Model results</b>:
 We found strongest evidence for K=2 major clusters.
 
-###### 2c.5.2. Convert STRUCTURE files for Northern Smallmouth Bass samples only; run the Rmd chunk below.
+###### 2c.6.2. Convert STRUCTURE files for Northern Smallmouth Bass samples only; run the Rmd chunk below.
 
 ##### Convert STRUCTURE files for Northern Smallmouth Bass to aligned Q files for CLUMPP: 
 ```{r}
@@ -701,8 +699,10 @@ align <- alignK(Q)
 # Save aligned replicates file for downstream analyses
 save(align, file = "../data/structure_data/aligned_data/default_northern_align.Rda")
 ```
+<b>Model results</b>:
+We found strongest evidence for K=2 major clusters.
 
-##### 2c.6. Export CLUMPP compatible files for CLUMPP analysis; run the rmd chunk below to export CLUMPP associated files for each K.
+##### 2c.7. Export CLUMPP compatible files for CLUMPP analysis; run the Rmd chunk below.
 
 <b>We used the following parameters: </b> <br>
 
@@ -711,32 +711,48 @@ Large-K-Greedy algorithm (paramrep = 3) <br>
 
 ### IMPORTANT NOTE: This step only needs to be run ONCE to generate files for CLUMPP. Once you have run this chunk, move on to Step 2e.3. Uncomment each line to run this code.
 
-##### Export CLUMPP files:
+###### 2c.7.1. Export CLUMPP files for Neosho Smallmouth Bass samples only;r run the Rmd chunk below.
+
+##### Export CLUMPP files for Neosho Smallmouth Bass only:
 ```{r, echo = FALSE}
 # Load aligned structure replicate data
-load("../data/structure_data/aligned_data/default_align.Rda")
+load("../data/structure_data/aligned_data/default_neosho_align.Rda")
 
 # Generate clumpp formatted file
 clumppExport(align, 
             parammode = 3, 
             paramrep = 10000,
-            exportpath = "../data/structure_data/clumpp_data/default_clumpp")
+            exportpath = "../data/structure_data/clumpp_data/default_clumpp/neosho_data/")
+```
+
+###### 2c.7.2. Export CLUMPP files for Northern Smallmouth Bass samples only;r run the Rmd chunk below.
+
+##### Export CLUMPP files for Northern Smallmouth Bass only:
+```{r, echo = FALSE}
+# Load aligned structure replicate data
+load("../data/structure_data/aligned_data/default_northern_align.Rda")
+
+# Generate clumpp formatted file
+clumppExport(align, 
+            parammode = 3, 
+            paramrep = 10000,
+            exportpath = "../data/structure_data/clumpp_data/default_clumpp/northern_data/")
 ```
 
 The code above generates a .txt file (pop_K#-combined.txt) with combined cluster ancestry proportions for each individual at each K and stores it in a separate directory labeled "pop_K#", where '#' is the corresponding K value. Additionally, the code generates an accompanying "paramfile" that is input for CLUMPP, which contains information on parameters to generate merged datasets across our 10 replicates at each K.
 
-##### 2c.3. Generate merged Q files using CLUMPP.
+##### 2c.8. Generate merged Q files using CLUMPP.
 In this step, we used the software program CLUMPP (Jakobbson and Rosenberg 2007) to merge cluster ancestry proportion inferences for all replicate runs of each K across individuals. We downloaded the Linux 64-bit build of CLUMPP v.1.1.2 and installed it on our computing cluster. We then executed the program for each analysis by sequentially copying the associated paramfiles generated in the clumppExport function (see section above) to the CLUMPP home directory. All output files were then moved to the corresponding structure directory.
 
-###### 2c.3.1. Downolad CLUMPP and install on cluster; navigate to the desired directory: `code`. Run the command: `wget https://rosenberglab.stanford.edu/software/CLUMPP_Linux64.1.1.2.tar.gz`
+###### 2c.8.1. Downolad CLUMPP and install on cluster; navigate to the desired directory: `code`. Run the command: `wget https://rosenberglab.stanford.edu/software/CLUMPP_Linux64.1.1.2.tar.gz`
 
-###### 2c.3.2. Run the command: `gunzip CLUMPP_Linux64.1.1.2.tar.gz`
+###### 2c.8.2. Run the command: `gunzip CLUMPP_Linux64.1.1.2.tar.gz`
 
-###### 2c.3.3. Run the command: `tar -xvf CLUMPP_Linux64.1.1.2.tar`
+###### 2c.8.3. Run the command: `tar -xvf CLUMPP_Linux64.1.1.2.tar`
 cd 
-###### 2e.3.4. For each analysis separately, copy the 'pop_K#-combined.txt' file and 'paramfile' over to the CLUMPP directory (`CLUMPP_Linux64.1.1.2`)
+###### 2c.8.4. For each analysis separately, copy the 'pop_K#-combined.txt' file and 'paramfile' over to the CLUMPP directory (`CLUMPP_Linux64.1.1.2`)
 
-###### 2c.3.5. For each analysis separately, execute CLUMPP on the paramfile; run the code `./CLUMPP paramfile`
+###### 2c.8.5. For each analysis separately, execute CLUMPP on the paramfile; run the code `./CLUMPP paramfile`
 We are running this code with GREEDY OPTION 2, which uses random sampling of replicate runs. 
 
 This code generates three additional files, which we moved back to the corresponding pop_K folder in the clumpp_data directory:
@@ -747,37 +763,52 @@ pop_K#-combined-miscfile.txt <br>
 pop_K#-combined-merged.txt <br>
 pop_K#-combined-aligned.txt <br>
 
-#### 2d. Plot deltaK results and STRUCTURE runs at best K value (according to deltak statistic) for each analysis
-Here we plot the results of structure analysis using default parameters and the Evanno method of cluster inference. The Evanno (deltaK) method revealed greatest relative support to <i>K</i>=2 clusters.
+#### 2d. Plot deltaK results and STRUCTURE runs at best K value (according to deltak statistic) for each substructure analysis
+Here we plot the results of sub-structure analysis using default parameters and the Evanno method of cluster inference. The Evanno (deltaK) method revealed greatest relative support to <i>K</i>=2 clusters.
 
-##### 2d.1. Read in sample metadata file and filter for samples with genotypes;run the rmd chunk below.
-In this step, we read in the full sample metadata and filter for only those samples used in genetic analyses (to be used for plotting)
+##### 2d.1. Read in sample metadata file and filter for samples with genotypes; run the Rmd chunk below.
+In this step, we read in the full sample metadata and filter for only those samples used in genetic analyses (to be used for plotting). Then, we generate separate metadata files for Neosho Smallmouth Bass samples only and Northern Smallmouth Bass samples only.
 
 ##### Read in and filter metadata:
 ```{r}
 # Load sample metadata
 load("../../02_data_summary_analysis/data/metadata.Rda") 
 
-# Filter metadata for only those samples with genotype data and convert factors to characters
-metadata <- metadata %>%
+# Filter metadata for only those samples with genotype data and convert factors to characters (Neosho Smallmouth Bass only)
+metadata_neosho <- metadata %>%
   filter(genotype == "yes") %>%
+  filter(subspecies == "Neosho Smallmouth Bass") %>%
   mutate(sample_id = as.character(sample_id), 
          population = as.character(population))
 
-# save metadata for plotting
-save(metadata, file = "../data/structure_data/metadata/full_default_metadata.Rda")
+# Filter metadata for only those samples with genotype data and convert factors to characters (Northern Smallmouth Bass only)
+metadata_northern <- metadata %>%
+  filter(genotype == "yes") %>%
+  filter(subspecies != "Neosho Smallmouth Bass") %>%
+  mutate(sample_id = as.character(sample_id), 
+         population = as.character(population))
+
+# save Neosho metadata for plotting
+save(metadata_neosho, file = "../data/structure_data/metadata/default_neosho_metadata.Rda")
+
+# save Northern metadata for plotting
+save(metadata_northern, file = "../data/structure_data/metadata/default_northern_metadata.Rda")
 ```
 
-##### STRUCTURE results for default parameters: 1) `default_deltak.pdf`; 2) `default_k2.pdf`
+##### 2d.2. Plot STRUCTURE results for substructure analysis with default parameters
+
+###### 2d.2.1. Plot results for Neosho Smallmouth Bass only; run the Rmd chunk below.
+
+##### STRUCTURE results for default parameters: 1) `default_neosho_deltak.pdf`; 2) `default_neosho_k2.pdf`
 ```{r}
 # Load default deltak data
-load("../data/structure_data/deltak_data/default_deltak.Rda")
+load("../data/structure_data/deltak_data/default_neosho_deltak.Rda")
 
 # Load full default metadata
-load("../data/structure_data/metadata/full_default_metadata.Rda")
+load("../data/structure_data/metadata/default_neosho_metadata.Rda")
 
 # DeltaK results
-pdf("../figures/default_deltak.pdf", width = 8, height = 5)
+pdf("../figures/default_neosho_deltak.pdf", width = 8, height = 5)
 
 ggplot(evanno, aes(x = k, y = deltaK)) +
   geom_point() + 
@@ -793,11 +824,11 @@ ggplot(evanno, aes(x = k, y = deltaK)) +
 dev.off()
 
 # Read in combined-merged Q table from CLUMPP
-default_k2 <- readQ("../data/structure_data/clumpp_data/default_clumpp/pop_K2/pop_K2-combined-merged.txt")
+default_neosho_k2 <- readQ("../data/structure_data/clumpp_data/default_clumpp/neosho_data/pop_K2/pop_K2-combined-merged.txt")
 
 # Plot structure results
-plotQ(default_k2,
-      grplab = metadata[,c(1,4)],
+plotQ(default_neosho_k2,
+      grplab = metadata_neosho[,c(1,4)],
       ordergrp = F,
       selgrp = "population",
       showgrplab = T,
@@ -822,6 +853,66 @@ plotQ(default_k2,
       imgtype = "pdf",
       height = 10, 
       width = 100,
-      outputfilename = "default_k2",
+      outputfilename = "default_neosho_k2",
+      exportpath = "../figures")
+```
+
+###### 2d.2.2. Plot results for Northern Smallmouth Bass only; run the Rmd chunk below.
+
+##### STRUCTURE results for default parameters: 1) `default_northern_deltak.pdf`; 2) `default_northern_k2.pdf`
+```{r}
+# Load default deltak data
+load("../data/structure_data/deltak_data/default_northern_deltak.Rda")
+
+# Load full default metadata
+load("../data/structure_data/metadata/default_northern_metadata.Rda")
+
+# DeltaK results
+pdf("../figures/default_northern deltak.pdf", width = 8, height = 5)
+
+ggplot(evanno, aes(x = k, y = deltaK)) +
+  geom_point() + 
+  geom_line() +
+  theme_set(theme_cowplot(12)) +
+  geom_vline(xintercept = 2, color = "blue", size = 1) +
+  theme(axis.text = element_text(size = 15)) +
+  theme(axis.title = element_text(size = 15)) +
+  theme(axis.title.x = element_text(face = "italic")) +
+  labs(x = "K", y = "deltaK") + 
+  scale_x_continuous("K", labels = as.character(evanno$k), breaks = evanno$k)
+
+dev.off()
+
+# Read in combined-merged Q table from CLUMPP
+default_northern_k2 <- readQ("../data/structure_data/clumpp_data/default_clumpp/northern_data/pop_K2/pop_K2-combined-merged.txt")
+
+# Plot structure results
+plotQ(default_northern_k2,
+      grplab = metadata_northern[,c(1,4)],
+      ordergrp = F,
+      selgrp = "population",
+      showgrplab = T,
+      showlegend = F, 
+      showsp = F, 
+      showdiv = T, 
+      divsize = 2, 
+      divtype = 1,
+      divcol = "black",  
+      grplabsize = 4, 
+      grplabangle = 45,
+      grplabjust = 0.5,
+      legendkeysize = 15, 
+      linealpha = 0,
+      legendtextsize = 10, 
+      linesize = 0.05, 
+      pointsize = 4, 
+      barbordercolour = "black",
+      barbordersize = 0.1, 
+      clustercol = c("firebrick3","mediumpurple"),
+      exportplot = T,
+      imgtype = "pdf",
+      height = 10, 
+      width = 100,
+      outputfilename = "default_northern_k2",
       exportpath = "../figures")
 ```

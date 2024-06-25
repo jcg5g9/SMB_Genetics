@@ -60,7 +60,7 @@ In this step, we opted to reformat the raw Excel microsatellite genotype data by
 ##### 1e. Save the Excel sheet as a .xlsx and a .txt file, with a specification that it is a "genepop" file.
 
 ### STEP 2: Generate STRUCTURE formatted file from genepop format.
-In this step, we read in, check, and convert the genepop file manually generated in STEP 1 above into a STRUCTURE formatted file. There are quite a few tricky and very specific formatting needs for the genepop text file before genepopedit will convert successfully. 
+In this step, we read in, check, and convert the genepop file manually generated in STEP 1 above into a STRUCTURE formatted file. There are quite a few tricky and very specific formatting needs for the genepop text file before genepopedit will convert successfully.
 
 Follow Step 2a-2f closely to create a proper genepop format. Click on the text file manually here, in R Studio, and use Ctrl + F in R Studio to find and replace the necessary things.
 
@@ -109,8 +109,6 @@ In this step, we conduct a full analysis in STRUCTURE using parameter settings r
 In this step, we conduct a full analysis in STRUCTURE using default parameter settings for <i>K</i> = 1-15 possible clusters (based no Model 1; see Step 1 in `01_prelim.Rmd`) but inferring population structure using metrics recommended by Puechmaille et al. (2016).
 
 ## -------------- END OF PHASE 2: STRUCTURE ANALYSIS ---------------- ##
-
-
 
 ## PHASE 3: PRINCIPAL COMPONENTS ANALYSIS
 In this phase of analysis, we visualize and infer population hierarchical structure at the species, subspecies, and population level using an alternative, model-free principal components analysis (PCA)
