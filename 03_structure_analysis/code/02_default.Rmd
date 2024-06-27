@@ -605,9 +605,13 @@ genepop_structure("../data/genepop_data/genepop_northern.txt",
 
 ##### 2c.1. Run STRUCTURE analysis using the input data generated in PHASE 1 (`smb_genetics_structure_analysis.Rmd`). Navigate to `shell_scripts/` Be sure that all relative and full paths to all input files and output destination directories are set up properly (ideally, this is already done within this GitHub repo). This command line code assumes capability to run the code using SLURM or a SLURM-like cluster scheduling software.
 
-Run `sbatch default_structure.sh`
+For Neosho Smallmouth Bass only, run `sbatch default_neosho_structure.sh` <br>
+For Northern Smallmouth Bass only, run `sbatch default_northern_structure.sh` 
 
-##### 2c.2. Structure output files are generated and stored here: `../data/structure_data/output_data/default/`
+##### 2c.2. Structure output files are generated and stored here: 
+
+For Neosho Smallmouth Bass only: `../data/structure_data/output_data/default/neosho_data/` <br>
+For Northern Smallmouth Bass only: `../data/structure_data/output_data/default/northern_data/`
 
 ##### 2c.3. Compress output directory into a zip file compatible with Structure Selector (Li and Liu 2017) or Structure Harvester (Earl and vonHoldt 2011) online
 
