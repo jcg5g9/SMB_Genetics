@@ -180,7 +180,11 @@ Run `sbatch default_structure.sh`
 
 ##### 4c.3. Compress output directory into a zip file compatible with Structure Selector (Li and Liu 2017) or Structure Harvester (Earl and vonHoldt 2011) online
 
-##### 4c.4. Submit zip directory to Structure Selector or Structure Harvester to extract summary results
+##### 4c.4. Submit zip directory to Structure Selector or Structure Harvester to extract summary results; analyze results using Puechmaille metrics (MedMedK, MedMeanK, MaxMedK, MaxMeanK) using a threshold value of 0.5
+We analyzed STRUCTURE results using the four metrics recommended by Puechmaille (2016).
+
+<b>Model results</b>:
+We found strongest evidence for K=9 major clusters; all metrics were optimzed at 9 unique clusters.
 
 ##### 4c.5. Visualize STRUCTURE runs for all data combinations
 
@@ -215,17 +219,14 @@ evanno$deltaK[is.na(evanno$deltaK)] <- 0
 evanno <- as.data.frame(evanno)
 
 ## save evanno file for downstream analyses
-save(evanno, file = "../data/structure_data/deltak_data/default_deltak.Rda")
+save(evanno, file = "../data/structure_data/deltak_data/puechmaille_deltak.Rda")
 
 # Align replicate runs for each K to correct label switching
 align <- alignK(Q)
 
 # Save aligned replicates file for downstream analyses
-save(align, file = "../data/structure_data/aligned_data/default_align.Rda")
+save(align, file = "../data/structure_data/aligned_data/puechmaille_align.Rda")
 ```
-
-<b>Model results</b>:
-We found strongest evidence for K=2 major clusters.
 
 ##### 4c.7. Export CLUMPP compatible files for CLUMPP analysis; run the rmd chunk below to export CLUMPP associated files for each K.
 
@@ -239,13 +240,13 @@ Large-K-Greedy algorithm (paramrep = 3) <br>
 ##### Export CLUMPP files:
 ```{r, echo = FALSE}
 # Load aligned structure replicate data
-load("../data/structure_data/aligned_data/default_align.Rda")
+load("../data/structure_data/aligned_data/puechmaille_align.Rda")
 
 # Generate clumpp formatted file
 clumppExport(align, 
             parammode = 3, 
             paramrep = 10000,
-            exportpath = "../data/structure_data/clumpp_data/default_clumpp/full_data/")
+            exportpath = "../data/structure_data/clumpp_data/puechmaille_clumpp/")
 ```
 
 The code above generates a .txt file (pop_K#-combined.txt) with combined cluster ancestry proportions for each individual at each K and stores it in a separate directory labeled "pop_K#", where '#' is the corresponding K value. Additionally, the code generates an accompanying "paramfile" that is input for CLUMPP, which contains information on parameters to generate merged datasets across our 10 replicates at each K.
@@ -272,8 +273,10 @@ pop_K#-combined-miscfile.txt <br>
 pop_K#-combined-merged.txt <br>
 pop_K#-combined-aligned.txt <br>
 
-#### 4d. Plot deltaK results and STRUCTURE runs at best K value (according to deltak statistic) for each analysis
-Here we plot the results of structure analysis using default parameters and the Evanno method of cluster inference. The Evanno (deltaK) method revealed greatest relative support to <i>K</i>=2 clusters.
+#### 4d. Plot Puechmaille results and STRUCTURE runs at best K value (according to Puechmaille metrics) for each analysis
+Here we plot the results of structure analysis using default parameters and the Puechmaille method of cluster inference. The Puechmaille method revealed greatest relative support to <i>K</i>=9 clusters.
+
+Rather than generating a plot of Puechmaille metrics, we opted to only generate a structure q-plot showing cluster membership of each individual at <i>K</i>=9 clusters
 
 ##### 4d.1. Read in sample metadata file and filter for samples with genotypes; run the Rmd chunk below.
 In this step, we read in the full sample metadata and filter for only those samples used in genetic analyses (to be used for plotting)
@@ -293,37 +296,18 @@ metadata <- metadata %>%
 save(metadata, file = "../data/structure_data/metadata/full_default_metadata.Rda")
 ```
 
-##### 4d.2. Plot STRUCTURE results for default parameters; run the Rmd chunk below.
+##### 4d.2. Plot STRUCTURE results for Puechmaille metrics; run the Rmd chunk below.
 
-##### STRUCTURE results for default parameters: 1) `default_deltak.pdf`; 2) `default_k2.pdf`
+##### STRUCTURE results for default parameters: `puechmaille_k9.pdf`
 ```{r}
-# Load default deltak data
-load("../data/structure_data/deltak_data/default_deltak.Rda")
-
 # Load full default metadata
 load("../data/structure_data/metadata/full_default_metadata.Rda")
 
-# DeltaK results
-pdf("../figures/default_deltak.pdf", width = 8, height = 5)
-
-ggplot(evanno, aes(x = k, y = deltaK)) +
-  geom_point() + 
-  geom_line() +
-  theme_set(theme_cowplot(12)) +
-  geom_vline(xintercept = 2, color = "blue", size = 1) +
-  theme(axis.text = element_text(size = 15)) +
-  theme(axis.title = element_text(size = 15)) +
-  theme(axis.title.x = element_text(face = "italic")) +
-  labs(x = "K", y = "deltaK") + 
-  scale_x_continuous("K", labels = as.character(evanno$k), breaks = evanno$k)
-
-dev.off()
-
 # Read in combined-merged Q table from CLUMPP for K=2
-default_k2 <- readQ("../data/structure_data/clumpp_data/default_clumpp/full_data/pop_K2/pop_K2-combined-merged.txt")
+default_k9 <- readQ("../data/structure_data/clumpp_data/puechmaille_clumpp/pop_K9/pop_K9-combined-merged.txt")
 
 # Plot structure results
-plotQ(default_k2,
+plotQ(default_k9,
       grplab = metadata[,c(1,4)],
       ordergrp = F,
       selgrp = "population",
@@ -344,45 +328,12 @@ plotQ(default_k2,
       pointsize = 4, 
       barbordercolour = "black",
       barbordersize = 0.1, 
-      clustercol = c("springgreen3","mediumpurple"),
+      clustercol = c("firebrick3", "lightskyblue", "darkorchid1", "blue", "chocolate1", "forestgreen", "goldenrod2", "lightpink1","mediumpurple"),
       exportplot = T,
       imgtype = "pdf",
       height = 10, 
       width = 100,
-      outputfilename = "default_k2",
-      exportpath = "../figures")
-
-# Read in combined-merged Q table from CLUMPP for K=3 
-default_k3 <- readQ("../data/structure_data/clumpp_data/default_clumpp/full_data/pop_K3/pop_K3-combined-merged.txt")
-
-# Plot structure results
-plotQ(default_k3,
-      grplab = metadata[,c(1,4)],
-      ordergrp = F,
-      selgrp = "population",
-      showgrplab = T,
-      showlegend = F, 
-      showsp = F, 
-      showdiv = T, 
-      divsize = 2, 
-      divtype = 1,
-      divcol = "black",  
-      grplabsize = 4, 
-      grplabangle = 45,
-      grplabjust = 0.5,
-      legendkeysize = 15, 
-      linealpha = 0,
-      legendtextsize = 10, 
-      linesize = 0.05, 
-      pointsize = 4, 
-      barbordercolour = "black",
-      barbordersize = 0.1, 
-      clustercol = c("firebrick3","springgreen3","mediumpurple"),
-      exportplot = T,
-      imgtype = "pdf",
-      height = 10, 
-      width = 100,
-      outputfilename = "default_k3",
+      outputfilename = "puechmaille_k9",
       exportpath = "../figures")
 ```
 

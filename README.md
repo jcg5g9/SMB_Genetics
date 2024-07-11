@@ -14,8 +14,8 @@ This is a publicly visible GitHub repository storing code (and a small amount of
 1) 01_map_analysis
 2) 02_data_summary_analysis
 3) 03_structure_analysis
-4) 04_
-5) 05_
+4) 04_genetic_diversity_analysis
+5) 05_morphological_analysis
 
 
 Within each analysis directory, you will find an R markdown script (.Rmd) with the name of the analysis, which contains all of the code needed to run the full analysis. Additionally, you will find:
