@@ -168,7 +168,7 @@ In this step, we are preparing the mainparam and extraparam input files for STRU
 ##### 3b.2. Edit base extraparam STRUCTURE file (downloaded with STRUCTURE program).
 
 <b>extraparam file:</b> <br>
-`../data/structure_data/param_files/extraparams_default` <br>
+`../data/structure_data/param_files/extraparams_wang` <br>
 
 ###### 3b.2.1. Set 'INFERALPHA' to '1'
 
@@ -233,7 +233,7 @@ save(align, file = "../data/structure_data/aligned_data/wang_align.Rda")
 ```
 
 <b>Model results</b>:
-We found strongest evidence for K=5 major clusters.
+We found strongest evidence for K=3 major clusters, but also found support for K=4 and K=5 major clusters.
 
 ##### 3c.7. Export CLUMPP compatible files for CLUMPP analysis; run the rmd chunk below to export CLUMPP associated files for each K.
 

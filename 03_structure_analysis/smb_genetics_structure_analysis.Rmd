@@ -39,6 +39,7 @@ library(cowplot)
 library(readxl)
 library(writexl)
 library(genepopedit)
+library(gstudio)
 ```
 
 ## PHASE 1: GENOTYPE DATA PREPARATION
@@ -112,6 +113,39 @@ In this step, we conduct a full analysis in STRUCTURE using default parameter se
 
 ## PHASE 3: PRINCIPAL COMPONENTS ANALYSIS
 In this phase of analysis, we visualize and infer population hierarchical structure at the species, subspecies, and population level using an alternative, model-free principal components analysis (PCA)
+
+### STEP 1: Read in raw genotype data and convert to input file types for PCA
+In this step, we prepare to run PCA on all genetic data by converting raw genotype data into the proper input files for 1) the R package <i>gstudio</i> (specifically for reading in allelic data in two-column format) and 2) PCA
+
+#### 1a. Convert raw genotype data into CSV format for reading into gstudio; run the Rmd chunk below:
+
+##### Convert genotype excel data to CSV:
+```{r}
+# Read in raw genotype data and convert to csv file type
+genotype_data <- read_excel("../raw_data/genotype_data.xlsx") %>%
+  write.csv("data/pca_data/genotype_data.csv", 
+            row.names = F)
+```
+
+
+```{r}
+# Read in microsatellite genotypes formatted for gstudio. T
+genotypes <- read_population("data/pca_data/genotype_data.csv", 
+                             type = "column", 
+                             locus.columns = 2:29)
+
+
+##Data Cleaning
+#Change categorical variables to factors
+#With Spotted Bass (All samples)
+gen_data_all$Population_Name <- as.factor(gen_data_all$Population_Name)
+gen_data_all$Sample_ID <- as.factor(gen_data_all$Sample_ID)
+
+#Without Spotted Bass
+gen_data_nospb$Population_Name <- as.factor(gen_data_nospb$Population_Name)
+gen_data_nospb$Sample_ID <- as.factor(gen_data_nospb$Sample_ID)
+```
+
 
 ## --------------  END OF PHASE 3: PRINCIPAL COMPONENTS ANALYSIS -------------- ## 
 

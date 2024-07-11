@@ -316,7 +316,7 @@ ggplot(evanno, aes(x = k, y = deltaK)) +
 
 dev.off()
 
-# Read in combined-merged Q table from CLUMPP
+# Read in combined-merged Q table from CLUMPP for K=2
 default_k2 <- readQ("../data/structure_data/clumpp_data/default_clumpp/full_data/pop_K2/pop_K2-combined-merged.txt")
 
 # Plot structure results
@@ -347,6 +347,39 @@ plotQ(default_k2,
       height = 10, 
       width = 100,
       outputfilename = "default_k2",
+      exportpath = "../figures")
+
+# Read in combined-merged Q table from CLUMPP for K=3 
+default_k3 <- readQ("../data/structure_data/clumpp_data/default_clumpp/full_data/pop_K3/pop_K3-combined-merged.txt")
+
+# Plot structure results
+plotQ(default_k3,
+      grplab = metadata[,c(1,4)],
+      ordergrp = F,
+      selgrp = "population",
+      showgrplab = T,
+      showlegend = F, 
+      showsp = F, 
+      showdiv = T, 
+      divsize = 2, 
+      divtype = 1,
+      divcol = "black",  
+      grplabsize = 4, 
+      grplabangle = 45,
+      grplabjust = 0.5,
+      legendkeysize = 15, 
+      linealpha = 0,
+      legendtextsize = 10, 
+      linesize = 0.05, 
+      pointsize = 4, 
+      barbordercolour = "black",
+      barbordersize = 0.1, 
+      clustercol = c("firebrick3","springgreen3","mediumpurple"),
+      exportplot = T,
+      imgtype = "pdf",
+      height = 10, 
+      width = 100,
+      outputfilename = "default_k3",
       exportpath = "../figures")
 ```
 
