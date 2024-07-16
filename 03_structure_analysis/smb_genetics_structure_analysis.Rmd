@@ -39,6 +39,7 @@ library(cowplot)
 library(readxl)
 library(writexl)
 library(genepopedit)
+library(adegenet)
 library(gstudio)
 ```
 
@@ -109,6 +110,8 @@ In this step, we conduct a full analysis in STRUCTURE using parameter settings r
 ### STEP 4: Run Model 4 - Puechmaille metrics; Run the code: `code/04_puechmaille.Rmd`
 In this step, we conduct a full analysis in STRUCTURE using default parameter settings for <i>K</i> = 1-15 possible clusters (based no Model 1; see Step 1 in `01_prelim.Rmd`) but inferring population structure using metrics recommended by Puechmaille et al. (2016).
 
+All structure output data were visualized both as q-plots (bar plots representing membership to each inferred cluster for each individual) and as pie-charts overlaid on the sampling distribution. Pie-charts were generated manually in Excel and overlaid manually onto maps generated in Analysis 1 (`01_map_analysis/smb_genetics_map_analysis.Rmd`). Pie charts represent average membership to each cluster across individuals for a given sampling site. Sampling sites correspond to Table 1 in the main text of the final ms.
+
 ## -------------- END OF PHASE 2: STRUCTURE ANALYSIS ---------------- ##
 
 ## PHASE 3: PRINCIPAL COMPONENTS ANALYSIS
@@ -117,7 +120,7 @@ In this phase of analysis, we visualize and infer population hierarchical struct
 ### STEP 1: Read in raw genotype data and convert to input file types for PCA
 In this step, we prepare to run PCA on all genetic data by converting raw genotype data into the proper input files for 1) the R package <i>gstudio</i> (specifically for reading in allelic data in two-column format) and 2) PCA
 
-#### 1a. Convert raw genotype data into CSV format for reading into gstudio; run the Rmd chunk below:
+#### 1a. Convert raw genotype data into CSV format; run the Rmd chunk below:
 
 ##### Convert genotype excel data to CSV:
 ```{r}
@@ -127,25 +130,211 @@ genotype_data <- read_excel("../raw_data/genotype_data.xlsx") %>%
             row.names = F)
 ```
 
+#### 1b. Convert genotype csv file to format readible by adegenet package; run the Rmd cunk below 
 
+##### Convert csv to adegent file:
 ```{r}
-# Read in microsatellite genotypes formatted for gstudio. T
+# Read in and convert microsatellite genotypes to adegenet format
 genotypes <- read_population("data/pca_data/genotype_data.csv", 
                              type = "column", 
                              locus.columns = 2:29)
 
-
-##Data Cleaning
-#Change categorical variables to factors
-#With Spotted Bass (All samples)
-gen_data_all$Population_Name <- as.factor(gen_data_all$Population_Name)
-gen_data_all$Sample_ID <- as.factor(gen_data_all$Sample_ID)
-
-#Without Spotted Bass
-gen_data_nospb$Population_Name <- as.factor(gen_data_nospb$Population_Name)
-gen_data_nospb$Sample_ID <- as.factor(gen_data_nospb$Sample_ID)
+# Save adegenet formatted genotypes
+save(genotypes, file = "data/pca_data/genotypes.Rda")
 ```
 
+### STEP 2: Run PCA and extract PC values.
+In this step, we run PCA on allelic data to assess genetic differentiation and clustering on two hierarchical levels: 1) species level, in which both subspecies (Neosho and Northern Smallmouth Bass) and Spotted Bass are included; and 2) intraspecific groups, in which we plot samples by populations ascertained in STRUCTURE analyses. 
+
+#### 2a. Run PCA and extract PC values for all samples combined, including Neosho Smallmouth Bass, Northern Smallmouth Bass, and Spotted Bass, to assess differentiation on the species level; run the Rmd chunk below.
+
+##### Run PCA and extract PC values:
+```{r}
+# Load genotypes
+load("data/pca_data/genotypes.Rda")
+
+# Load sample metadata
+load("../02_data_summary_analysis/data/metadata.Rda")
+
+## Run PCA
+
+# Generate multivariate allelic data table 
+mv <- to_mv(genotypes, 
+            drop.allele = T)
+
+# Perform PCA
+fit <- princomp(mv, 
+                cor = T)
+
+# Get proportion of variance summary for fit
+summary(fit)
+
+# Predict values from model fit
+predict <- predict(fit)
+
+# Generate data frame with predicted values
+pca <- data.frame(PC1 = predict[,1],
+                  PC2 = predict[,2]) 
+
+# Filter full metadata to extract only samples with genotypes to match PCA table
+metadata <- metadata %>%
+  filter(genotype == "yes")
+
+# Bind metadata and pca data for plotting
+pca <- cbind(metadata, 
+             pca)
+
+# Save full pca data for plotting
+save(pca, file = "data/pca_data/full_pca.Rda")
+```
+
+#### 2b. Run PCA and extract PC values for ONLY Smallmouth Bass samples, including Neosho Smallmouth Bass and Northern Smallmouth Bass, to assess differentiation on the subspecies/population level; run the Rmd chunk below.
+
+##### Run PCA and extract PC values:
+```{r}
+# Load genotypes
+load("data/pca_data/genotypes.Rda")
+
+# Load sample metadata
+load("../02_data_summary_analysis/data/metadata.Rda")
+
+## Run PCA
+
+# Filter genotypes file to include only Smallmouth Bass subspecies
+genotypes <- genotypes %>%
+  filter(!grepl("SPI", sample_id)) %>%
+  filter(!grepl("SPE", sample_id)) %>%
+  filter(!grepl("SPS", sample_id))
+
+# Generate multivariate allelic data table 
+mv <- to_mv(genotypes, 
+            drop.allele = T)
+
+# Perform PCA
+fit <- princomp(mv, 
+                cor = T)
+
+# Get proportion of variance summary for fit
+summary(fit)
+
+# Predict values from model fit
+predict <- predict(fit)
+
+# Generate data frame with predicted values
+pca <- data.frame(PC1 = predict[,1],
+                  PC2 = predict[,2]) 
+
+# Filter full metadata to extract only samples with genotypes to match PCA table
+metadata <- metadata %>%
+  filter(genotype == "yes") %>%
+  filter(subspecies != "Spotted Bass")
+
+# Bind metadata and pca data for plotting
+pca <- cbind(metadata, 
+             pca)
+
+# Save full pca data for plotting
+save(pca, file = "data/pca_data/subspecies_pca.Rda")
+```
+
+### STEP 3: Plot Genetic PCAs at the species and subspecies/population levels.
+
+#### 3a. Plot Genetic PCA at the species level to assess differentiation among species and subspecies; run the Rmd chunk below.
+
+##### Plot Genetic PCA at the species level:
+```{r}
+load("data/pca_data/full_pca.Rda")
+
+# Generate genetic pca plot 
+pdf("figures/species_pca.pdf", width=12, height=10)
+
+ggplot(pca, aes(x = PC1, y = PC2, fill = subspecies)) + 
+  geom_point(aes(fill = subspecies), color = "black", pch = 21, size = 3, show.legend = T, alpha = 0.9) + 
+  scale_fill_manual(values = c("springgreen3", "mediumpurple", "firebrick3")) + 
+  labs(fill = "Species", color = "Species", x = "PC1 (3.3 %)", y = "PC2 (2.8 %)") + 
+  theme_set(theme_cowplot(12)) + 
+  theme(legend.position = c(0.01,0.15)) + 
+  theme(axis.text = element_text(size = 20)) + 
+  theme(axis.title = element_text(size = 20)) + 
+  theme(legend.text = element_text(size = 20)) + 
+  theme(legend.title = element_text(size = 20, face = "bold")) + 
+  theme(legend.background = element_rect(linetype = "solid", size = 0.5, color = "black")) + 
+  theme(legend.margin = margin(5, 5, 5, 5)) +
+  theme(panel.border = element_rect(colour = "black", fill=NA, size=1))
+
+dev.off()
+```
+
+This plot is the basis for Figure S3a in the final ms.
+
+#### 3b. Plot Genetic PCAs at the subspecies level to assess differentiation among species and subspecies; run the Rmd chunk below.
+
+##### Plot Genetic PCA at the species level:
+```{r}
+# Load pca data at the subspecies level
+load("data/pca_data/subspecies_pca.Rda")
+
+# Generate genetic pca plot 
+pdf("figures/subspecies_pca.pdf", width=12, height=10)
+
+ggplot(pca, aes(x = PC1, y = PC2, fill = subspecies)) + 
+  geom_point(aes(fill = subspecies), color = "black", pch = 21, size = 3, show.legend = T, alpha = 0.9) + 
+  scale_fill_manual(values = c("springgreen3", "mediumpurple")) + 
+  labs(fill = "Species", color = "Species", x = "PC1 (3.3 %)", y = "PC2 (2.8 %)") + 
+  theme_set(theme_cowplot(12)) + 
+  theme(legend.position = c(0.01,0.15)) + 
+  theme(axis.text = element_text(size = 20)) + 
+  theme(axis.title = element_text(size = 20)) + 
+  theme(legend.text = element_text(size = 20)) + 
+  theme(legend.title = element_text(size = 20, face = "bold")) + 
+  theme(legend.background = element_rect(linetype = "solid", size = 0.5, color = "black")) + 
+  theme(legend.margin = margin(5, 5, 5, 5)) +
+  theme(panel.border = element_rect(colour = "black", fill=NA, size=1))
+
+dev.off()
+```
+
+#### 3c. Plot Genetic PCA at the subspecies level to assess differentiation among populations; run the Rmd chunk below.
+In this step, we used the population structure analysis output from STRUCTURE for K=9, reflecting population inference from Puechmaille (2016) metrics (see model 4 in `code/04_puechmaille.Rmd`), to assign individuals to "populations" based on majority average membership coefficients. We arbitrarily named these "populations" based on the stream systems from which individual fish were generally collected. We then generated an additional vector column in the PCA dataset ("popluation") reflecting the assigned population of each individual. Points on the PCA plot were then colored based on these assignments.
+
+##### Plot Genetic PCA at the species level:
+```{r}
+# Load pca data at the subspecies level
+load("data/pca_data/subspecies_pca.Rda")
+
+# Generate new column ("population") with list of population assignments
+pca$population <- c(rep("swmo", times = 244), 
+                    rep("honey_syc", times = 81), 
+                    rep("illinois", times = 192),
+                    rep("swmo", times = 19), 
+                    rep("leemulb", times = 28), 
+                    rep("bayoupiney", times = 52), 
+                    rep("missouri", times = 42), 
+                    rep("white", times = 35), 
+                    rep("skiatook", times = 20), 
+                    rep("missouri", times = 20))
+
+# Generate genetic pca plot 
+pdf("figures/subspecies_pca.pdf", width=8, height=7)
+
+ggplot(pca, aes(x = PC1, y = PC2, fill = population)) + 
+  geom_point(aes(fill = population), color = "black", pch = 21, size = 3, show.legend = F, alpha = 0.9) + 
+  scale_fill_manual(values = c("forestgreen", "lightblue", "darkorchid1", "gold1", "chocolate1", "maroon1", "lightpink1","blue")) + 
+  labs(fill = "Species", color = "Species", x = "PC1 (3.3 %)", y = "PC2 (2.8 %)") + 
+  theme_set(theme_cowplot(12)) + 
+  theme(legend.position = c(0.01,0.15)) + 
+  theme(axis.text = element_text(size = 20)) + 
+  theme(axis.title = element_text(size = 20)) + 
+  theme(legend.text = element_text(size = 20)) + 
+  theme(legend.title = element_text(size = 20, face = "bold")) + 
+  theme(legend.background = element_rect(linetype = "solid", size = 0.5, color = "black")) + 
+  theme(legend.margin = margin(5, 5, 5, 5)) +
+  theme(panel.border = element_rect(colour = "black", fill=NA, size=1))
+
+dev.off()
+```
+
+These plots are the basis for Figure S3b-d in the final ms.
 
 ## --------------  END OF PHASE 3: PRINCIPAL COMPONENTS ANALYSIS -------------- ## 
 

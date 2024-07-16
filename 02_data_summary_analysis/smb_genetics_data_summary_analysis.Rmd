@@ -42,6 +42,7 @@ In this step, we read in the full metadata for all fish included in the study. D
    6. "source": indication of whether a fish was collected from a wild population (stream or river) or hatchery
    7. "subspecies": subspecies designation of the fish, based on the population from which it was collected (Neosho Smallmouth Bass or Northern Smallmouth Bass); this column also includes Spotted Bass (species) as an outgroup
    8. "state": United States state from which a fish was collected
+   9. "drainage": River drainage from which a fish was collected
    9. "phenotype": a yes/no indicator of whether a fish has (yes) or does not have (no) associated phenotype data 
    10. "genotype": a yes/no indicator of whether a fish has (yes) or does not have (no) associated genotype data 
 
@@ -60,6 +61,7 @@ metadata <- metadata %>%
          source = factor(source), 
          subspecies = factor(subspecies), 
          state = factor(state), 
+         drainage = factor(drainage),
          phenotype = factor(phenotype), 
          genotype = factor(genotype))
 
