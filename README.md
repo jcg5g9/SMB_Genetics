@@ -90,12 +90,12 @@ In this analysis, we use Bayesian clustering analysis and genotypes from 14 micr
 #### Run the code: `03_structure_analysis/smb_genetics_structure_analysis.Rmd`
 
 ### Analysis 4: Genetic diversity and differentiation analysis
-In this analysis, 
+In this analysis, we use genotypes from 14 microsatellite loci to compare genetic diversity metrics within and among populations of Neosho Smallmouth Bass and Northern Smallmouth Bass in the CIH. We first calculate pairwise Fst to assess genetic differentiation between each pair of populations and between subspecies. We then calculate rarefied allelic richness, allelic richness of common alleles, expected and observed heterozygosity, and private allelic richness, and we calcualte average differences in each metric across sampling sites and subspecies.
 
 #### Run the code: `04_diversity_analysis/smb_genetics_diversity_analysis.Rmd`
 
 ### Analysis 5: Morphological differentiation analysis
-In this analysis, 
+In this analysis, we assess morphological differentiation between Neosho Smallmouth Bass and Northern Smallmouth Bass in the CIH using five morphometrics (traits with continuous distributions; total length, standard length, body depth, head length, and orbital length) and one meristic (discrete count trait; soft dorsal fin rays) and three independently analysis frameworks: 1) individual analyses of covariance (ANCOVAs) on morphometric traits; 2) multiviariate discriminant function analysis (DFA) on morphometric traits; and 3) logistic regression on soft dorsal fin rays. With ANCOVA, we assess differentiation between subsepecies at each trait individually. With DFA, we assess the accuracy with which an individual can be assigned to either subspecies based on composite trait values. With logistic regression, we assess the probability with which a Neosho Smallmouth Bass and Northern Smallmouth Bass possess a specific number of soft dorsal rays.
 
 #### Run the code: `05_morphology_analysis/smb_genetics_morphology_analysis.Rmd`
 
