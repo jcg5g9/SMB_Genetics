@@ -139,6 +139,10 @@ genotypes <- read_population("data/pca_data/genotype_data.csv",
                              type = "column", 
                              locus.columns = 2:29)
 
+# missing genotypes need to be coded as blank for gstudio, so coding as blanks:
+genotypes[genotypes == "0:0"] <- ""
+
+
 # Save adegenet formatted genotypes
 save(genotypes, file = "data/pca_data/genotypes.Rda")
 ```
@@ -241,7 +245,7 @@ save(pca, file = "data/pca_data/subspecies_pca.Rda")
 
 #### 3a. Plot Genetic PCA at the species level to assess differentiation among species and subspecies; run the Rmd chunk below.
 
-##### Plot Genetic PCA at the species level:
+##### Plot Genetic PCA at the species level: `figures/species_pca.pdf`
 ```{r}
 load("data/pca_data/full_pca.Rda")
 
@@ -253,7 +257,7 @@ ggplot(pca, aes(x = PC1, y = PC2, fill = subspecies)) +
   scale_fill_manual(values = c("springgreen3", "mediumpurple", "firebrick3")) + 
   labs(fill = "Species", color = "Species", x = "PC1 (3.3 %)", y = "PC2 (2.8 %)") + 
   theme_set(theme_cowplot(12)) + 
-  theme(legend.position = c(0.01,0.15)) + 
+  theme(legend.position = c(0.03,0.1)) + 
   theme(axis.text = element_text(size = 20)) + 
   theme(axis.title = element_text(size = 20)) + 
   theme(legend.text = element_text(size = 20)) + 
@@ -269,7 +273,7 @@ This plot is the basis for Figure S3a in the final ms.
 
 #### 3b. Plot Genetic PCAs at the subspecies level to assess differentiation among species and subspecies; run the Rmd chunk below.
 
-##### Plot Genetic PCA at the species level:
+##### Plot Genetic PCA at the subspecies level: `figures/subspecies_pca.pdf`
 ```{r}
 # Load pca data at the subspecies level
 load("data/pca_data/subspecies_pca.Rda")
@@ -280,9 +284,9 @@ pdf("figures/subspecies_pca.pdf", width=12, height=10)
 ggplot(pca, aes(x = PC1, y = PC2, fill = subspecies)) + 
   geom_point(aes(fill = subspecies), color = "black", pch = 21, size = 3, show.legend = T, alpha = 0.9) + 
   scale_fill_manual(values = c("springgreen3", "mediumpurple")) + 
-  labs(fill = "Species", color = "Species", x = "PC1 (3.3 %)", y = "PC2 (2.8 %)") + 
+  labs(fill = "Subspecies", color = "Subspecies", x = "PC1 (3.3 %)", y = "PC2 (2.8 %)") + 
   theme_set(theme_cowplot(12)) + 
-  theme(legend.position = c(0.01,0.15)) + 
+  theme(legend.position = c(0.03,0.1)) + 
   theme(axis.text = element_text(size = 20)) + 
   theme(axis.title = element_text(size = 20)) + 
   theme(legend.text = element_text(size = 20)) + 
@@ -297,7 +301,7 @@ dev.off()
 #### 3c. Plot Genetic PCA at the subspecies level to assess differentiation among populations; run the Rmd chunk below.
 In this step, we used the population structure analysis output from STRUCTURE for K=9, reflecting population inference from Puechmaille (2016) metrics (see model 4 in `code/04_puechmaille.Rmd`), to assign individuals to "populations" based on majority average membership coefficients. We arbitrarily named these "populations" based on the stream systems from which individual fish were generally collected. We then generated an additional vector column in the PCA dataset ("popluation") reflecting the assigned population of each individual. Points on the PCA plot were then colored based on these assignments.
 
-##### Plot Genetic PCA at the species level:
+##### Plot Genetic PCA at the population level: `figures/population_pca.pdf`
 ```{r}
 # Load pca data at the subspecies level
 load("data/pca_data/subspecies_pca.Rda")
@@ -315,12 +319,12 @@ pca$population <- c(rep("swmo", times = 244),
                     rep("missouri", times = 20))
 
 # Generate genetic pca plot 
-pdf("figures/subspecies_pca.pdf", width=8, height=7)
+pdf("figures/population_pca.pdf", width=8, height=7)
 
 ggplot(pca, aes(x = PC1, y = PC2, fill = population)) + 
   geom_point(aes(fill = population), color = "black", pch = 21, size = 3, show.legend = F, alpha = 0.9) + 
-  scale_fill_manual(values = c("forestgreen", "lightblue", "darkorchid1", "gold1", "chocolate1", "maroon1", "lightpink1","blue")) + 
-  labs(fill = "Species", color = "Species", x = "PC1 (3.3 %)", y = "PC2 (2.8 %)") + 
+  scale_fill_manual(values = c("lightblue", "forestgreen", "darkorchid1", "gold1", "chocolate1", "maroon1", "lightpink1","blue")) + 
+  labs(fill = "Population", color = "Species", x = "PC1 (3.3 %)", y = "PC2 (2.8 %)") + 
   theme_set(theme_cowplot(12)) + 
   theme(legend.position = c(0.01,0.15)) + 
   theme(axis.text = element_text(size = 20)) + 

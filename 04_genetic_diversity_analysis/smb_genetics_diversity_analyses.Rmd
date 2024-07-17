@@ -9,37 +9,210 @@ output: html_document
 We investigated patterns of genetic (via microsatellites) and morphological diversity, differentiation, and structure across Smallmouth Bass populations (<i>Micropterus dolomieu</i>) in the Central Interior Highlands (CIH) of North America, including the two recognized subspecies: Northern Smallmouth Bass (<i>M. d. dolomieu</i>), which is native to the lower Ozark Highlands, and Neosho Smallmouth Bass (<i>M. d. velox</i>), which is endemic to tributaries of the Arkansas River Basin. We compared three independent combinations of starting parameters in the Bayesian clustering software program STRUCTURE to ascertain a robust picture of hierarchical genetic structure in the CIH. We paired these data with genetic diversity metrics (e.g., observed and expected heterozygosity and allelic richness) to determine relative amounts of variation across geographically separated populations. We then assessed differentiation in five morphometric and meristic traits. We ultimately aimed to validate or amend the taxonomic status of the Smallmouth Bass subspecies by revealing potential ecological and evolutionary divergence between them, with the hope that increased taxonomic resolution would provide insight into the presence and distribution of evolutionary significant and management units for a popular sportfish.
 
 ## Specific Aim: Genetic diversity and differentiation analysis
-In this analysis, we use genotypes from 14 microsatellite loci to compare genetic diversity metrics within and among populations of Neosho Smallmouth Bass and Northern Smallmouth Bass in the CIH. We first calculate pairwise Fst to assess genetic differentiation between each pair of populations and between subspecies. We then calculate rarefied allelic richness, allelic richness of common alleles, expected and observed heterozygosity, and private allelic richness, and we calcualte average differences in each metric across sampling sites and subspecies.
+In this analysis, we use genotypes from 14 microsatellite loci to compare genetic diversity metrics within and among populations of Neosho Smallmouth Bass and Northern Smallmouth Bass in the CIH. We first calculate pairwise Fst to assess genetic differentiation between each pair of populations and between subspecies. We then calculate rarefied allelic richness, allelic richness of common alleles, expected and observed heterozygosity, and private allelic richness, and we calculate average differences in each metric across sampling sites and subspecies.
 
 ## Phases of Analysis
-### Phase 1: Genotype data preparation
 ### Phase 2: Diversity metric calculation and comparison
 
 Programs needed:
 
-STRUCTURE v.2.3.4. (Pritchard et al. 2000)
+HPRARE v.2.3.4. (Kalinowski 2005)
 
 Citation:
 
-Pritchard JK, Stephens M, Donnelly P. 2000. Inference of population structure using multilocus genotype data. Genetics 155: 945-959.
+Kalinowski ST (2005) HP-Rare: a computer program for performing rarefaction on measures of allelic diversity. Mol Ecol Notes 5:187–189. https://doi.org/10.1111/j.1471-8286.2004.00845.zx
 
-CLUMPP v.1.1.2 (Jakobsson and Rosenberg 2007)
+GENODIVE v.2.0b23. (Meirmans and Van Tienderen 2004)
 
 Citation:
 
-Jakobsson M, Rosenberg NA. 2007. CLUMPP: A cluster matching and permutation program for dealing with label switching and multimodality in analysis of population structure. Bioinformatics 23: 1801-1806.
-
-We ran each hierarchical analysis in separate .Rmd files, which are found in the `code/` directory.
+Meirmans PG, Van Tienderen PH (2004) GENOTYPE and GENODIVE: two programs for the analysis of genetic diversity of sexual organisms. Mol Ecol Notes 4:792–794. https://doi.org/10.1111/j.1471-8286.2004.00770.x
 
 ## Libraries needed for analysis
 ```{r}
 library(tidyverse)
 library(cowplot)
 library(readxl)
-library(writexl)
-library(genepopedit)
-library(adegenet)
 library(gstudio)
 ```
 
-## PHASE 1: GENOTYPE DATA PREPARATION
+## PHASE 1: DIVERSITY METRIC CALCULATION AND COMPARISON
+In this phase of the analysis, we conduct genetic diversity assessments for all sample sites within Smallmouth Bass subspecies (Neosho and Northern Smallmouth Bass) and Smallmouth Bass using various calculations of rarefied allelic richness, allelic richness of common alleles, and expected and observed heterozygosity. We then compare genetic diversity metrics across groups. Finally, we use two additional software programs (see "Programs Needed" Section above) to calculate private allelic richness (HPRARE) and pairwise Fst (GENODIVE).
+
+### STEP 1: Read in sample metadata and clean; run the Rmd chunk below
+In this step, we read in the sample metadata and filter to align with genotype data.
+
+##### Read in metadata and clean:
+```{r}
+# Load sample metadata
+load("../02_data_summary_analysis/data/metadata.Rda")
+
+# Get only samples from metadata that have genotypes
+metadata <- metadata %>%
+  filter(genotype == "yes")
+
+# Save metadata with genotypes
+save(metadata, file = "data/metadata.Rda")
+```
+
+### STEP 2. Read in genotype data and conduct diversity metric calculations
+
+#### 2a. Calculate diversity metrics across individuals; run the Rmd chunk below
+
+##### Calculate diversity metrics:
+```{r}
+# Load genotype data
+load("../03_structure_analysis/data/pca_data/genotypes.Rda")
+
+# Column bind metadata and genotype data
+genotypes <- cbind(metadata, 
+                   genotypes)
+
+# Create new column for both population and site, to be used in gstudio metric calculations
+genotypes <- genotypes %>%
+  unite(population_site, 
+        c(population, site), 
+        sep = "_")
+
+# Calculate non-rare allele frequencies
+a95 <- genetic_diversity(genotypes, 
+                         mode = "A95",
+                         stratum = "population_site") %>%
+  dplyr::select(-Locus)
+
+# Calculate observed heterozygosity
+ho <- genetic_diversity(genotypes, 
+                        mode = "Ho",
+                        stratum = "population_site") %>%
+  dplyr::select(-Locus)
+
+# Calculate observed heterozygosity
+he <- genetic_diversity(genotypes, 
+                        mode = "He",
+                        stratum = "population_site") %>%
+  dplyr::select(-Locus)
+  
+# join all metrics and omit superfluous columns
+diversity <- cbind(a95,
+                   ho,
+                   he) %>%
+  dplyr::select(-c(3,5))
+
+# save diversity metric data 
+save(diversity, file = "data/diversity.Rda")
+```
+
+#### 2b. Summarize diversity metrics across sites; run the Rmd chunk below
+
+##### Summarize diversity metrics for populations and sites:
+```{r}
+# Load diversity metric data 
+load("data/diversity.Rda")
+
+# Calculate average metrics across populations and sites
+mean_diversity <- diversity %>%
+  group_by(Stratum) %>%
+  summarize(mean_a95 = mean(A95),
+            mean_ho = mean(Ho),
+            mean_he = mean(He),
+            sd_a95 = sd(A95),
+            sd_ho = sd(Ho),
+            sd_he = sd(He))
+
+# Save mean diversity data
+save(mean_diversity, file = "data/mean_diversity.Rda")
+```
+
+These values are the basis for Table S3 in the final ms.
+
+### STEP 3. Compare genetic diversity metrics by subspecies and species
+In this step, we use linear models to compare genetic diversity metrics at the subspecies and species level.
+
+#### 3a. Prepare genetic diversity metric data for linear model comparison; run the Rmd chunk below.
+
+##### Prepare genetic diversity metric data for linear models:
+```{r}
+# Load diversity metric data
+load("data/mean_diversity.Rda")
+
+# Load metadata for genotyped samples
+load("data/metadata.Rda")
+
+# Separate Stratum column into corresponding population and site names to match metadata
+mean_diversity <- mean_diversity %>%
+  separate(Stratum, c('population', 'site'), sep = "_")
+
+# Get subspecies column from metadata, for merging with mean diversity data
+subspecies <- metadata %>%
+  dplyr::select(subspecies, population, site)
+
+# Merge mean diversity and subspecies columns
+mean_diversity <- full_join(subspecies,
+                            mean_diversity,
+                            by = c("population", "site"),
+                            copy = FALSE,
+                            keep = )
+
+# Get overall subspecies/species means
+mean_diversity %>%
+  group_by(subspecies) %>%
+  summarize(subspecies_a95 = mean(mean_a95),
+            subspecies_ho = mean(mean_ho),
+            subspecies_he = mean(mean_he))
+
+# Save merged mean diversity data
+save(mean_diversity, file = "data/diversity_lm_data")
+```
+
+## Mean diversity metrics by species
+<b><i>a95</i><sub>Neosho</sub></b> = 3.836698 <br>
+<b><i>a95</i><sub>Northern</sub></b> = 4.587639 <br>
+<b><i>a95</i><sub>Spotted</sub></b> = 3.406926 <br>
+
+<b><i>Ho</i><sub>Neosho</sub></b> = 0.5030336 <br>
+<b><i>Ho</i><sub>Northern</sub></b> = 0.6323559 <br>
+<b><i>Ho</i><sub>Spotted</sub></b> = 0.3569007 <br>
+
+<b><i>He</i><sub>Neosho</sub></b> = 0.5331237 <br>
+<b><i>He</i><sub>Northern</sub></b> = 0.6221727 <br>
+<b><i>He</i><sub>Spotted</sub></b> = 0.4837295 <br>
+
+These values are the basis for Table S3 in the final ms.
+
+#### 3b. Run linear models on genetic diversity metrics; run the Rmd chunk below.
+
+##### Run linear models on diversity metrics:
+```{r}
+# Load mean diversity data for linear models
+load("data/diversity_lm_data")
+
+# Remove spotted bass
+mean_diversity <- mean_diversity %>%
+  filter(subspecies != "Spotted Bass")
+
+# Run linear model for a95
+a95 <- aov(mean_a95 ~ subspecies, 
+           data = mean_diversity)
+
+# Get summary statistics
+summary(a95)
+
+# Run linear model for Ho
+ho <- aov(mean_ho ~ subspecies, 
+          data = mean_diversity)
+
+# Get summary statistics
+summary(ho)
+
+# Run linear model for He
+he <- lm(mean_he ~ subspecies, 
+         data = mean_diversity)
+
+# Get summary statistics
+summary(he)
+```
+
+## --------------  END OF PHASE 1: DIVERSITY METRIC CALCULATIONS AND COMPARISON -------------- ## 
+
+## --------------  END OF ANALYSIS 2: GENETIC DIVERSITY AND DIFFERENTIATION ANALYSIS --------------  ##
+
