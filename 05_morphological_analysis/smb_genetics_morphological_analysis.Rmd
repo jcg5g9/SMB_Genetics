@@ -21,11 +21,67 @@ In this analysis, we assess morphological differentiation between Neosho Smallmo
 library(tidyverse)
 library(cowplot)
 library(readxl)
+library(pophelper)
 ```
 
 ## PHASE 1: UNIVARIATE MORPHOMETRIC ANALYSIS WITH ANCOVA
-In this phase of the analysis, 
+In this phase of the analysis, we assess differentiation between Neosho Smallmouth Bass and Northern Smallmouth Bass in five individual morphometric traits (i.e., total length, standard length, body depth, head length, and orbital length; see Analysis 2 in `../02_data_summary_analysis/smb_genetics_data_summary_analysis` for descriptions for each trait) using analysis of covariance.  Thus, we compare each trait between subspecies as they co-vary with total length. We complete this assessment for two subsets of samples: 1) all fish labeled by the subspecies range from which they were collected (Arkansas River Basin, aka Neosho, vs. Missouri or White River drainages, aka Northern), and 2) only fish that assigned as purely (defined as assigning with >90% ancestry membership to any one genetic cluster based on population structure analysis) Neosho or Northern. 
+
+### STEP 1: Read in raw phenotype data and merge with metadata and population structure membership data
+In this step, we prepare the data for analysis by merging all phenotype data with both metadata and population structure membersihp data as ascertained in Analysis 3.
+
+#### 1a. Read in and merge phenotype data with metadata; run the Rmd chunk below.
+
+##### Read in phenotype data and merge with metadata:
+```{r}
+# read in phenotpye data
+load("../02_data_summary_analysis/data/phenotype_data.Rda")
+
+# load sample metadata
+load("../02_data_summary_analysis/data/metadata.Rda")
+
+# Merge phenotype data and metadata
+phenotypes <- merge(metadata,
+                    phenotype_data,
+                    by = "sample_id")
+
+# Save combined phenotype data and metadata
+save(phenotypes, file = "data/phenotypes.Rda")
+```
+
+#### 1b. Read in population structure membership data and merge with phenotype data; run the Rmd chunk below.
+In this step, we read in the results of structure analysis with default parameters for K=3, which gives membership coefficients for Neosho Smallmouth Bass and Northern Smallmouth Bass, as well as Spotted Bass. We then merge these membership values with the phenotype data.
+
+##### Read in population structure membership data and merge with metadata:
+```{r}
+# Read in combined-merged Q table for K=3 from default structure analysis
+q <- readQ("../03_structure_analysis/data/structure_data/clumpp_data/default_clumpp/full_data/pop_K3/pop_K3-combined-merged.txt") %>%
+  as.data.frame()
+
+# load sample metadata
+load("../02_data_summary_analysis/data/metadata.Rda")
+
+# load phenotype data
+load("data/phenotypes.Rda")
+
+# name columns by predominant cluster membership 
+colnames(q) <- c("spotted_bass", "northern_smallmouth_bass", "neosho_smallmouth_bass")
 
 
+# get only genotyped samples from metadata
+metadata <- metadata %>%
+  filter(genotype == "yes")
+
+# Bind genotyped sample_id column with population structure membership data
+q <- cbind(metadata,
+           q) %>%
+  dplyr::select(sample_id, spotted_bass, northern_smallmouth_bass, neosho_smallmouth_bass)
+
+# merge q data with phenotype data
+phenotypes <- merge(q, 
+                    phenotypes,
+                    by = "sample_id")
+
+```
 ## --------------  END OF ANALYSIS 5: GENETIC DIVERSITY AND DIFFERENTIATION ANALYSIS --------------  ##
 
