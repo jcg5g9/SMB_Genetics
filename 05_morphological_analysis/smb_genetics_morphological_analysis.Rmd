@@ -1,0 +1,31 @@
+---
+title: "Analysis 5: : Morphological differentiation analysis"
+author: "Joe Gunn"
+date: "2022-07-28"
+output: html_document
+---
+
+# Project: Population genetic structure and morphological differentiation between Northern Smallmouth Bass (<i>Micropterus dolomieu dolomieu</i>) and Neosho Smallmouth Bass (<i>M. d. velox</i>)
+We investigated patterns of genetic (via microsatellites) and morphological diversity, differentiation, and structure across Smallmouth Bass populations (<i>Micropterus dolomieu</i>) in the Central Interior Highlands (CIH) of North America, including the two recognized subspecies: Northern Smallmouth Bass (<i>M. d. dolomieu</i>), which is native to the lower Ozark Highlands, and Neosho Smallmouth Bass (<i>M. d. velox</i>), which is endemic to tributaries of the Arkansas River Basin. We compared three independent combinations of starting parameters in the Bayesian clustering software program STRUCTURE to ascertain a robust picture of hierarchical genetic structure in the CIH. We paired these data with genetic diversity metrics (e.g., observed and expected heterozygosity and allelic richness) to determine relative amounts of variation across geographically separated populations. We then assessed differentiation in five morphometric and meristic traits. We ultimately aimed to validate or amend the taxonomic status of the Smallmouth Bass subspecies by revealing potential ecological and evolutionary divergence between them, with the hope that increased taxonomic resolution would provide insight into the presence and distribution of evolutionary significant and management units for a popular sportfish.
+
+## Specific Aim: Genetic diversity and differentiation analysis
+In this analysis, we assess morphological differentiation between Neosho Smallmouth Bass and Northern Smallmouth Bass in the CIH using five morphometrics (traits with continuous distributions; total length, standard length, body depth, head length, and orbital length) and one meristic (discrete count trait; soft dorsal fin rays) and three independently analysis frameworks: 1) individual analyses of covariance (ANCOVAs) on morphometric traits; 2) multiviariate discriminant function analysis (DFA) on morphometric traits; and 3) logistic regression on soft dorsal fin rays. With ANCOVA, we assess differentiation between subsepecies at each trait individually. With DFA, we assess the accuracy with which an individual can be assigned to either subspecies based on composite trait values. With logistic regression, we assess the probability with which a Neosho Smallmouth Bass and Northern Smallmouth Bass possess a specific number of soft dorsal rays.
+
+## Phases of Analysis
+### Phase 1: Univariate morphometric analysis with ANCOVA
+### Phase 2: Multivariate morphometric analysis with DFA
+### Phase 3: Univariate meristic analysis with logistic regression
+
+## Libraries needed for analysis
+```{r}
+library(tidyverse)
+library(cowplot)
+library(readxl)
+```
+
+## PHASE 1: UNIVARIATE MORPHOMETRIC ANALYSIS WITH ANCOVA
+In this phase of the analysis, 
+
+
+## --------------  END OF ANALYSIS 5: GENETIC DIVERSITY AND DIFFERENTIATION ANALYSIS --------------  ##
+

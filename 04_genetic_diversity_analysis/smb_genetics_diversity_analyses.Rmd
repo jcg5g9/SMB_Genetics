@@ -12,7 +12,8 @@ We investigated patterns of genetic (via microsatellites) and morphological dive
 In this analysis, we use genotypes from 14 microsatellite loci to compare genetic diversity metrics within and among populations of Neosho Smallmouth Bass and Northern Smallmouth Bass in the CIH. We first calculate pairwise Fst to assess genetic differentiation between each pair of populations and between subspecies. We then calculate rarefied allelic richness, allelic richness of common alleles, expected and observed heterozygosity, and private allelic richness, and we calculate average differences in each metric across sampling sites and subspecies.
 
 ## Phases of Analysis
-### Phase 2: Diversity metric calculation and comparison
+### Phase 1: Diversity metric calculation and comparison
+### Phase 2: Fst, allelic richness, and private allelic richness calculation
 
 Programs needed:
 
@@ -65,31 +66,32 @@ save(metadata, file = "data/metadata.Rda")
 load("../03_structure_analysis/data/pca_data/genotypes.Rda")
 
 # Column bind metadata and genotype data
-genotypes <- cbind(metadata, 
-                   genotypes)
+genotypes <- merge(metadata, 
+                   genotypes,
+                   by = "sample_id")
 
-# Create new column for both population and site, to be used in gstudio metric calculations
+# Create new column for both population, site and subspecies, to be used in gstudio metric calculations
 genotypes <- genotypes %>%
-  unite(population_site, 
-        c(population, site), 
+  unite(population_site_subspecies, 
+        c(population, site, subspecies), 
         sep = "_")
 
 # Calculate non-rare allele frequencies
 a95 <- genetic_diversity(genotypes, 
                          mode = "A95",
-                         stratum = "population_site") %>%
+                         stratum = "population_site_subspecies") %>%
   dplyr::select(-Locus)
 
 # Calculate observed heterozygosity
 ho <- genetic_diversity(genotypes, 
                         mode = "Ho",
-                        stratum = "population_site") %>%
+                        stratum = "population_site_subspecies") %>%
   dplyr::select(-Locus)
 
 # Calculate observed heterozygosity
 he <- genetic_diversity(genotypes, 
                         mode = "He",
-                        stratum = "population_site") %>%
+                        stratum = "population_site_subspecies") %>%
   dplyr::select(-Locus)
   
 # join all metrics and omit superfluous columns
@@ -97,6 +99,15 @@ diversity <- cbind(a95,
                    ho,
                    he) %>%
   dplyr::select(-c(3,5))
+
+# separate stratum column into population, site, and subspecies again
+diversity <- diversity %>%
+  separate(Stratum, 
+           c("population", "site", "subspecies"),
+           sep = "_") %>%
+  mutate(population = as.factor(population),
+         site = as.factor(site),
+         subspecies = as.factor(subspecies))
 
 # save diversity metric data 
 save(diversity, file = "data/diversity.Rda")
@@ -111,7 +122,7 @@ load("data/diversity.Rda")
 
 # Calculate average metrics across populations and sites
 mean_diversity <- diversity %>%
-  group_by(Stratum) %>%
+  group_by(subspecies, population, site) %>%
   summarize(mean_a95 = mean(A95),
             mean_ho = mean(Ho),
             mean_he = mean(He),
@@ -135,47 +146,26 @@ In this step, we use linear models to compare genetic diversity metrics at the s
 # Load diversity metric data
 load("data/mean_diversity.Rda")
 
-# Load metadata for genotyped samples
-load("data/metadata.Rda")
-
-# Separate Stratum column into corresponding population and site names to match metadata
-mean_diversity <- mean_diversity %>%
-  separate(Stratum, c('population', 'site'), sep = "_")
-
-# Get subspecies column from metadata, for merging with mean diversity data
-subspecies <- metadata %>%
-  dplyr::select(subspecies, population, site)
-
-# Merge mean diversity and subspecies columns
-mean_diversity <- full_join(subspecies,
-                            mean_diversity,
-                            by = c("population", "site"),
-                            copy = FALSE,
-                            keep = )
-
 # Get overall subspecies/species means
 mean_diversity %>%
   group_by(subspecies) %>%
   summarize(subspecies_a95 = mean(mean_a95),
             subspecies_ho = mean(mean_ho),
             subspecies_he = mean(mean_he))
-
-# Save merged mean diversity data
-save(mean_diversity, file = "data/diversity_lm_data")
 ```
 
 ## Mean diversity metrics by species
-<b><i>a95</i><sub>Neosho</sub></b> = 3.836698 <br>
-<b><i>a95</i><sub>Northern</sub></b> = 4.587639 <br>
-<b><i>a95</i><sub>Spotted</sub></b> = 3.406926 <br>
+<b><i>a95</i><sub>Neosho</sub></b> = 3.764286 <br>
+<b><i>a95</i><sub>Northern</sub></b> = 4.539683 <br>
+<b><i>a95</i><sub>Spotted</sub></b> = 3.238095 <br>
 
-<b><i>Ho</i><sub>Neosho</sub></b> = 0.5030336 <br>
-<b><i>Ho</i><sub>Northern</sub></b> = 0.6323559 <br>
-<b><i>Ho</i><sub>Spotted</sub></b> = 0.3569007 <br>
+<b><i>Ho</i><sub>Neosho</sub></b> =  0.4854380 <br>
+<b><i>Ho</i><sub>Northern</sub></b> = 0.6348964 <br>
+<b><i>Ho</i><sub>Spotted</sub></b> = 0.3510444 <br>
 
-<b><i>He</i><sub>Neosho</sub></b> = 0.5331237 <br>
-<b><i>He</i><sub>Northern</sub></b> = 0.6221727 <br>
-<b><i>He</i><sub>Spotted</sub></b> = 0.4837295 <br>
+<b><i>He</i><sub>Neosho</sub></b> = 0.5221605 <br>
+<b><i>He</i><sub>Northern</sub></b> = 0.6224878 <br>
+<b><i>He</i><sub>Spotted</sub></b> = 0.4690017 <br>
 
 These values are the basis for Table S3 in the final ms.
 
@@ -184,7 +174,7 @@ These values are the basis for Table S3 in the final ms.
 ##### Run linear models on diversity metrics:
 ```{r}
 # Load mean diversity data for linear models
-load("data/diversity_lm_data")
+load("data/mean_diversity.Rda")
 
 # Remove spotted bass
 mean_diversity <- mean_diversity %>%
@@ -212,7 +202,16 @@ he <- lm(mean_he ~ subspecies,
 summary(he)
 ```
 
+<b> Model results by subspecies</b>: <br>
+A<sub>95</sub>: p = 0.0308, F = 5.044
+H<sub>o</sub>: p = 0.00014, F = 18.03
+H<sub>E</sub>: p = 0.00954, F = 2.734
+
 ## --------------  END OF PHASE 1: DIVERSITY METRIC CALCULATIONS AND COMPARISON -------------- ## 
 
-## --------------  END OF ANALYSIS 2: GENETIC DIVERSITY AND DIFFERENTIATION ANALYSIS --------------  ##
+## PHASE 2: FST, ALLELIC RICHNESS, AND PRIVATE ALLELIC RICHNESS CALCULATION
+All pairwise Fst were calculated in Genodive, and allelic richness and private allelic richness were calculted in HP-RARE (see section on Software programs needed above).
 
+## --------------  END OF PHASE 2: FST, ALLELIC RICHNESS, AND PRIVATE ALLELIC RICHNESS CALCULATION -------------- ## 
+
+## --------------  END OF ANALYSIS 5: GENETIC DIVERSITY AND DIFFERENTIATION ANALYSIS --------------  ##
