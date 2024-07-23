@@ -22,15 +22,15 @@ library(tidyverse)
 library(cowplot)
 library(readxl)
 library(pophelper)
+library(ggpubr)
+library(nlme)
 ```
 
 ## PHASE 1: UNIVARIATE MORPHOMETRIC ANALYSIS WITH ANCOVA
-In this phase of the analysis, we assess differentiation between Neosho Smallmouth Bass and Northern Smallmouth Bass in five individual morphometric traits (i.e., total length, standard length, body depth, head length, and orbital length; see Analysis 2 in `../02_data_summary_analysis/smb_genetics_data_summary_analysis` for descriptions for each trait) using analysis of covariance.  Thus, we compare each trait between subspecies as they co-vary with total length. We complete this assessment for two subsets of samples: 1) all fish labeled by the subspecies range from which they were collected (Arkansas River Basin, aka Neosho, vs. Missouri or White River drainages, aka Northern), and 2) only fish that assigned as purely (defined as assigning with >90% ancestry membership to any one genetic cluster based on population structure analysis) Neosho or Northern. 
+In this phase of the analysis, we assess differentiation between Neosho Smallmouth Bass and Northern Smallmouth Bass in four individual morphometric traits (i.e., standard length, body depth, head length, and orbital length; see Analysis 2 in `../02_data_summary_analysis/smb_genetics_data_summary_analysis` for descriptions for each trait) using analysis of covariance, comparing each trait between subspecies as they co-vary with total length. We complete this assessment for two subsets of samples: 1) all fish labeled by the subspecies range from which they were collected (Arkansas River Basin, aka Neosho, vs. Missouri or White River drainages, aka Northern), and 2) only fish that assigned as purely (defined as assigning with >90% ancestry membership to any one genetic cluster based on population structure analysis) Neosho or Northern. 
 
-### STEP 1: Read in raw phenotype data and merge with metadata and population structure membership data
-In this step, we prepare the data for analysis by merging all phenotype data with both metadata and population structure membersihp data as ascertained in Analysis 3.
-
-#### 1a. Read in and merge phenotype data with metadata; run the Rmd chunk below.
+### STEP 1: Read in and combine raw phenotype data, metadata, and population structure membership data; run the Rmd chunk below
+In this step, we prepare the data for analysis by merging all phenotype data with both metadata and population structure membership data as ascertained in Analysis 3.
 
 ##### Read in phenotype data and merge with metadata:
 ```{r}
@@ -40,48 +40,842 @@ load("../02_data_summary_analysis/data/phenotype_data.Rda")
 # load sample metadata
 load("../02_data_summary_analysis/data/metadata.Rda")
 
-# Merge phenotype data and metadata
-phenotypes <- merge(metadata,
-                    phenotype_data,
-                    by = "sample_id")
-
-# Save combined phenotype data and metadata
-save(phenotypes, file = "data/phenotypes.Rda")
-```
-
-#### 1b. Read in population structure membership data and merge with phenotype data; run the Rmd chunk below.
-In this step, we read in the results of structure analysis with default parameters for K=3, which gives membership coefficients for Neosho Smallmouth Bass and Northern Smallmouth Bass, as well as Spotted Bass. We then merge these membership values with the phenotype data.
-
-##### Read in population structure membership data and merge with metadata:
-```{r}
 # Read in combined-merged Q table for K=3 from default structure analysis
 q <- readQ("../03_structure_analysis/data/structure_data/clumpp_data/default_clumpp/full_data/pop_K3/pop_K3-combined-merged.txt") %>%
   as.data.frame()
 
-# load sample metadata
-load("../02_data_summary_analysis/data/metadata.Rda")
+# Combine phenotype data and metadata
+phenotypes <- full_join(metadata, 
+                        phenotype_data,
+                        by = "sample_id")
 
-# load phenotype data
-load("data/phenotypes.Rda")
-
-# name columns by predominant cluster membership 
-colnames(q) <- c("spotted_bass", "northern_smallmouth_bass", "neosho_smallmouth_bass")
-
-
-# get only genotyped samples from metadata
-metadata <- metadata %>%
+# Get metadata for only genotyped samples
+metadata_genotypes <- metadata %>%
   filter(genotype == "yes")
 
+# Combine structure data and metadata
+q <- cbind(metadata_genotypes$sample_id, 
+           q)
+
+# rename columns by predominant cluster membership 
+colnames(q) <- c("sample_id", "spotted_bass", "neosho_smallmouth_bass", "northern_smallmouth_bass")
+
 # Bind genotyped sample_id column with population structure membership data
-q <- cbind(metadata,
-           q) %>%
-  dplyr::select(sample_id, spotted_bass, northern_smallmouth_bass, neosho_smallmouth_bass)
+phenotypes <- full_join(phenotypes,
+                        q,
+                        by = "sample_id")
 
-# merge q data with phenotype data
-phenotypes <- merge(q, 
-                    phenotypes,
-                    by = "sample_id")
+# Eliminate spotted bass from the dataset altogether
+phenotypes <- phenotypes %>%
+  filter(subspecies != "Spotted Bass") %>%
+  dplyr::select(-spotted_bass)
 
+# Save full phenotype data for downstream analyses
+save(phenotypes, file = "data/phenotypes.Rda")
 ```
+
+### STEP 2: Run ANCOVA on individual morphometric traits
+In this step, we run analysis of covariance (ANCOVA) on four morphometric traits (standard length, SL; body depth, BD; head length, HL; and orbital length, OL) individually. We regress each trait on TL and compare regressions between subspecies by range (where samples were collected) and by genetic assignment (samples assigning > 90% to either Neosho or Northern Smallmouth Bass genetic clusters as inferred in population structure analysis).
+
+#### 2a. Generate separate datasets for 1) morphometric traits by range and 2) morphometric traits by genetic assignment and summarize sample sizes and log-transform trait values; run the rmd chunk below.
+
+##### Read in phenotype data, merge with metadata, and generate range and genetics datasets with log-transformed trait values:
+```{r}
+# read in phenotpye data
+load("data/phenotypes.Rda")
+
+# Generate and clean dataset for samples by range
+range <- phenotypes %>%
+  dplyr::select(sample_id, population, subspecies, tl, sl, ol, hl, bd) %>%
+  drop_na()
+
+# Generate and clean dataset for samples by genetic assignment
+genetics <- phenotypes %>%
+  dplyr::select(sample_id, population, tl, sl, ol, hl, bd, northern_smallmouth_bass, neosho_smallmouth_bass) %>%
+  filter(northern_smallmouth_bass > 0.9 |
+           neosho_smallmouth_bass > 0.9) %>%
+  drop_na()
+
+# Categorize sample ids into 25 mm size bins based on total length while alive (tl_alive)
+genetics$genetic_id <- with(genetics, ifelse(northern_smallmouth_bass >= 0.9, "Northern Smallmouth Bass",
+                                             ifelse(northern_smallmouth_bass <= 0.1, "Neosho Smallmouth Bass", "done")))
+
+# Log transform trait values in range data 
+range <- range %>%
+  mutate(logtl = log(tl),
+         logsl = log(sl),
+         logbd = log(bd),
+         loghl = log(hl),
+         logol = log(ol))
+
+# Log transform trait values in genetics data 
+genetics <- genetics %>%
+  mutate(logtl = log(tl),
+         logsl = log(sl),
+         logbd = log(bd),
+         loghl = log(hl),
+         logol = log(ol))
+
+# Count samples by range
+range %>%
+  count()
+
+# Count samples by subspecies and range
+range %>%
+  group_by(subspecies) %>%
+   count()
+
+# Count samples by genetic id
+genetics %>%
+  count()
+
+# Count samples by subspecies and range
+genetics %>%
+  group_by(genetic_id) %>%
+   count()
+
+# Save range data
+save(range, file = "data/range.Rda")
+
+# Save genetics data
+save(genetics, file = "data/genetics.Rda")
+```
+
+### Data summary:
+
+## Total samples by range
+<b><i>N</i><sub>range</sub></b> = 249 <br>
+
+## Total samples by subspecies and range
+<b><i>N</i><sub>Neosho Smallmouth Bass </sub></b> = 184 <br>
+<b><i>N</i><sub>Northern Smallmouth Bass</sub></b> = 65 <br>
+
+## Total samples by range
+<b><i>N</i><sub>range</sub></b> = 89 <br>
+
+## Total samples by subspecies and range
+<b><i>N</i><sub>Neosho Smallmouth Bass </sub></b> = 17 <br>
+<b><i>N</i><sub>Northern Smallmouth Bass</sub></b> = 72 <br>
+
+#### 2b. Test normality in all morphometric traits
+
+##### 2b.1. Test for normality in Neosho Smallmouth Bass samples by range; run the Rmd chunk below.
+
+##### Test for normality in trait values:
+```{r}
+# Load range data
+load("data/range.Rda")
+
+# Get only neosho samples by range
+neosho_range <- range %>%
+  filter(subspecies == "Neosho Smallmouth Bass")
+
+# Test for normality in each trait
+shapiro.test(neosho_range$logtl)
+shapiro.test(neosho_range$logsl)
+shapiro.test(neosho_range$logol)
+shapiro.test(neosho_range$loghl)
+shapiro.test(neosho_range$logbd)
+```
+
+<b> Model results by trait</b>: <br>
+TL: p = 0.07977, W = 0.98668 (Normal)
+SL: p = 0.09018, W = 0.98707 (Normal)
+OL: p < 0.00100, W = 0.95523 (Non-normal)
+HL: p = 0.16490, W = 0.988970 (Normal)
+BD: p = 0.59970, W = 0.99355 (Normal)
+
+##### 2b.2. Test for normality in Northern Smallmouth Bass samples by range; run the Rmd chunk below.
+
+##### Test for normality in trait values:
+```{r}
+# Load range data
+load("data/range.Rda")
+
+# Get only northern samples by range
+northern_range <- range %>%
+  filter(subspecies == "Northern Smallmouth Bass")
+
+# Test for normality in each trait
+shapiro.test(northern_range$logtl) 
+shapiro.test(northern_range$logsl) 
+shapiro.test(northern_range$logol)
+shapiro.test(northern_range$loghl)
+shapiro.test(northern_range$logbd) 
+```
+
+<b> Model results by trait</b>: <br>
+TL: p = 0.4577, W = 0.98188 (Normal)
+SL: p = 0.2968, W = 0.97793 (Normal)
+OL: p = 0.5188, W = 0.98312 (Normal)
+HL: p < 0.0010, W = 0.91592 (Non-normal)
+BD: p = 0.2971, W = 0.97794 (Normal)
+
+##### 2b.3. Test for normality in Neosho Smallmouth Bass samples by genetic assignment; run the Rmd chunk below.
+
+##### Test for normality in trait values:
+```{r}
+# Load genetics data
+load("data/genetics.Rda")
+
+# Get only neosho samples by genetic assignment
+neosho_genetics <- genetics %>%
+  filter(genetic_id == "Neosho Smallmouth Bass")
+
+# Test for normality in each trait
+shapiro.test(neosho_genetics$logtl)
+shapiro.test(neosho_genetics$logsl)
+shapiro.test(neosho_genetics$logol)
+shapiro.test(neosho_genetics$loghl)
+shapiro.test(neosho_genetics$logbd)
+```
+
+<b> Model results by trait</b>: <br>
+TL: p = 0.4462, W = 0.94934 (Normal)
+SL: p = 0.5208, W = 0.95389 (Normal)
+OL: p = 0.5098, W = 0.95324 (Normal)
+HL: p = 0.6847, W = 0.96281 (Normal)
+BD: p = 0.2028, W = 0.92817 (Normal)
+
+##### 2b.4. Test for normality in Northern Smallmouth Bass samples by genetic assignment; run the Rmd chunk below.
+
+##### Test for normality in trait values:
+```{r}
+# Load genetics data
+load("data/genetics.Rda")
+
+# Get only neosho samples by genetic assignment
+northern_genetics <- genetics %>%
+  filter(genetic_id == "Northern Smallmouth Bass")
+
+# Test for normality in each trait
+shapiro.test(northern_genetics$logtl) 
+shapiro.test(northern_genetics$logsl) 
+shapiro.test(northern_genetics$logol) 
+shapiro.test(northern_genetics$loghl)
+shapiro.test(northern_genetics$logbd) 
+```
+
+<b> Model results by trait</b>: <br>
+TL: p = 0.6208, W = 0.98621 (Normal)
+SL: p = 0.7938, W = 0.98910 (Normal)
+OL: p = 0.5048, W = 0.98421 (Normal)
+HL: p < 0.0010, W = 0.90931 (Non-normal)
+BD: p = 0.6511, W = 0.98671 (Normal)
+
+##### 2b.5. Plot qq normal distribution plots for all traits and groups; run the Rmd chunk below.
+
+##### Plot qq normal distribution for all traits: `figures/normality.pdf`
+```{r}
+# Load range data
+load("data/range.Rda")
+
+# Load genetics data
+load("data/genetics.Rda")
+
+# Get only neosho samples by range
+neosho_range <- range %>%
+  filter(subspecies == "Neosho Smallmouth Bass")
+
+# Neosho range total length plot
+neosho_range_tl <- ggqqplot(neosho_range$logtl) + 
+    labs(y = "Total Length Sample", title = "Neosho Range") + 
+    theme_set(theme_cowplot(12)) + 
+    theme(axis.title.x = element_blank()) + 
+    theme(plot.title = element_text(hjust = 0.5)) + 
+    theme(axis.title.y = element_text(size = 20)) + 
+    theme(plot.title = element_text(size = 20)) + 
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
+
+# Neosho range standard length plot
+neosho_range_sl <- ggqqplot(neosho_range$logsl) + 
+    labs(y = "Standard Length Sample") + 
+    theme_set(theme_cowplot(12)) + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.title.y = element_text(size = 20)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
+
+# Neosho range orbital length plot
+neosho_range_ol <- ggqqplot(neosho_range$logol) + 
+    labs(y = "Orbital Length Sample") + 
+    theme_set(theme_cowplot(12)) + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.title.y = element_text(size = 20)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
+
+# Neosho range head length plot
+neosho_range_hl <- ggqqplot(neosho_range$loghl) + 
+    labs(y = "Head Length Sample") + 
+    theme_set(theme_cowplot(12)) + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.title.y = element_text(size = 20))  +
+    theme(panel.border = element_rect(colour =  "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
+
+# Neosho range body depth plot
+neosho_range_bd <- ggqqplot(neosho_range$logbd) + 
+    labs(y = "Body Depth Sample", x = "Theoretical") + 
+    theme_set(theme_cowplot(12)) + 
+    theme(axis.title.y = element_text(size = 20)) + 
+    theme(axis.title.x = element_text(size = 20))  +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
+
+# Get only neosho samples by range
+northern_range <- range %>%
+  filter(subspecies == "Northern Smallmouth Bass")
+
+# Northern range total length plot
+northern_range_tl <- ggqqplot(northern_range$logtl) + 
+    labs(title = "Northern Range") + 
+    theme_set(theme_cowplot(12)) + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.title.y = element_blank()) + 
+    theme(plot.title = element_text(hjust = 0.5)) + 
+    theme(plot.title = element_text(size = 20))  +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
+
+# Northern range standard length plot
+northern_range_sl <- ggqqplot(northern_range$logsl) + 
+    theme_set(theme_cowplot(12)) + 
+    theme(axis.title.x = element_blank()) +
+    theme(axis.title.y = element_blank()) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
+
+# Northern range orbital length plot
+northern_range_ol <- ggqqplot(northern_range$logol) +  
+    theme_set(theme_cowplot(12)) + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.title.y = element_blank()) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
+
+# Northern range head length plot
+northern_range_hl <- ggqqplot(northern_range$loghl) + 
+    theme_set(theme_cowplot(12)) + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.title.y = element_blank()) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
+
+# Northern range body depth plot
+northern_range_bd <- ggqqplot(northern_range$logbd) + 
+    labs(x = "Theoretical") + 
+    theme_set(theme_cowplot(12)) + 
+    theme(axis.title.x = element_text(size = 20)) + 
+    theme(axis.title.y = element_blank())  +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
+
+# Get only Neosho samples by genetic assignment
+neosho_genetics <- genetics %>%
+  filter(genetic_id == "Neosho Smallmouth Bass")
+
+# Neosho genetics total length plot
+neosho_genetics_tl <- ggqqplot(neosho_genetics$logtl) + 
+    labs(title = "Neosho Genetic Assignment") + 
+    theme_set(theme_cowplot(12)) + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.title.y = element_blank()) + 
+    theme(plot.title = element_text(hjust = 0.5)) + 
+    theme(plot.title = element_text(size = 20)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
+
+# Neosho genetics standard length plot
+neosho_genetics_sl <- ggqqplot(neosho_genetics$logsl) + 
+    theme_set(theme_cowplot(12)) +
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.title.y = element_blank()) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
+
+# Neosho genetics orbital length plot
+neosho_genetics_ol <- ggqqplot(neosho_genetics$logol) + 
+    theme_set(theme_cowplot(12)) + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.title.y = element_blank()) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
+
+# Neosho genetics head length plot
+neosho_genetics_hl <- ggqqplot(neosho_genetics$loghl) + 
+    theme_set(theme_cowplot(12)) + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.title.y = element_blank()) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
+
+# Neosho genetics body depth plot
+neosho_genetics_bd <- ggqqplot(neosho_genetics$logbd) + 
+    labs(x = "Theoretical") + theme_set(theme_cowplot(12)) +
+    theme(axis.title.y = element_blank()) +
+    theme(axis.title.x = element_text(size = 20)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
+
+# Get only Northern samples by genetic assignment
+northern_genetics <- genetics %>%
+  filter(genetic_id == "Northern Smallmouth Bass")
+
+# Northern genetics total length plot
+northern_genetics_tl <- ggqqplot(northern_genetics$logtl) + 
+    labs(title = "Northern Genetic Assignment") + 
+    theme_set(theme_cowplot(12)) + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.title.y = element_blank()) + 
+    theme(plot.title = element_text(hjust = 0.5)) + 
+    theme(plot.title = element_text(size = 20)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
+
+# Northern genetics standard length plot
+northern_genetics_sl <- ggqqplot(northern_genetics$logsl) + 
+    theme_set(theme_cowplot(12)) + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.title.y = element_blank()) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
+
+# Northern genetics orbital length plot
+northern_genetics_ol <- ggqqplot(northern_genetics$logol) +
+    theme_set(theme_cowplot(12)) + 
+    theme(axis.title.x = element_blank()) +
+    theme(axis.title.y = element_blank()) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
+
+# Northern genetics head length plot
+northern_genetics_hl <- ggqqplot(northern_genetics$loghl) + 
+    theme_set(theme_cowplot(12)) + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.title.y = element_blank()) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
+
+# Northern genetics body depth plot
+northern_genetics_bd <- ggqqplot(northern_genetics$logbd) + 
+    theme_set(theme_cowplot(12)) + 
+    labs(x = "Theoretical") + 
+    theme(axis.title.y = element_blank()) + 
+    theme(axis.title.x = element_text(size = 20)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0))
+
+# Plot all together
+pdf("figures/qq_plots.pdf", width = 19, height = 19)
+
+plot_grid(neosho_range_tl, northern_range_tl, neosho_genetics_tl, northern_genetics_tl, 
+          neosho_range_sl, northern_range_sl, neosho_genetics_sl, northern_genetics_sl,
+          neosho_range_ol, northern_range_ol, neosho_genetics_ol, northern_genetics_ol,
+          neosho_range_hl, northern_range_hl, neosho_genetics_hl, northern_genetics_hl,
+          neosho_range_bd, northern_range_bd, neosho_genetics_bd, northern_genetics_bd,
+          ncol = 4,
+          nrow = 5,
+          labels = c("a","b","c","d","e",
+                     "f","g","h","i","j",
+                     "k","l","m","n","o",
+                     "p","q","r","s","t"),
+          label_size = 25,
+          label_y = 1.03)
+
+dev.off()
+```
+
+This figure is the basis for Figure S4 in the final ms.
+
+#### 2c. Plot and compare density distributions for all traits by range and genetic assignment; run the Rmd chunk below.
+
+##### Plot denisty distributions for all traits: `figures/density.pdf`
+```{r}
+# Load range data
+load("data/range.Rda")
+
+# Load genetics data
+load("data/genetics.Rda")
+
+# Change names of subspecies for plotting
+levels(range$subspecies) <- c("Neosho", "Northern", "Spotted")
+
+# Range total length plot
+range_tl <- ggplot(range, aes(x = logtl, fill = subspecies)) + 
+    geom_density(show.legend = T, alpha = 0.7) + 
+    theme_set(theme_cowplot(12)) + 
+    scale_fill_manual(values = c("springgreen3", "mediumpurple")) + 
+    labs(fill = "Range", y = "Probability Density", fill = "Subspecies") + 
+    theme(legend.position = c(0.6,0.85), legend.background = element_blank()) + 
+    theme(legend.text = element_text(size = 15), legend.title = element_text(size = 20, face = "bold")) + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.title.y = element_text(size = 20)) + 
+    theme(axis.text = element_text(size = 20)) +
+    scale_x_continuous(expand = c(0,0)) +
+    scale_y_continuous(expand = c(0,0)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1))
+
+# Range standard length plot
+range_sl <- ggplot(range, aes(x = logsl, fill = subspecies)) + 
+    geom_density(show.legend = F, alpha = 0.7) + 
+    theme_set(theme_cowplot(12)) + 
+    scale_fill_manual(values = c("springgreen3", "mediumpurple")) + 
+    theme(axis.title.y = element_blank()) + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.text = element_text(size = 20)) +
+    scale_x_continuous(expand = c(0,0)) +
+    scale_y_continuous(expand = c(0,0)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1))
+
+# Range orbital length plot
+range_ol <- ggplot(range, aes(x = logol, fill = subspecies)) + 
+    geom_density(show.legend = F, alpha = 0.7) + 
+    theme_set(theme_cowplot(12)) + 
+    scale_fill_manual(values = c("springgreen3", "mediumpurple")) + 
+    theme(axis.title.y = element_blank()) + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.text = element_text(size = 20)) + 
+    theme(axis.text = element_text(size = 20)) +
+    scale_x_continuous(expand = c(0,0)) +
+    scale_y_continuous(expand = c(0,0)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1))
+
+# Range head length plot
+range_hl <- ggplot(range, aes(x = loghl, fill = subspecies)) + 
+    geom_density(show.legend = F, alpha = 0.7) + 
+    theme_set(theme_cowplot(12)) + 
+    scale_fill_manual(values = c("springgreen3", "mediumpurple")) + 
+    theme(axis.title.y = element_blank()) + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.text = element_text(size = 20)) +
+    scale_x_continuous(expand = c(0,0)) +
+    scale_y_continuous(expand = c(0,0)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1))
+
+# Range body depth plot
+range_bd <- ggplot(range, aes(x = logbd, fill = subspecies)) + 
+    geom_density(show.legend = F, alpha = 0.7) + 
+    theme_set(theme_cowplot(12)) + 
+    scale_fill_manual(values = c("springgreen3", "mediumpurple")) + 
+    theme(axis.title.x = element_blank()) + theme(axis.title.y = element_blank()) + 
+    theme(axis.text = element_text(size = 20)) +
+    scale_x_continuous(expand = c(0,0)) +
+    scale_y_continuous(expand = c(0,0)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1))
+
+# Plot all range together
+range <- plot_grid(range_tl, 
+                   range_sl, 
+                   range_ol, 
+                   range_hl, 
+                   range_bd, 
+                   nrow = 1,
+                   labels = c("f","g","h","i","j"),
+                   label_size = 25,
+                   label_y = 0.99,
+                   label_x = 0.1)
+
+# Genetics total length plot
+genetics_tl <- ggplot(genetics, aes(x = logtl, fill = genetic_id)) + 
+    geom_density(show.legend = F, alpha = 0.7) + 
+    theme_set(theme_cowplot(12)) + 
+    scale_fill_manual(values = c("springgreen3", "mediumpurple")) + 
+    labs(fill = "Assignment", y = "Probability Density", x = "Total Length (mm)") + 
+    theme(legend.position = c(0.6,0.9), legend.background = element_blank()) + 
+    theme(legend.text = element_text(size = 15), legend.title = element_text(size = 20, face = "bold")) + 
+    theme(axis.title = element_text(size = 20)) + 
+    theme(axis.text = element_text(size = 20)) +
+    scale_x_continuous(expand = c(0,0)) +
+    scale_y_continuous(expand = c(0,0)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1))
+
+# Genetics standard length plot
+genetics_sl <- ggplot(genetics, aes(x = logsl, fill = genetic_id)) + 
+    geom_density(show.legend = F, alpha = 0.7) + 
+    theme_set(theme_cowplot(12)) + 
+    scale_fill_manual(values = c("springgreen3", "mediumpurple")) + 
+    labs(x = "Standard Length (mm)") + 
+    theme(axis.title.y = element_blank()) + 
+    theme(axis.title.x = element_text(size = 20)) + 
+    theme(axis.text = element_text(size = 20)) +
+    scale_x_continuous(expand = c(0,0)) +
+    scale_y_continuous(expand = c(0,0)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1))
+
+# Genetics orbital length plot
+genetics_ol <- ggplot(genetics, aes(x = logol, fill = genetic_id)) + 
+    geom_density(show.legend = F, alpha = 0.7) + 
+    theme_set(theme_cowplot(12)) + 
+    scale_fill_manual(values = c("springgreen3", "mediumpurple")) + 
+    labs(x = "Orbital Length (mm)") + 
+    theme(axis.title.y = element_blank()) + 
+    theme(axis.title.x = element_text(size = 20)) + 
+    theme(axis.text = element_text(size = 20)) +
+    scale_x_continuous(expand = c(0,0)) +
+    scale_y_continuous(expand = c(0,0)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1))
+
+# Genetics head length plot
+genetics_hl <- ggplot(genetics, aes(x = loghl, fill = genetic_id)) + 
+    geom_density(show.legend = F, alpha = 0.7) + 
+    theme_set(theme_cowplot(12)) + 
+    scale_fill_manual(values = c("springgreen3", "mediumpurple")) + 
+    labs(x = "Head Length (mm)") + 
+    theme(axis.title.y = element_blank()) + 
+    theme(axis.title.x = element_text(size = 20)) + 
+    theme(axis.text = element_text(size = 20)) +
+    scale_x_continuous(expand = c(0,0)) +
+    scale_y_continuous(expand = c(0,0)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1))
+
+# Genetics body depth plot
+genetics_bd <- ggplot(genetics, aes(x = logbd, fill = genetic_id)) + 
+    geom_density(show.legend = F, alpha = 0.7) + 
+    theme_set(theme_cowplot(12)) + 
+    scale_fill_manual(values = c("springgreen3", "mediumpurple")) + 
+    labs(x = "Body Depth (mm)") + 
+    theme(axis.title.y = element_blank()) + 
+    theme(axis.title.x = element_text(size = 20)) + 
+    theme(axis.text = element_text(size = 20)) +
+    scale_x_continuous(expand = c(0,0)) + 
+    scale_y_continuous(expand = c(0,0)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1))
+
+# Plot all genetics together
+genetics <- plot_grid(genetics_tl, 
+                      genetics_sl, 
+                      genetics_ol, 
+                      genetics_hl, 
+                      genetics_bd, 
+                      nrow = 1,
+                      labels = c("a","b","c","d","e"),
+                      label_size = 25,
+                      label_y = 0.99,
+                      label_x = 0.01)
+
+# Plot everything together
+pdf("figures/density.pdf", width = 20, height = 8)
+
+plot_grid(range, 
+          genetics,
+          nrow = 2)
+
+dev.off()
+```
+
+This figure is the basis for Figure S5 in the final ms.
+
+#### 2d. Run ANCOVA models for all traits
+
+##### 2d.1. Run ANCOVA models for traits by range
+
+###### 2d.1.1. Run ANCOVAs with interaction terms and extract model coefficients by range; run the Rmd chunk below
+
+##### Run ANCOVAs including interaction term:
+```{r}
+# Load range data
+load("data/range.Rda")
+
+# ANCOVA with interaction for standard length
+range_sl <- lme(logsl ~ logtl*subspecies, 
+                random = ~1|population,
+                data = range)
+
+# Get summary statistics
+anova(range_sl)
+
+# ANCOVA with interaction for orbital length
+range_ol <- lme(logol ~ logtl*subspecies,
+                random = ~1|population, 
+                data = range)
+
+# Get summary statistics
+anova(range_ol)
+
+# ANCOVA with interaction for head length
+range_hl <- lme(loghl ~ logtl*subspecies, 
+                random = ~1|population, 
+                data = range)
+
+# Get summary statistics
+anova(range_hl)
+
+# ANCOVA with interaction for body depth
+range_bd <- lme(logbd ~ logtl*subspecies, 
+                random = ~1|population, 
+                data = range)
+
+# Get summary statistics
+anova(range_bd)
+```
+
+<b> Interaction model results by trait</b>: <br>
+SL: p = 0.1411 , F = 2.2000 (no interaction)
+OL: p < 0.0001 , F = 33.301 (interaction)
+HL: p = 0.8227 , F = 0.0500 (no interaction)
+BD: p = 0.2085 , F = 1.5900 (no interaction)
+
+###### 2d.1.2. Run additive ANCOVAs and extract model coefficients by range; run the Rmd chunk below
+
+##### Run additive ANCOVAs models:
+```{r}
+# Load range data
+load("data/range.Rda")
+
+# ANCOVA with interaction for standard length
+range_sl <- lme(logsl ~ logtl + subspecies, 
+                random = ~1|population,
+                data = range)
+
+# Get summary statistics
+anova(range_sl)
+
+# ANCOVA with interaction for orbital length
+range_ol <- lme(logol ~ logtl + subspecies,
+                random = ~1|population, 
+                data = range)
+
+# Get summary statistics
+anova(range_ol)
+
+# ANCOVA with interaction for head length
+range_hl <- lme(loghl ~ logtl + subspecies, 
+                random = ~1|population, 
+                data = range)
+
+# Get summary statistics
+anova(range_hl)
+
+# ANCOVA with interaction for body depth
+range_bd <- lme(logbd ~ logtl + subspecies, 
+                random = ~1|population, 
+                data = range)
+
+# Get summary statistics
+anova(range_bd)
+```
+
+<b> Model results by trait</b>: <br>
+SL: p = 0.2341, F = 1.600 (not significant)
+OL: p = 0.5231, F = 0.431 (not significant)
+HL: p = 0.0067, F = 10.37 (significant)
+BD: p = 0.8468, F = 0.040 (not significant)
+
+##### 2d.2. Run ANCOVA models for traits by genetic assignment
+
+###### 2d.2.1. Run ANCOVAs with interaction terms and extract model coefficients by genetic assignment; run the Rmd chunk below
+
+##### Run ANCOVAs including interaction term:
+```{r}
+# Load genetics data
+load("data/genetics.Rda")
+
+# ANCOVA with interaction for standard length
+genetics_sl <- lme(logsl ~ logtl*genetic_id, 
+                   random = ~1|population, 
+                   data = genetics)
+
+# Get summary statistics
+anova(genetics_sl)
+
+# ANCOVA with interaction for orbital length
+genetics_ol <- lme(logol ~ logtl*genetic_id, 
+                   random = ~1|population, 
+                   data = genetics)
+
+# Get summary statistics
+anova(genetics_ol)
+
+# ANCOVA with interaction for head length
+genetics_hl <- lme(loghl ~ logtl*genetic_id, 
+                   random = ~1|population, 
+                   data = genetics)
+
+# Get summary statistics
+anova(genetics_hl)
+
+# ANCOVA with interaction for body depth
+genetics_bd <- lme(logbd ~ logtl*genetic_id, 
+                   random = ~1|population, 
+                   data = genetics)
+
+# Get summary statistics
+anova(genetics_bd)
+```
+
+<b> Interaction model results by trait</b>: <br>
+SL: p = 0.1111 , F = 2.6000 (no interaction)
+OL: p = 0.1129 , F = 2.5740 (no interaction)
+HL: p = 0.7336 , F = 0.1200 (no interaction)
+BD: p = 0.6771 , F = 0.1700 (no interaction)
+
+###### 2d.2.2 Run additive ANCOVAs and extract model coefficients by genetic assignment; run the Rmd chunk below
+
+##### Run additive ANCOVAs models:
+```{r}
+# Load genetics data
+load("data/genetics.Rda")
+
+# ANCOVA with interaction for standard length
+genetics_sl <- lme(logsl ~ logtl + genetic_id, 
+                   random = ~1|population, 
+                   data = genetics)
+
+# Get summary statistics
+anova(genetics_sl)
+
+# ANCOVA with interaction for orbital length
+genetics_ol <- lme(logol ~ logtl + genetic_id, 
+                   random = ~1|population, 
+                   data = genetics)
+
+# Get summary statistics
+anova(genetics_ol)
+
+# ANCOVA with interaction for head length
+genetics_hl <- lme(loghl ~ logtl + genetic_id, 
+                   random = ~1|population, 
+                   data = genetics)
+
+# Get summary statistics
+anova(genetics_hl)
+
+# ANCOVA with interaction for body depth
+genetics_bd <- lme(logbd ~ logtl + genetic_id, 
+                   random = ~1|population, 
+                   data = genetics)
+
+# Get summary statistics
+anova(genetics_bd)
+```
+
+<b> Model results by trait</b>: <br>
+SL: p = 0.5694, F = 0.300 (not significant)
+OL: p = 0.9160, F = 0.011 (not significant)
+HL: p = 0.1131, F = 2.570 (not significant)
+BD: p = 0.2706, F = 1.230 (not significant)
+
 ## --------------  END OF ANALYSIS 5: GENETIC DIVERSITY AND DIFFERENTIATION ANALYSIS --------------  ##
 
