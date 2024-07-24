@@ -12,9 +12,10 @@ We investigated patterns of genetic (via microsatellites) and morphological dive
 In this analysis, we assess morphological differentiation between Neosho Smallmouth Bass and Northern Smallmouth Bass in the CIH using five morphometrics (traits with continuous distributions; total length, standard length, body depth, head length, and orbital length) and one meristic (discrete count trait; soft dorsal fin rays) and three independently analysis frameworks: 1) individual analyses of covariance (ANCOVAs) on morphometric traits; 2) multiviariate discriminant function analysis (DFA) on morphometric traits; and 3) logistic regression on soft dorsal fin rays. With ANCOVA, we assess differentiation between subsepecies at each trait individually. With DFA, we assess the accuracy with which an individual can be assigned to either subspecies based on composite trait values. With logistic regression, we assess the probability with which a Neosho Smallmouth Bass and Northern Smallmouth Bass possess a specific number of soft dorsal rays.
 
 ## Phases of Analysis
-### Phase 1: Univariate morphometric analysis with ANCOVA
-### Phase 2: Multivariate morphometric analysis with DFA
-### Phase 3: Univariate meristic analysis with logistic regression
+### Phase 1: Data preparation
+### Phase 2: Univariate morphometric analysis with ANCOVA
+### Phase 3: Multivariate morphometric analysis with DFA
+### Phase 4: Univariate meristic analysis with logistic regression
 
 ## Libraries needed for analysis
 ```{r}
@@ -24,10 +25,12 @@ library(readxl)
 library(pophelper)
 library(ggpubr)
 library(nlme)
+library(MASS)
+library(DescTools)
 ```
 
-## PHASE 1: UNIVARIATE MORPHOMETRIC ANALYSIS WITH ANCOVA
-In this phase of the analysis, we assess differentiation between Neosho Smallmouth Bass and Northern Smallmouth Bass in four individual morphometric traits (i.e., standard length, body depth, head length, and orbital length; see Analysis 2 in `../02_data_summary_analysis/smb_genetics_data_summary_analysis` for descriptions for each trait) using analysis of covariance, comparing each trait between subspecies as they co-vary with total length. We complete this assessment for two subsets of samples: 1) all fish labeled by the subspecies range from which they were collected (Arkansas River Basin, aka Neosho, vs. Missouri or White River drainages, aka Northern), and 2) only fish that assigned as purely (defined as assigning with >90% ancestry membership to any one genetic cluster based on population structure analysis) Neosho or Northern. 
+## PHASE 1: DATA PREPARATION 
+In this phase of analysis, we prepare phenotype data, metadata, and population structure data for downstream analysis of morphometric and meristic traits.
 
 ### STEP 1: Read in and combine raw phenotype data, metadata, and population structure membership data; run the Rmd chunk below
 In this step, we prepare the data for analysis by merging all phenotype data with both metadata and population structure membership data as ascertained in Analysis 3.
@@ -74,10 +77,7 @@ phenotypes <- phenotypes %>%
 save(phenotypes, file = "data/phenotypes.Rda")
 ```
 
-### STEP 2: Run ANCOVA on individual morphometric traits
-In this step, we run analysis of covariance (ANCOVA) on four morphometric traits (standard length, SL; body depth, BD; head length, HL; and orbital length, OL) individually. We regress each trait on TL and compare regressions between subspecies by range (where samples were collected) and by genetic assignment (samples assigning > 90% to either Neosho or Northern Smallmouth Bass genetic clusters as inferred in population structure analysis).
-
-#### 2a. Generate separate datasets for 1) morphometric traits by range and 2) morphometric traits by genetic assignment and summarize sample sizes and log-transform trait values; run the rmd chunk below.
+### STEP 2: Generate separate datasets for 1) morphometric traits by range and 2) morphometric traits by genetic assignment and summarize sample sizes and log-transform trait values; run the rmd chunk below.
 
 ##### Read in phenotype data, merge with metadata, and generate range and genetics datasets with log-transformed trait values:
 ```{r}
@@ -87,7 +87,8 @@ load("data/phenotypes.Rda")
 # Generate and clean dataset for samples by range
 range <- phenotypes %>%
   dplyr::select(sample_id, population, subspecies, tl, sl, ol, hl, bd) %>%
-  drop_na()
+  drop_na() %>%
+  droplevels()
 
 # Generate and clean dataset for samples by genetic assignment
 genetics <- phenotypes %>%
@@ -114,7 +115,8 @@ genetics <- genetics %>%
          logsl = log(sl),
          logbd = log(bd),
          loghl = log(hl),
-         logol = log(ol))
+         logol = log(ol)) %>%
+  mutate(genetic_id = factor(genetic_id))
 
 # Count samples by range
 range %>%
@@ -157,9 +159,12 @@ save(genetics, file = "data/genetics.Rda")
 <b><i>N</i><sub>Neosho Smallmouth Bass </sub></b> = 17 <br>
 <b><i>N</i><sub>Northern Smallmouth Bass</sub></b> = 72 <br>
 
-#### 2b. Test normality in all morphometric traits
+## PHASE 2: UNIVARIATE MORPHOMETRIC ANALYSIS WITH ANCOVA
+In this phase of the analysis, we assess differentiation between Neosho Smallmouth Bass and Northern Smallmouth Bass in four individual morphometric traits (i.e., standard length, body depth, head length, and orbital length; see Analysis 2 in `../02_data_summary_analysis/smb_genetics_data_summary_analysis` for descriptions for each trait) using analysis of covariance, comparing each trait between subspecies as they co-vary with total length. We complete this assessment for two subsets of samples: 1) all fish labeled by the subspecies range from which they were collected (Arkansas River Basin, aka Neosho, vs. Missouri or White River drainages, aka Northern), and 2) only fish that assigned as purely (defined as assigning with >90% ancestry membership to any one genetic cluster based on population structure analysis) Neosho or Northern. 
 
-##### 2b.1. Test for normality in Neosho Smallmouth Bass samples by range; run the Rmd chunk below.
+### STEP 3: Test normality in all morphometric traits
+
+#### 3a. Test for normality in Neosho Smallmouth Bass samples by range; run the Rmd chunk below.
 
 ##### Test for normality in trait values:
 ```{r}
@@ -185,7 +190,7 @@ OL: p < 0.00100, W = 0.95523 (Non-normal)
 HL: p = 0.16490, W = 0.988970 (Normal)
 BD: p = 0.59970, W = 0.99355 (Normal)
 
-##### 2b.2. Test for normality in Northern Smallmouth Bass samples by range; run the Rmd chunk below.
+#### 3b. Test for normality in Northern Smallmouth Bass samples by range; run the Rmd chunk below.
 
 ##### Test for normality in trait values:
 ```{r}
@@ -211,7 +216,7 @@ OL: p = 0.5188, W = 0.98312 (Normal)
 HL: p < 0.0010, W = 0.91592 (Non-normal)
 BD: p = 0.2971, W = 0.97794 (Normal)
 
-##### 2b.3. Test for normality in Neosho Smallmouth Bass samples by genetic assignment; run the Rmd chunk below.
+#### 3c. Test for normality in Neosho Smallmouth Bass samples by genetic assignment; run the Rmd chunk below.
 
 ##### Test for normality in trait values:
 ```{r}
@@ -237,7 +242,7 @@ OL: p = 0.5098, W = 0.95324 (Normal)
 HL: p = 0.6847, W = 0.96281 (Normal)
 BD: p = 0.2028, W = 0.92817 (Normal)
 
-##### 2b.4. Test for normality in Northern Smallmouth Bass samples by genetic assignment; run the Rmd chunk below.
+#### 3d. Test for normality in Northern Smallmouth Bass samples by genetic assignment; run the Rmd chunk below.
 
 ##### Test for normality in trait values:
 ```{r}
@@ -263,7 +268,7 @@ OL: p = 0.5048, W = 0.98421 (Normal)
 HL: p < 0.0010, W = 0.90931 (Non-normal)
 BD: p = 0.6511, W = 0.98671 (Normal)
 
-##### 2b.5. Plot qq normal distribution plots for all traits and groups; run the Rmd chunk below.
+#### 3e. Plot qq normal distribution plots for all traits and groups; run the Rmd chunk below.
 
 ##### Plot qq normal distribution for all traits: `figures/normality.pdf`
 ```{r}
@@ -509,7 +514,7 @@ dev.off()
 
 This figure is the basis for Figure S4 in the final ms.
 
-#### 2c. Plot and compare density distributions for all traits by range and genetic assignment; run the Rmd chunk below.
+### STEP 4: Plot and compare density distributions for all traits by range and genetic assignment; run the Rmd chunk below.
 
 ##### Plot denisty distributions for all traits: `figures/density.pdf`
 ```{r}
@@ -520,7 +525,7 @@ load("data/range.Rda")
 load("data/genetics.Rda")
 
 # Change names of subspecies for plotting
-levels(range$subspecies) <- c("Neosho", "Northern", "Spotted")
+levels(range$subspecies) <- c("Neosho", "Northern")
 
 # Range total length plot
 range_tl <- ggplot(range, aes(x = logtl, fill = subspecies)) + 
@@ -687,11 +692,16 @@ dev.off()
 
 This figure is the basis for Figure S5 in the final ms.
 
-#### 2d. Run ANCOVA models for all traits
+## -------------- END OF PHASE 2: DATA PREPARATION --------------  ##
 
-##### 2d.1. Run ANCOVA models for traits by range
+## PHASE 2: UNIVARIATE MORPHOMETRIC ANALYSIS WITH ANCOVA
+In this step, we run analysis of covariance (ANCOVA) on four morphometric traits (standard length, SL; body depth, BD; head length, HL; and orbital length, OL) individually. We regress each trait on TL and compare regressions between subspecies by range (where samples were collected) and by genetic assignment (samples assigning > 90% to either Neosho or Northern Smallmouth Bass genetic clusters as inferred in population structure analysis).
 
-###### 2d.1.1. Run ANCOVAs with interaction terms and extract model coefficients by range; run the Rmd chunk below
+### STEP 1. Run ANCOVA models for all traits
+
+#### 1a. Run ANCOVA models for traits by range
+
+##### 1a.1 Run ANCOVAs with interaction terms and extract model coefficients by range; run the Rmd chunk below
 
 ##### Run ANCOVAs including interaction term:
 ```{r}
@@ -737,7 +747,7 @@ OL: p < 0.0001 , F = 33.301 (interaction)
 HL: p = 0.8227 , F = 0.0500 (no interaction)
 BD: p = 0.2085 , F = 1.5900 (no interaction)
 
-###### 2d.1.2. Run additive ANCOVAs and extract model coefficients by range; run the Rmd chunk below
+##### 1a.2. Run additive ANCOVAs and extract model coefficients by range; run the Rmd chunk below
 
 ##### Run additive ANCOVAs models:
 ```{r}
@@ -783,9 +793,9 @@ OL: p = 0.5231, F = 0.431 (not significant)
 HL: p = 0.0067, F = 10.37 (significant)
 BD: p = 0.8468, F = 0.040 (not significant)
 
-##### 2d.2. Run ANCOVA models for traits by genetic assignment
+#### 1b. Run ANCOVA models for traits by genetic assignment
 
-###### 2d.2.1. Run ANCOVAs with interaction terms and extract model coefficients by genetic assignment; run the Rmd chunk below
+##### 1b.1. Run ANCOVAs with interaction terms and extract model coefficients by genetic assignment; run the Rmd chunk below
 
 ##### Run ANCOVAs including interaction term:
 ```{r}
@@ -831,7 +841,7 @@ OL: p = 0.1129 , F = 2.5740 (no interaction)
 HL: p = 0.7336 , F = 0.1200 (no interaction)
 BD: p = 0.6771 , F = 0.1700 (no interaction)
 
-###### 2d.2.2 Run additive ANCOVAs and extract model coefficients by genetic assignment; run the Rmd chunk below
+##### 1b.2. Run additive ANCOVAs and extract model coefficients by genetic assignment; run the Rmd chunk below
 
 ##### Run additive ANCOVAs models:
 ```{r}
@@ -876,6 +886,475 @@ SL: p = 0.5694, F = 0.300 (not significant)
 OL: p = 0.9160, F = 0.011 (not significant)
 HL: p = 0.1131, F = 2.570 (not significant)
 BD: p = 0.2706, F = 1.230 (not significant)
+
+#### 1c. Extract coefficients from ANCOVA models for generating data table
+In this step, we extract all coefficients of variation from all linear models to back-calculate mean real values for each trait.
+
+##### 1c.1. Extract coefficients from ANCOVA models by range; run the Rmd chunk below
+
+##### Extract ANCOVA coefficients by range:
+```{r}
+# Load range data
+load("data/range.Rda")
+
+# Coefficients for ANOVA for standard length
+range_sl <- lmList(logsl ~ logtl|subspecies, data = range)
+
+# Get summary statistics
+summary(range_sl)
+
+# Coefficients for ANOVA for orbital length
+range_ol <- lmList(logol ~ logtl|subspecies, data = range)
+
+# Get summary statistics
+summary(range_ol)
+
+# Coefficients for ANOVA for head length
+range_hl <- lmList(loghl ~ logtl|subspecies, data = range)
+
+# Get summary statistics
+summary(range_hl)
+
+# Coefficients for ANOVA for head length
+range_bd <- lmList(logbd ~ logtl|subspecies, data = range)
+
+# Get summary statistics
+summary(range_bd)
+```
+
+##### 1c.2. Extract coefficients from ANCOVA models by genetic assignment; run the Rmd chunk below
+
+##### Extract ANCOVA coefficients by genetic assignment:
+```{r}
+# Load genetics data
+load("data/genetics.Rda")
+
+# Coefficients for ANOVA for standard length
+genetics_sl <- lmList(logsl ~ logtl|genetic_id, data = genetics)
+
+# Get summary statistics
+summary(genetics_sl)
+
+# Coefficients for ANOVA for orbital length
+genetics_ol <- lmList(logol ~ logtl|genetic_id, data = genetics)
+
+# Get summary statistics
+summary(genetics_ol)
+
+# Coefficients for ANOVA for head length
+genetics_hl <- lmList(loghl ~ logtl|genetic_id, data = genetics)
+
+# Get summary statistics
+summary(genetics_hl)
+
+# Coefficients for ANOVA for head length
+genetics_bd <- lmList(logbd ~ logtl|genetic_id, data = genetics)
+
+# Get summary statistics
+summary(genetics_bd)
+```
+
+Coefficients from ANCOVA models were used to calculate values found in Tables 3 and S8 in the final ms.
+
+### STEP 2: Plot ANCOVA models for all traits; run the Rmd chunk below
+
+##### Plot ANCOVA models by range: `figures/ancova.pdf`
+```{r}
+# Load range data
+load("data/range.Rda")
+
+# Load genetics data
+load("data/genetics.Rda")
+
+# Change names of subspecies for plotting
+levels(range$subspecies) <- c("Neosho", "Northern")
+
+# Change names of subspecies for plotting
+levels(genetics$genetic_id) <- c("Neosho", "Northern")
+
+# Separate datasets into groups for plotting
+
+# Get Neosho only by range
+range_neosho <- range %>%
+  filter(subspecies == "Neosho")
+
+# Get Northern only by range
+range_northern <- range %>%
+  filter(subspecies == "Northern")
+
+# Get Neosho only by genetics
+genetics_neosho <- genetics %>%
+  filter(genetic_id == "Neosho")
+
+# Get Northern only by genetics
+genetics_northern <- genetics %>%
+  filter(genetic_id == "Northern")
+
+# Plot standard length by total length by range
+range_sl <- ggplot() + 
+    geom_point(data = range_neosho, aes(x = tl, y = sl, group = subspecies, fill = subspecies, shape = subspecies), size = 4, pch = 21, color = "black", show.legend = T) +
+    geom_smooth(data = range_neosho, aes(x = tl, y = sl, color = subspecies), show.legend = F, method = "lm", fullrange = T) +
+    geom_point(data = range_northern, aes(x = tl, y = sl, fill = subspecies, shape = subspecies), size = 4, pch = 22, color = "black", show.legend = F) +
+    geom_smooth(data = range_northern, aes(x = tl, y = sl, color = subspecies), show.legend = F, method = "lm", fullrange = T) +
+    theme_set(theme_cowplot(12)) + 
+    scale_fill_manual(values = c("springgreen3", "mediumpurple")) +
+    scale_color_manual(values = c("springgreen3", "mediumpurple")) +
+    scale_shape_manual(values = c("circle","square")) +
+    labs(y = "Standard length (mm)", fill = "Subspecies", color = "Subspecies", shape = "Subspecies", title = "Taxonomic Range") +
+    theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 25)) +
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.text.x = element_blank()) + 
+    theme(axis.text = element_text(size = 20)) + 
+    theme(axis.title = element_text(size = 20)) +
+    theme(legend.position = c(0.6,0.2)) +
+    theme(legend.title = element_text(size = 20, face = "bold")) +
+    theme(legend.background = element_blank()) + 
+    theme(legend.text = element_text(size = 20)) +
+    scale_x_continuous(expand = c(0,0)) + 
+    scale_y_continuous(expand = c(0,0)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1))
+
+# Plot orbital length by total length by range
+range_ol <- ggplot() + 
+    geom_point(data = range_neosho, aes(x = tl, y = ol, group = subspecies, fill = subspecies, shape = subspecies), size = 4, pch = 21, color = "black", show.legend = F) +
+    geom_smooth(data = range_neosho, aes(x = tl, y = ol, color = subspecies), show.legend = F, method = "lm", fullrange = T) +
+    geom_point(data = range_northern, aes(x = tl, y = ol, fill = subspecies, shape = subspecies), size = 4, pch = 22, color = "black", show.legend = F) +
+    geom_smooth(data = range_northern, aes(x = tl, y = ol, color = subspecies), show.legend = F, method = "lm", fullrange = T) +
+    theme_set(theme_cowplot(12)) + 
+    scale_fill_manual(values = c("springgreen3", "mediumpurple")) +
+    scale_color_manual(values = c("springgreen3", "mediumpurple")) +
+    scale_shape_manual(values = c("circle","square")) +
+    scale_y_continuous(breaks = c(7.5,10.0,12.5,15.0,17.5,20.0)) +
+    labs(y = "Orbital length (mm)", fill = "Subspecies", color = "Subspecies", shape = "Subspecies") + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.text = element_text(size = 20)) + 
+    theme(axis.text.x = element_blank()) + 
+    theme(axis.title = element_text(size = 20)) +
+    scale_x_continuous(expand = c(0,0)) + 
+    scale_y_continuous(expand = c(0,0)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) + 
+    scale_y_continuous(
+    labels = scales::number_format(accuracy = 0.1,
+                                 decimal.mark = '.'))
+
+# Plot orbital length by total length by range
+range_hl <- ggplot() + 
+    geom_point(data = range_neosho, aes(x = tl, y = hl, group = subspecies, fill = subspecies, shape = subspecies), size = 4, pch = 21, color = "black", show.legend = F) +
+    geom_smooth(data = range_neosho, aes(x = tl, y = hl, color = subspecies), show.legend = F, method = "lm", fullrange = T) +
+    geom_point(data = range_northern, aes(x = tl, y = hl, fill = subspecies, shape = subspecies), size = 4, pch = 22, color = "black", show.legend = F) +
+    geom_smooth(data = range_northern, aes(x = tl, y = hl, color = subspecies), show.legend = F, method = "lm", fullrange = T) +
+    theme_set(theme_cowplot(12)) + 
+    scale_fill_manual(values = c("springgreen3", "mediumpurple")) +
+    scale_color_manual(values = c("springgreen3", "mediumpurple")) +
+    scale_shape_manual(values = c("circle","square")) +
+    labs(y = "Head length (mm)", fill = "Subspecies", color = "Subspecies", shape = "Subspecies") +
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.text = element_text(size = 20)) + 
+    theme(axis.text.x = element_blank()) + 
+    theme(axis.title = element_text(size = 20)) +
+    scale_x_continuous(expand = c(0,0)) + 
+    scale_y_continuous(expand = c(0,0)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1))
+
+# Plot orbital length by total length by range
+range_bd <- ggplot() + 
+    geom_point(data = range_neosho, aes(x = tl, y = bd, group = subspecies, fill = subspecies, shape = subspecies), size = 4, pch = 21, color = "black", show.legend = F) +
+    geom_smooth(data = range_neosho, aes(x = tl, y = bd, color = subspecies), show.legend = F, method = "lm", fullrange = T) +
+    geom_point(data = range_northern, aes(x = tl, y = bd, fill = subspecies, shape = subspecies), size = 4, pch = 22, color = "black", show.legend = F) +
+    geom_smooth(data = range_northern, aes(x = tl, y = bd, color = subspecies), show.legend = F, method = "lm", fullrange = T) +
+    theme_set(theme_cowplot(12)) + 
+    scale_fill_manual(values = c("springgreen3", "mediumpurple")) +
+    scale_color_manual(values = c("springgreen3", "mediumpurple")) +
+    scale_shape_manual(values = c("circle","square")) +
+    labs(y = "Body depth (mm)", x = "Total length (mm)", fill = "Subspecies", color = "Subspecies", shape = "Subspecies") +
+    theme(axis.text = element_text(size = 20)) + 
+    theme(axis.title = element_text(size = 20)) +
+    scale_x_continuous(expand = c(0,0)) + 
+    scale_y_continuous(expand = c(0,0)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1))
+
+# Plot all ANCOVAs by range together
+range <- plot_grid(range_sl, 
+                   range_ol, 
+                   range_hl, 
+                   range_bd, 
+                   nrow = 4, 
+                   labels = c("a","c","e","g"), 
+                   label_x = 0.001, 
+                   label_y = 1.02, 
+                   label_size = 30)
+
+# Plot standard length by total length by genetics
+genetics_sl <- ggplot() + 
+    geom_point(data = genetics_neosho, aes(x = tl, y = sl, group = genetic_id, fill = genetic_id, shape = genetic_id), size = 4, pch = 21, color = "black", show.legend = F) +
+    geom_smooth(data = genetics_neosho, aes(x = tl, y = sl, color = genetic_id), show.legend = F, method = "lm", fullrange = T) +
+    geom_point(data = genetics_northern, aes(x = tl, y = sl, fill = genetic_id, shape = genetic_id), size = 4, pch = 22, color = "black", show.legend = F) +
+    geom_smooth(data = genetics_northern, aes(x = tl, y = sl, color = genetic_id), show.legend = F, method = "lm", fullrange = T) +
+    theme_set(theme_cowplot(12)) + 
+    scale_fill_manual(values = c("springgreen3", "mediumpurple")) +
+    scale_color_manual(values = c("springgreen3", "mediumpurple")) +
+    scale_shape_manual(values = c("circle","square")) +
+    labs(y = "Standard length (mm)", fill = "Assignment", color = "Assignment", shape = "Assignment", title = "Genetic Assignment") +
+    theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 25)) +
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.text = element_text(size = 20)) + 
+    theme(axis.text.x = element_blank()) + 
+    theme(legend.position = c(0.7,0.2)) +
+    theme(legend.title = element_text(size = 20, face = "bold")) +
+    theme(legend.background = element_blank())+ 
+    theme(legend.text = element_blank()) +
+    scale_x_continuous(expand = c(0,0)) + 
+    scale_y_continuous(expand = c(0,0)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) + 
+    theme(axis.title = element_text(size = 20))
+
+# Plot orbital length by total length by genetics
+genetics_ol <- ggplot() + 
+    geom_point(data = genetics_neosho, aes(x = tl, y = ol, group = genetic_id, fill = genetic_id, shape = genetic_id), size = 4, pch = 21, color = "black", show.legend = F) +
+    geom_smooth(data = genetics_neosho, aes(x = tl, y = ol, color = genetic_id), show.legend = F, method = "lm", fullrange = T) +
+    geom_point(data = genetics_northern, aes(x = tl, y = ol, fill = genetic_id, shape = genetic_id), size = 4, pch = 22, color = "black", show.legend = F) +
+    geom_smooth(data = genetics_northern, aes(x = tl, y = ol, color = genetic_id), show.legend = F, method = "lm", fullrange = T) +
+    theme_set(theme_cowplot(12)) + 
+    scale_fill_manual(values = c("springgreen3", "mediumpurple")) +
+    scale_color_manual(values = c("springgreen3", "mediumpurple")) +
+    scale_shape_manual(values = c("circle","square")) +
+    labs(y = "Orbital length (mm)", fill = "Assignment", color = "Assignment", shape = "Assignment") + 
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.text = element_text(size = 20)) +
+    theme(axis.text.x = element_blank()) + 
+    scale_x_continuous(expand = c(0,0)) + 
+    scale_y_continuous(expand = c(0,0)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) + 
+    scale_y_continuous(
+    labels = scales::number_format(accuracy = 0.1,
+                                 decimal.mark = '.')) + 
+    theme(axis.title = element_text(size = 20))
+
+# Plot head length by total length by genetics
+genetics_hl <- ggplot() + 
+    geom_point(data = genetics_neosho, aes(x = tl, y = hl, group = genetic_id, fill = genetic_id, shape = genetic_id), size = 4, pch = 21, color = "black", show.legend = F) +
+    geom_smooth(data = genetics_neosho, aes(x = tl, y = hl, color = genetic_id), show.legend = F, method = "lm", fullrange = T) +
+    geom_point(data = genetics_northern, aes(x = tl, y = hl, fill = genetic_id, shape = genetic_id), size = 4, pch = 22, color = "black", show.legend = F) +
+    geom_smooth(data = genetics_northern, aes(x = tl, y = hl, color = genetic_id), show.legend = F, method = "lm", fullrange = T) +
+    theme_set(theme_cowplot(12)) + 
+    scale_fill_manual(values = c("springgreen3", "mediumpurple")) +
+    scale_color_manual(values = c("springgreen3", "mediumpurple")) +
+    scale_shape_manual(values = c("circle","square")) +
+    labs(y = "Head length (mm)", fill = "Assignment", color = "Assignment", shape = "Assignment") +
+    theme(axis.title.x = element_blank()) + 
+    theme(axis.text = element_text(size = 20)) + 
+    theme(axis.text.x = element_blank()) + 
+    scale_x_continuous(expand = c(0,0)) + 
+    scale_y_continuous(expand = c(0,0)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) + 
+    theme(axis.title = element_text(size = 20))
+
+# Plot body depth by total length by genetics
+genetics_bd <- ggplot() + 
+    geom_point(data = genetics_neosho, aes(x = tl, y = bd, group = genetic_id, fill = genetic_id, shape = genetic_id), size = 4, pch = 21, color = "black", show.legend = F) +
+    geom_smooth(data = genetics_neosho, aes(x = tl, y = bd, color = genetic_id), show.legend = F, method = "lm", fullrange = T) +
+    geom_point(data = genetics_northern, aes(x = tl, y = bd, fill = genetic_id, shape = genetic_id), size = 4, pch = 22, color = "black", show.legend = F) +
+    geom_smooth(data = genetics_northern, aes(x = tl, y = bd, color = genetic_id), show.legend = F, method = "lm", fullrange = T) +
+    theme_set(theme_cowplot(12)) + 
+    scale_fill_manual(values = c("springgreen3", "mediumpurple")) +
+    scale_color_manual(values = c("springgreen3", "mediumpurple")) +
+    scale_shape_manual(values = c("circle","square")) +
+    labs(y = "Body depth (mm)", x = "Total length (mm)", fill = "Assignment", color = "Assignment", shape = "Assignment") +
+    theme(axis.text = element_text(size = 20)) + 
+    theme(axis.title.x = element_text(size = 20)) + 
+    scale_x_continuous(expand = c(0,0)) + 
+    scale_y_continuous(expand = c(0,0)) +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) + 
+    theme(axis.title = element_text(size = 20))
+
+# Plot all ANCOVAs by range together
+genetics <- plot_grid(genetics_sl, 
+                      genetics_ol,
+                      genetics_hl, 
+                      genetics_bd, 
+                      nrow = 4, 
+                      labels = c("b","d","f","h"), 
+                      label_x = 0.001,
+                      label_y = 1.02, 
+                      label_size = 30)
+
+
+# Plot everything together
+pdf("figures/ancova.pdf", width = 14, height = 20)
+
+plot_grid(range, 
+          genetics, 
+          align = "v", 
+          axis = "l", 
+          ncol = 2)
+
+dev.off()
+```
+
+## -------------- END OF PHASE 2: UNIVARIATE MORPHOMETRIC ANALYSIS WITH ANCOVA --------------  ##
+
+### PHASE 3: MULTIVARIATE MORPHOMETRIC ANALYSIS WITH DFA
+In this phase of analysis, we use both the full phenotpyic dataset (all samples delineated by subspecies, or range from which individuals were collected) and the dataset including only individuals assigning as purely Neosho Smallmouth Bass or Northern Smallmouth Bass based on population structure inference to conduct multivariate discriminant function analysis (DFA) on all morphometric traits (total length, standard length, orbital length, head length, and body depth). DFA uses a principal components framework to assess the accuracy of assigning an individual to a given group based on composite variation from all response variables. 
+
+#### STEP 1: Run discriminant function analysis (DFA) by range; run the Rmd chunk below
+
+##### Run discriminant function analysis by range:
+```{r}
+# Load range data
+load("data/range.Rda")
+
+# Select only columns needed for analysis and convert to dataframe
+range <- range %>%
+  dplyr::select(subspecies, logtl:logol) %>%
+  as.data.frame()
+
+# Run DFA
+dfa <- lda(subspecies ~ logtl + logsl + logol + loghl + logbd, data = range) 
+
+# Get DFA predicted values
+predict <-predict(dfa, 
+                  CV = TRUE, 
+                  range[c(2:6)])$class
+
+# Get prediction table
+table <- table(predict, 
+               range[,1])
+
+# Get summary of table
+summary(table)
+
+# Get 
+diag(prop.table(table,1))
+
+# 
+sum(diag(prop.table(table)))
+```
+
+<b> Model results </b>: <br>
+X-square: 43.750, p < 0.001
+Accuracy: 0.7991968
+
+These data were used as the basis for Table S9 in the final ms.
+
+#### STEP 3: Run discriminant function analysis (DFA) by genetic assignment; run the Rmd chunk below
+
+##### Run discriminant function analysis by genetic assignment:
+```{r}
+# Load genetics data
+load("data/genetics.Rda")
+
+# Select only columns needed for analysis and convert to dataframe
+genetics <- genetics %>%
+  dplyr::select(genetic_id, logtl:logol) %>%
+  as.data.frame()
+
+# Run DFA
+dfa <- lda(genetic_id ~ logtl + logsl + logol + loghl + logbd, data = genetics) 
+
+# Get DFA predicted values
+predict <-predict(dfa, 
+                  CV = TRUE, 
+                  genetics[c(2:6)])$class
+
+# Get prediction table
+table <- table(predict, 
+               genetics[,1])
+
+# Get summary of table
+summary(table)
+
+# Get 
+diag(prop.table(table,1)) 
+
+# 
+sum(diag(prop.table(table)))
+```
+
+<b> Model results </b>: <br>
+X-square: 7.115, p = 0.0076
+Accuracy: 0.8202247
+
+These data were used as the basis for Table S9 in the final ms.
+
+## -------------- END OF PHASE 3: MULTIVARIATE MORPHOMETRIC ANALYSIS WITH DFA --------------  ##
+
+### PHASE 4: UNIVARIATE MERISTIC ANALYSIS WITH LOGISTIC REGRESSION
+In this phase of analysis, we use the full phenotpyic dataset (all samples delineated by subspecies, or range from which individuals were collected) including membership assignment coefficients ascertained in population structure inference to conduct univariate logistic regression on the number of soft dorsal fin rays (meristic trait) in Neosho Smallmouth Bass and Northern Smallmouth Bass. We use percent assignment to the Neosho Smallmouth Bass genetic cluster as a continuous variable on which to regress whether an individual has 13 or 14 soft dorsal rays; thus, we determine the likelihood of having either number of rays based on percent Neosho Smallmouth Bass ancestry and infer whether this trait is diagnostic for subspecies.
+
+### STEP 1: Run logistic regression analysius on soft dorsal fin ray count
+
+#### 1a. Prepare genetic and meristic data for logistic regression; run the Rmd chunk below
+In this step, we use a logit transformation (custom function) on the genetic proportion of individuals (continuous variable; percent assignment to Neosho Smallmouth Bass genetic cluster). We then convert number of soft dorsal fin rays to binary data (13 rays = 1; 14 rays = 0).
+
+##### Prepare genetic and meristic data for downstream analyses:
+```{r}
+# load phenotypic data 
+load("data/phenotypes.Rda")
+
+# Get only data that is phenotyped and genotyped, select columns needed for analysis, drop NA values
+rays <- phenotypes %>%
+  filter(genotype == "yes" &
+           phenotype == "yes") %>%
+  dplyr::select(neosho_smallmouth_bass, rays) %>%
+  drop_na()
+
+# Convert number of rays to binary data
+rays$rays[rays$rays == "13"] <- "1"
+rays$rays[rays$rays == "14"] <- "0"
+
+# Convert ray count to numeric variable
+rays <- rays %>%
+  mutate(rays = as.numeric(rays))
+
+# Save rays data for downstream analysis
+save(rays, file = "data/rays.Rda")
+```
+
+#### 1b. Run logistic regression analysis; run the Rmd chunk below
+
+##### Run logistic regression analysis:
+```{r}
+# Load rays data 
+load("data/rays.Rda")
+
+# Run logistic regression
+lr <- glm(rays ~ neosho_smallmouth_bass, data = rays, family = binomial(link = "logit"))
+
+# Get model summary 
+summary(lr)
+
+# Get pseudo r-squared 
+PseudoR2(lr)
+```
+
+<b> Model results </b>: <br>
+p = 0.0076
+pseudo-R2 = 0.1191975
+
+### STEP 2: Plot logistic regression results; run the Rmd chunk below.
+
+##### Plot logistic regression curve: `figures/logistic_regression.pdf`
+```{r}
+# Load rays data 
+load("data/rays.Rda")
+
+# Generate figure
+pdf("figures/logistic_regression.pdf", width = 8, height = 6)
+
+ggplot(rays, aes(x = neosho_smallmouth_bass, y = rays)) + 
+    geom_point(position = position_jitter(height = 0.05), show.legend = F, size = 4, color = "black", pch=21) + 
+    geom_smooth(method="glm", method.args = list(family = "binomial"), show.legend = F, color = "black", fullrange = T) + 
+    labs(x = "Genotypic proportion assigned to the Neosho cluster", y = "Probability of fin ray count") + 
+    theme(axis.text = element_text(size = 20)) +
+    theme(axis.title = element_text(size = 20)) + 
+    scale_fill_manual(values = c("grey","grey")) +
+    scale_x_continuous(expand = c(0,0)) + 
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) 
+
+dev.off()
+```
+
+## -------------- END OF PHASE 4: UNIVARIATE MERISTIC ANALYSIS WITH LOGISTIC REGRESSION --------------  ##
 
 ## --------------  END OF ANALYSIS 5: GENETIC DIVERSITY AND DIFFERENTIATION ANALYSIS --------------  ##
 

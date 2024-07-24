@@ -112,18 +112,9 @@ phenotype_data <- read_excel("../raw_data/phenotype_data.xlsx")
 # Convert characters to factors for the full dataset
 phenotype_data <- phenotype_data %>%
   mutate(sample_id = factor(sample_id)) 
-
-# Create a second dataset with only number of soft dorsal rays (for downstream analysis), and convert meristic to binary variables (i.e., 13 = 0, 14 = 1)
-ray_data <- phenotype_data %>%
-  drop_na() %>%
-  mutate(rays = as.numeric(if_else(rays=="13","0","1"))) %>%
-  select(sample_id, rays)
   
 # Save raw phenotype data for downstream analyses
 save(phenotype_data, file = "data/phenotype_data.Rda")
-
-# Save ray data for downstream analyses
-save(ray_data, file = "data/ray_data.Rda")
 ```
 
 ### ----------------------- END OF PHASE 1: DATA READ-IN AND PREPARATION ----------------------- ###
